@@ -1,0 +1,44 @@
+{
+	"contentType": "text/json",
+	"animation": {
+		"0": {
+			"frameLength": 10,
+			"frameDelay": 0,
+			"repeatCount": 0,
+			"channels": [
+				{
+					"access": "overwrite",
+					"target": "transform.translation.x",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 0
+						},
+						{
+							"frame": 10,
+							"easing": "quadratic:out",
+							"value": 10
+						}
+					]
+				},
+				{
+					"access": "overwrite",
+					"target": "transform.translation.y",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 10,
+							"value": 0
+						},
+						{
+							"frame": 10,
+							"easing": "quadratic:out",
+							"value": 10
+						}
+					]
+				}
+			]
+		}
+	}
+}

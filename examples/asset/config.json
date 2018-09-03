@@ -1,0 +1,109 @@
+{
+	"contentType": "text/json",
+	"animation": {
+		"0": {
+			"frameLength": 10,
+			"frameDelay": 0,
+			"repeatCount": 0,
+			"channels": [
+				{
+					"access": "overwrite",
+					"target": "transform.translation.x",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 10
+						},
+						{
+							"frame": 10,
+							"easing": "linear:in",
+							"value": 40
+						}
+					]
+				},
+				{
+					"access": "overwrite",
+					"target": "transform.translation.y",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 20
+						},
+						{
+							"frame": 10,
+							"easing": "linear:in",
+							"value": 30
+						}
+					]
+				}
+			]
+		}
+	},
+	"window/sdl2": {
+		"title": "TT Engine Tutorials",
+		"pos": {
+			"x": 536805376,
+			"x.comment": "SDL_WINDOWPOS_UNDEFINED",
+			"y": 536805376,
+			"y.comment": "SDL_WINDOWPOS_UNDEFINED"
+		},
+		"size": {
+			"w": 256,
+			"h": 240
+		}
+	},
+	"renderer/sdl2": {
+		"index": -1,
+		"flags": 6,
+		"flags.comment": "SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC",
+		"clearColor": {
+			"r": 64,
+			"g": 64,
+			"b": 64,
+			"a": 255
+		},
+		"viewports": {
+			"0": {
+				"pos": {
+					"x": 0,
+					"y": 0
+				},
+				"size": {
+					"w": 240,
+					"h": 240
+				}
+			}
+		}
+	},
+	"input/sdl2": {
+		"vkeys": [
+			{
+				"alias": "escape",
+				"scancode": 41,
+				"scancode.comment": "SDL_SCANCODE_ESCAPE"
+			},
+			{
+				"alias": "down",
+				"scancode": 81,
+				"scancode.comment": "SDL_SCANCODE_DOWN"
+			},
+			{
+				"alias": "up",
+				"scancode": 82,
+				"scancode.comment": "SDL_SCANCODE_DOWN"
+			},
+			{
+				"alias": "left",
+				"scancode": 80,
+				"scancode.comment": "SDL_SCANCODE_LEFT"
+			},
+			{
+				"alias": "right",
+				"scancode": 79,
+				"scancode.comment": "SDL_SCANCODE_RIGHT"
+			}
+		]
+	}
+}

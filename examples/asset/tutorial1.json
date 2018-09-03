@@ -1,0 +1,15 @@
+{
+	"contentType": "image/png",
+	"tag1": 123,
+	"array": [
+		{
+			"value": 3
+		},
+		{
+			"value": 2
+		},
+		{
+			"value": 1
+		}
+	]
+}

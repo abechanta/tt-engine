@@ -1,0 +1,14 @@
+{
+	"contentType": "text/json",
+	"transform": {
+		"translation": {
+			"x": 30,
+			"y": 20,
+			"z": 0
+		},
+		"rotation": {
+			"unit": "degree",
+			"z": 90
+		}
+	}
+}

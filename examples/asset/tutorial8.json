@@ -1,0 +1,28 @@
+{
+	"contentType": "text/json",
+	"animation": {
+		"falling": {
+			"frameLength": 10,
+			"frameDelay": 0,
+			"repeatCount": 0,
+			"channels": [
+				{
+					"access": "overwrite",
+					"target": "transform.translation.y",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 0
+						},
+						{
+							"frame": 10,
+							"easing": "quadratic:in",
+							"value": 10
+						}
+					]
+				}
+			]
+		}
+	}
+}

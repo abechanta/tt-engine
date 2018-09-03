@@ -1,0 +1,90 @@
+{
+	"contentType": "text/json",
+	"animation": {
+		"0": {
+			"frameLength": 15,
+			"frameDelay": 2,
+			"repeatCount": 0,
+			"channels": [
+				{
+					"access": "delta",
+					"target": "transform.rotation.z",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 0
+						},
+						{
+							"frame": 10,
+							"easing": "quadratic:out",
+							"value": 1
+						}
+					]
+				},
+				{
+					"access": "overwrite",
+					"target": "transform.translation.x",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 10,
+							"value": 0
+						},
+						{
+							"frame": 15,
+							"easing": "linear:inout",
+							"value": 15
+						}
+					]
+				}
+			]
+		},
+		"right": {
+			"frameLength": 90,
+			"frameDelay": 0,
+			"repeatCount": 0,
+			"channels": [
+				{
+					"access": "delta",
+					"target": "transform.rotation.z",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 0
+						},
+						{
+							"frame": 90,
+							"easing": "elastic:out",
+							"value": -3.14
+						}
+					]
+				}
+			]
+		},
+		"left": {
+			"frameLength": 15,
+			"frameDelay": 0,
+			"repeatCount": 0,
+			"channels": [
+				{
+					"access": "delta",
+					"target": "transform.rotation.z",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 0
+						},
+						{
+							"frame": 15,
+							"easing": "quadratic:out",
+							"value": 3.14
+						}
+					]
+				}
+			]
+		}
+	}
+}

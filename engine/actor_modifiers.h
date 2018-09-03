@@ -1,0 +1,100 @@
+#pragma once
+#include <actor.h>
+#include <asset.h>
+#include <cassert>
+#include <cstdint>
+#include <functional>
+#include <boost/property_tree/ptree.hpp>
+#include <string>
+#include <utility>
+
+namespace tte {
+	using namespace std;
+
+	Actor::Action operator+(const Actor::Action &lhs, const Actor::Action &rhs)
+#if defined(tte_declare_static_variables)
+	{
+		return [lhs, rhs](Actor &a) {
+			lhs(a);
+			rhs(a);
+		};
+	}
+#else
+	;
+#endif	// defined(tte_declare_static_variables)
+
+	Actor::Action operator*(const Actor::Trigger &lhs, const Actor::Action &rhs)
+#if defined(tte_declare_static_variables)
+	{
+		return [lhs, rhs](Actor &a) {
+			if (lhs(a)) {
+				rhs(a);
+			}
+		};
+	}
+#else
+		;
+#endif	// defined(tte_declare_static_variables)
+
+	template<typename Vc1>
+	Actor::Action componentModifier(const function<void(Actor &, Vc1 &)> &action) {
+		return [action](Actor &a) {
+			a.findComponent<Vc1>([action, &a](Vc1 &component1) {
+				action(a, component1);
+			});
+		};
+	}
+
+	template<typename Vc1, typename Vc2>
+	Actor::Action componentModifier(const function<void(Actor &, Vc1 &, Vc2 &)> &action) {
+		return [action](Actor &a) {
+			a.findComponent<Vc1>([action, &a](Vc1 &component1) {
+				a.findComponent<Vc1>([action, &a, &component1](Vc2 &component2) {
+					action(a, component1, component2);
+				});
+			});
+		};
+	}
+
+	template<typename Vp>
+	Actor::Action put(const string &key, const Vp &value) {
+		return [key, value](Actor &a) {
+			a.put<Vp>(key, value);
+		};
+	}
+
+	Actor::Action loadProps(const Asset &asset)
+#if defined(tte_declare_static_variables)
+	{
+		return [&asset](Actor &a) {
+			if (asset.props().get<string>("contentType").compare("text/json") == 0) {
+				a.importProps(asset.props());
+			}
+		};
+	}
+#else
+		;
+#endif	// defined(tte_declare_static_variables)
+
+	Actor::Action changeState(const string &stateName)
+#if defined(tte_declare_static_variables)
+	{
+		return [stateName](Actor &a) {
+			a.props().put<string>("state", stateName);
+		};
+	}
+#else
+		;
+#endif	// defined(tte_declare_static_variables)
+
+	Actor::Action notifyEvent(const string &eventName, const function<property_tree::ptree(Actor &a)> &eventSetup = [](Actor &) -> property_tree::ptree { return property_tree::ptree(); })
+#if defined(tte_declare_static_variables)
+	{
+		return [eventName, eventSetup](Actor &a) {
+			a.props().add_child("eventPool." + eventName, eventSetup(a));
+		};
+	}
+#else
+		;
+#endif	// defined(tte_declare_static_variables)
+}
