@@ -73,7 +73,7 @@ namespace tte {
 			// member variables
 			//
 		private:
-			std::unique_ptr<SDL_Window, default_delete<SDL_Window> > m_mainWindow;
+			std::unique_ptr<SDL_Window> m_mainWindow;
 			std::unique_ptr<SDL_Surface, empty_delete<SDL_Surface> > m_mainSurface;
 			Window m_window;
 			Renderer m_renderer;
@@ -96,6 +96,8 @@ namespace tte {
 
 		public:
 			virtual ~Adapter() {
+				m_mainSurface.reset();
+				m_mainWindow.reset();
 				IMG_Quit();
 				SDL_Quit();
 			}

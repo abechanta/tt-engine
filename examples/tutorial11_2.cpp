@@ -50,7 +50,7 @@ public:
 	virtual void finalize() override {
 		cout << __FUNCTION__ << endl;
 		SDL_FreeSurface(m_pSplashSurface), m_pSplashSurface = nullptr;
-		SDL_DestroyWindow(m_pMainWindow), m_pMainWindow = nullptr, m_pMainSurface = nullptr;
+		SDL_DestroyWindow(m_pMainWindow), m_pMainWindow = m_pMainSurface = nullptr;
 	}
 
 	virtual bool isRunning() override {

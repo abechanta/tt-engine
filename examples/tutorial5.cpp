@@ -32,21 +32,21 @@ namespace Tutorial5 {
 		cout << __FUNCTION__ << endl;
 		{
 			cout << "--- ctor" << endl;
-			auto actor1 = make_unique<Actor>(Actor::noAction, Indexer::append("actor1"));
-			auto actor2 = make_unique<Actor>(Actor::noAction, Indexer::append("actor2"));
-			auto actor3 = make_unique<Actor>(Actor::noAction, Indexer::append("actor3"));
+			auto actor1 = make_unique<Actor>(Actor::noAction, Indexer::append("a1"));
+			auto actor2 = make_unique<Actor>(Actor::noAction, Indexer::append("a2"));
+			auto actor3 = make_unique<Actor>(Actor::noAction, Indexer::append("a3"));
 			cout << "--- find1" << endl;
-			Finder<Actor>::find("actor2", [](Actor &) {
+			Finder<Actor>::find("a2", [](Actor &) {
 				cout << "actor2 found." << endl;
 			});
-			Finder<Actor>::find("actor4", [](Actor &) {
+			Finder<Actor>::find("a4", [](Actor &) {
 				cout << "actor4 found." << endl;
 			});
 			cout << "--- dtor" << endl;
 		}
 		{
 			cout << "--- find2" << endl;
-			Finder<Actor>::find("actor2", [](Actor &) {
+			Finder<Actor>::find("a2", [](Actor &) {
 				cout << "actor2 found." << endl;
 			});
 		}

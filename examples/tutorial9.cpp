@@ -17,20 +17,20 @@ namespace Tutorial9 {
 			0,0,0,0,1,1,0,0, 0,0,0,0,0,0,0,0, 0,1,1,1,1,1,1,1, 1,1,1,1,0,0,0,0,
 			0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,1, 0,0,0,0,0,0,1,1, 1,1,1,1,1,1,1,1,
 		};
-		cout << "\tpast <<< ";
+		cout << "\tpast<<<";
 		for (auto &it : key1) {
 			cout << it;
 			input1->update();
 			input1->buttons("key1").update(it);
 		}
-		cout << " <<< now" << endl;
+		cout << "<<<now" << endl;
 		cout << "--- check" << endl;
 		for (auto &n : { 1, 4, 8, 15, }) {
-			cout << "\ton(" << n << ")=" << input1->buttons("key1").on(n) << " ";
+			cout << "\ton(" << n << ")=" << input1->buttons("key1").on(n);
 		}
 		cout << endl;
 		for (auto &n : { 10, 20, 40, 60, }) {
-			cout << "\tpressed(" << n << ")=" << input1->buttons("key1").pressed(n) << " ";
+			cout << "\tpressed(" << n << ")=" << input1->buttons("key1").pressed(n);
 		}
 		cout << endl;
 	}
@@ -45,16 +45,16 @@ namespace Tutorial9 {
 				return (d == end) ? false : *d++;
 			};
 		};
-		auto kbd1 = device({ 0,0,0,0,1,1,0,0, 0,0,0,0,0,0,0,0, 0,1,1,1,1,1,1,1, 1,1,1,1,0,0,0,0, });
-		auto pad1 = device({ 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,1, 0,0,0,0,0,0,1,1, 1,1,1,1,1,1,1,1, });
-		for (auto i = 0; i < 32; i++) {
+		auto kbd1 = device({ 0,0,0,0,0,0,0,0, 0,1,1,1,1,1,1,1, 1,1,1,1,0,0,0,0, });
+		auto pad1 = device({ 0,0,0,0,0,0,0,1, 0,0,0,0,0,0,1,1, 1,1,1,1,1,1,1,1, });
+		for (auto i = 0; i < 24; i++) {
 			input1->update();
 			input1->buttons("left").update(kbd1());
 			input1->buttons("left").update(pad1() | input1->buttons("left").on());
 		}
 		cout << "--- check" << endl;
 		for (auto &n : { 1, 4, 8, 15, }) {
-			cout << "\ton(" << n << ")=" << input1->buttons("left").on(n) << " ";
+			cout << "\ton(" << n << ")=" << input1->buttons("left").on(n);
 		}
 		cout << endl;
 	}

@@ -31,7 +31,7 @@ namespace tte {
 
 	public:
 		void update(bool onoff) {
-			m_bits = (m_bits & ~1) | (onoff ? 1 : 0);
+			onoff ? (m_bits |= 1) : (m_bits &= ~1);
 		}
 
 		//
