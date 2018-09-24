@@ -45,6 +45,15 @@ namespace tte {
 		};
 	}
 
+	template<typename Vc1>
+	Actor::Action componentModifier(const string &key, const function<void(Actor &, Vc1 &)> &action) {
+		return [key, action](Actor &a) {
+			Finder<Actor>::find<Vc1>(key, [action, &a](auto &component1) {
+				action(a, component1);
+			});
+		};
+	}
+
 	template<typename Vc1, typename Vc2>
 	Actor::Action componentModifier(const function<void(Actor &, Vc1 &, Vc2 &)> &action) {
 		return [action](Actor &a) {
@@ -55,6 +64,19 @@ namespace tte {
 			});
 		};
 	}
+
+	Actor::Action actChildren()
+#if defined(tte_declare_static_variables)
+	{
+		return [](Actor &a) {
+			for_each(a.begin(true), a.end(), [](Actor &a) {
+				a.act();
+			});
+		};
+	}
+#else
+		;
+#endif	// defined(tte_declare_static_variables)
 
 	template<typename Vp>
 	Actor::Action put(const string &key, const Vp &value) {

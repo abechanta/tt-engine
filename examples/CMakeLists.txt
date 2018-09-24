@@ -1,8 +1,7 @@
-set(TARGET_NAME tutorial_vol1)
+set(TARGET_NAME tutorial)
 add_executable(
 	${TARGET_NAME}
-#	main.cpp tutorial1.cpp tutorial2_1.cpp tutorial2_2.cpp tutorial3.cpp tutorial4_1.cpp tutorial4_2.cpp tutorial5.cpp
-	main.cpp tutorial0.cpp tutorial1.cpp tutorial2.cpp tutorial3.cpp tutorial4.cpp tutorial5.cpp tutorial6.cpp tutorial7.cpp tutorial8.cpp tutorial9.cpp tutorial10.cpp tutorial11_1.cpp tutorial11_2.cpp column1.cpp column2.cpp examplex.cpp
+	main.cpp tutorial0.cpp tutorial1.cpp tutorial2.cpp tutorial3.cpp tutorial4.cpp tutorial5.cpp tutorial6.cpp tutorial7.cpp tutorial8.cpp tutorial9.cpp tutorial10.cpp tutorial11_1.cpp tutorial11_2.cpp column1.cpp column2.cpp showcase1.cpp
 )
 include_directories(${Boost_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
 target_include_directories(${TARGET_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/engine)
