@@ -55,6 +55,26 @@ namespace tte {
 			};
 		}
 
+		static Actor::Action apply(const string &key = "transform") {
+			static const unordered_map<string, float> unitConv = {
+				{ "radian", 1.f, },
+				{ "degree", Geometry::deg2rad, },
+				{ "fixed32", Geometry::fixed2rad, },
+			};
+			return [key](Actor &a) {
+				a.findComponent<Transform>([key, &a](auto &transform) {
+					vector3 t = Geometry::get<vector3>(a.props(), key + ".translation");
+					vector3 r = Geometry::get<vector3>(a.props(), key + ".rotation");
+					string rUnit = a.get<string>(key + ".rotation.unit", "degree");
+					//r *= unitConv.at(rUnit);	// TODO
+					vector3 s = Geometry::get<vector3>(a.props(), key + ".scaling", 1.f);
+					transform.translation() = t;
+					transform.rotation() = r;
+					transform.scaling() = s;
+				});
+			};
+		}
+
 		matrix3x4 & trs2d(matrix3x4 &m) const {
 			return Geometry::trs2d(m, m_translation, m_rotation, m_scaling);
 		}

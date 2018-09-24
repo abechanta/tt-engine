@@ -42,7 +42,7 @@
 		}
 	},
 	"window/sdl2": {
-		"title": "TT Engine Tutorials",
+		"title": "TT Engine Showcase",
 		"pos": {
 			"x": 536805376,
 			"x.comment": "SDL_WINDOWPOS_UNDEFINED",
@@ -50,7 +50,7 @@
 			"y.comment": "SDL_WINDOWPOS_UNDEFINED"
 		},
 		"size": {
-			"w": 256,
+			"w": 512,
 			"h": 240
 		}
 	},
@@ -59,22 +59,10 @@
 		"flags": 6,
 		"flags.comment": "SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC",
 		"clearColor": {
-			"r": 64,
-			"g": 64,
-			"b": 64,
+			"r": 192,
+			"g": 192,
+			"b": 192,
 			"a": 255
-		},
-		"viewports": {
-			"0": {
-				"pos": {
-					"x": 0,
-					"y": 0
-				},
-				"size": {
-					"w": 240,
-					"h": 240
-				}
-			}
 		}
 	},
 	"input/sdl2": {
