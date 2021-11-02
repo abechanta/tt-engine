@@ -256,7 +256,7 @@ namespace tte {
 			static function<void(Asset &)> initializerPng(Adapter &adapter) {
 				return [&adapter](Asset &a) {
 					cout << __FUNCTION__ << ": " << a.path() << endl;
-					assert(fs::is_regular_file(a.path()));
+					assert(filesystem::is_regular_file(a.path()));
 					a.setLoader([&adapter](Asset &a, bool bLoad) -> bool {
 						if (bLoad) {
 							std::unique_ptr<SDL_Surface> surface(IMG_Load(a.path().string().c_str()));

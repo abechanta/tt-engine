@@ -12,7 +12,6 @@
 namespace tte {
 	using namespace boost;
 	using namespace std;
-	namespace fs = experimental::filesystem::v1;
 
 	template<typename Dx>
 	struct empty_delete : public std::default_delete<Dx> {
@@ -25,7 +24,7 @@ namespace tte {
 		// public definitions
 		//
 	public:
-		typedef fs::path Path;
+		typedef filesystem::path Path;
 
 		//
 		// member variables
