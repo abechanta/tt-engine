@@ -41,22 +41,22 @@ namespace tte {
 				if (a.get<float>("size.x", FP_NAN) == FP_NAN) {
 					// filler
 					float w = asset.props().get<float>("size.w", 8.f);
-					a.put<float>("size.x", w);
+					a.props().put<float>("size.x", w);
 					float h = asset.props().get<float>("size.h", 8.f);
-					a.put<float>("size.y", h);
+					a.props().put<float>("size.y", h);
 				}
-				vector4 d = Geometry::get<vector4>(a.props(), key + ".diffuse", 1.f);
-				vector2 uv0 = Geometry::get<vector2>(a.props(), key + ".uv.0", 0.f);
-				vector2 uv1 = Geometry::get<vector2>(a.props(), key + ".uv.1", 1.f);
-				a.transform<bool, string>(key + ".uv.unit", false, [&a, &uv0, &uv1](const string &unit) -> bool {
+				vector4 d = Geometry::get<vec, float, 4>(*a.props(key + ".diffuse"), "", 1.f);
+				vector2 uv0 = Geometry::get<vec, float, 2>(*a.props(key + ".uv.0"), "", 0.f);
+				vector2 uv1 = Geometry::get<vec, float, 2>(*a.props(key + ".uv.1"), "", 1.f);
+				a.props(key + ".uvUnit", [&a, &uv0, &uv1](const property_tree::ptree &node) {
+					auto unit = node.get<string>("");
 					if (unit == "px") {
-						vector2 size = Geometry::get<vector2>(a.props(), "size", 1.f);
+						vector2 size = Geometry::get<vec, float, 2>(a.props(), "size", 1.f);
 						X(uv0) /= X(size);
 						Y(uv0) /= Y(size);
 						X(uv1) /= X(size);
 						Y(uv1) /= Y(size);
 					}
-					return true;
 				});
 				a.appendComponent(new Material(asset, d, uv0, uv1));
 			};

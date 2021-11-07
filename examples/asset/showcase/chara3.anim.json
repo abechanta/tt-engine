@@ -1,0 +1,51 @@
+{
+  "contentType": "text/json",
+  "animation": {
+    "right": {
+      "frameLength": 60,
+      "frameDelay": 0,
+      "repeatCount": 0,
+      "channels": [
+        {
+          "access": "delta",
+          "target": "transform.translation.x",
+          "type": "float",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 60,
+              "easing": "elastic:out",
+              "value": 384
+            }
+          ]
+        }
+      ]
+    },
+    "left": {
+      "frameLength": 60,
+      "frameDelay": 0,
+      "repeatCount": 0,
+      "channels": [
+        {
+          "access": "delta",
+          "target": "transform.translation.x",
+          "type": "float",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 60,
+              "easing": "elastic:in",
+              "value": -384
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

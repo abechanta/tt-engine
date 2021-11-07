@@ -46,11 +46,11 @@ namespace tte {
 				{ "fixed32", Geometry::fixed2rad, },
 			};
 			return [key](Actor &a) {
-				vector3 t = Geometry::get<vector3>(a.props(), key + ".translation");
-				vector3 r = Geometry::get<vector3>(a.props(), key + ".rotation");
+				vector3 t = Geometry::get<vec, float, 3>(a.props(), key + ".translation");
+				vector3 r = Geometry::get<vec, float, 3>(a.props(), key + ".rotation");
 				string rUnit = a.get<string>(key + ".rotation.unit", "degree");
 				r *= unitConv.at(rUnit);
-				vector3 s = Geometry::get<vector3>(a.props(), key + ".scaling", 1.f);
+				vector3 s = Geometry::get<vec, float, 3>(a.props(), key + ".scaling", 1.f);
 				a.appendComponent(new Transform(t, r, s));
 			};
 		}
@@ -63,11 +63,11 @@ namespace tte {
 			};
 			return [key](Actor &a) {
 				a.findComponent<Transform>([key, &a](auto &transform) {
-					vector3 t = Geometry::get<vector3>(a.props(), key + ".translation");
-					vector3 r = Geometry::get<vector3>(a.props(), key + ".rotation");
+					vector3 t = Geometry::get<vec, float, 3>(a.props(), key + ".translation");
+					vector3 r = Geometry::get<vec, float, 3>(a.props(), key + ".rotation");
 					string rUnit = a.get<string>(key + ".rotation.unit", "degree");
 					//r *= unitConv.at(rUnit);	// TODO
-					vector3 s = Geometry::get<vector3>(a.props(), key + ".scaling", 1.f);
+					vector3 s = Geometry::get<vec, float, 3>(a.props(), key + ".scaling", 1.f);
 					transform.translation() = t;
 					transform.rotation() = r;
 					transform.scaling() = s;

@@ -22,28 +22,29 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <vector>
 using namespace tte;
 
 class Showcase1 : public App {
 private:
 	std::unique_ptr<sdl2::Adapter> &m_adapter;
-	std::unique_ptr<Asset> m_assetRoot;
+	std::unique_ptr<Asset> m_assets;
 	std::unique_ptr<Actor> m_actors;
 
 public:
-	Showcase1() : App(), m_adapter(sdl2::Adapter::create()), m_assetRoot(), m_actors() {
+	Showcase1() : App(), m_adapter(sdl2::Adapter::create()), m_assets(), m_actors() {
 		cout << __FUNCTION__ << endl;
 		AssetHandler::clear();
 		AssetHandler::appendInitializer({ AssetHandler::extensionUnknown, AssetHandler::initializerUnknown, });
 		AssetHandler::appendInitializer({ L".json", AssetHandler::initializerJson, });
 		AssetHandler::appendInitializer({ L".png", sdl2::Adapter::initializerPng(*m_adapter), });
 		AssetHandler::appendInitializer({ L"", AssetHandler::initializerDir, });
-		m_assetRoot = std::make_unique<Asset>(L"asset", AssetHandler::factory(L"asset:"));
+		m_assets = std::make_unique<Asset>(L"asset", AssetHandler::factory(L"asset:"));
 	}
 
 	virtual ~Showcase1() override {
 		cout << __FUNCTION__ << endl;
-		m_assetRoot.reset();
+		m_assets.reset();
 		m_adapter.reset();
 		AssetHandler::clear();
 	}
@@ -51,7 +52,7 @@ public:
 	virtual void initialize() override {
 		cout << __FUNCTION__ << endl;
 
-		auto &config = m_assetRoot->find(L"config.json");
+		auto &config = m_assets->find(L"config.json");
 		config.load();
 		auto root = new Actor(actChildren(), Indexer::append("sys:root"));
 		auto resource = new Actor(Actor::noAction, Indexer::append("sys:resource"));
@@ -69,7 +70,7 @@ public:
 		root->appendChild(renderer);
 		m_actors.reset(root);
 
-		auto &showcase = m_assetRoot->find(L"showcase");
+		auto &showcase = m_assets->find(L"showcase");
 		resource->appendChild(new Actor(
 			Actor::noAction,
 			Indexer::append("asset:showcase") + Resource::append(showcase)
@@ -92,24 +93,20 @@ public:
 			loadProps(showcase.find(L"grid0.json")) + Transform::append() + Material::append(showcase.find(L"grid.png"))
 		));
 		scene->appendChild(new Actor(
-			rendererRender(),
-			loadProps(showcase.find(L"grid1.json")) + Transform::append() + Material::append(showcase.find(L"grid.png"))
+			Transform::apply() + renderAsSprite(),
+			loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara0.anim.json"))
 		));
 		scene->appendChild(new Actor(
-			Transform::apply() + rendererRender(),
-			loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara0.json"))
+			Transform::apply() + renderAsSprite(),
+			loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara1.anim.json"))
 		));
 		scene->appendChild(new Actor(
-			Transform::apply() + rendererRender(),
-			loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara1.json"))
+			Transform::apply() + renderAsSprite(),
+			loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara2.anim.json"))
 		));
 		scene->appendChild(new Actor(
-			Transform::apply() + rendererRender(),
-			loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara2.json"))
-		));
-		scene->appendChild(new Actor(
-			Transform::apply() + rendererRender(),
-			loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara3.json"))
+			Transform::apply() + renderAsSprite(),
+			loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara3.anim.json"))
 		));
 	}
 
@@ -130,7 +127,7 @@ public:
 	}
 
 private:
-	function<void(Actor &)> rendererRender() {
+	function<void(Actor &)> renderAsSprite() {
 		return componentModifier<Renderer2d>("renderer:", [](Actor &a, auto &renderer) {
 			renderer.render(a);
 		});

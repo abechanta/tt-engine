@@ -57,9 +57,9 @@ namespace tte {
 
 			static Handle get(const Component &transform, const Actor &a) {
 				vec<int32_t, 3> t = transform.translation();
-				vec<int32_t, 2> s = Geometry::get<vector2>(a.props(), "size");
-				//vec<int32_t, 2> c = Geometry::get<vector2>(a.props(), "center");
-				vec<int32_t, 2> c = Geometry::get<vector2>(a.props(), "size") / 2;
+				vec<int32_t, 2> s = Geometry::get<vec, int32_t, 2>(a.props(), "size");
+				//vec<int32_t, 2> c = Geometry::get<vec, int32_t, 2>(a.props(), "center");
+				vec<int32_t, 2> c = Geometry::get<vec, int32_t, 2>(a.props(), "size") / 2;
 				return Handle{
 					SDL_Rect{ X(t), Y(t), X(s), Y(s), },
 					SDL_Point{ X(c), Y(c), },

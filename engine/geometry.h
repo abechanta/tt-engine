@@ -38,18 +38,27 @@ namespace tte {
 			return ret;
 		}
 
-		template<typename V>
-		static V get(const property_tree::ptree &props, const string &key, float defvalue = 0.f) {
+		template<template<typename, int> class C, typename V, int N>
+		static C<V, N> get(const property_tree::ptree &node, const string &key = "", V defvalue = 0) {
 			static const initializer_list<string> keys = { ".x", ".y", ".z", ".w", };
-			V ret;
+			C<V, N> ret;
 			auto it = keys.begin();
 			for (auto &e : ret.a) {
-				e = props.get<float>(key + *it++, defvalue);
+				e = node.get<V>(key + *it++, defvalue);
 			}
 			return ret;
 		}
 
-		static matrix3x4 & identity(matrix3x4 &m) {
+		template<template<typename> class C, typename V>
+		static C<V> get(const property_tree::ptree &node, const string &key = "") {
+			C<V> ret;
+			for (auto &ch : node.get_child(key)) {
+				ret.push_back(ch.second.get<V>(""));
+			}
+			return ret;
+		}
+
+		static matrix3x4& identity(matrix3x4 &m) {
 			m = del_row<3>(identity_mat<float, 4>());
 			return m;
 		}

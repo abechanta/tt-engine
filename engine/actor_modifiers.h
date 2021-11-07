@@ -81,7 +81,7 @@ namespace tte {
 	template<typename Vp>
 	Actor::Action put(const string &key, const Vp &value) {
 		return [key, value](Actor &a) {
-			a.put<Vp>(key, value);
+			a.props().put<Vp>(key, value);
 		};
 	}
 

@@ -1,5 +1,9 @@
 {
 	"contentType": "text/json",
+	"size": {
+		"x": 32,
+		"y": 32
+	},
 	"transform": {
 		"translation": {
 			"x": 64,
@@ -14,52 +18,23 @@
 			"y": 1
 		}
 	},
-	"animation": {
-		"right": {
-			"frameLength": 60,
-			"frameDelay": 0,
-			"repeatCount": 0,
-			"channels": [
-				{
-					"access": "delta",
-					"target": "transform.translation.x",
-					"type": "float",
-					"keys": [
-						{
-							"frame": 0,
-							"value": 0
-						},
-						{
-							"frame": 60,
-							"easing": "cubic:out",
-							"value": 384
-						}
-					]
-				}
-			]
+	"material": {
+		"diffuse": {
+			"r": 255,
+			"g": 255,
+			"b": 255,
+			"a": 255
 		},
-		"left": {
-			"frameLength": 60,
-			"frameDelay": 0,
-			"repeatCount": 0,
-			"channels": [
-				{
-					"access": "delta",
-					"target": "transform.translation.x",
-					"type": "float",
-					"keys": [
-						{
-							"frame": 0,
-							"value": 0
-						},
-						{
-							"frame": 60,
-							"easing": "cubic:in",
-							"value": -384
-						}
-					]
-				}
-			]
-		}
+		"uvUnit": "px",
+		"uv": [
+			{
+				"x": 0,
+				"y": 0
+			},
+			{
+				"x": 32,
+				"y": 32
+			}
+		]
 	}
 }

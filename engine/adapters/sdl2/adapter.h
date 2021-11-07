@@ -213,7 +213,7 @@ namespace tte {
 							//	continue;
 							//}
 							if (e.type == SDL_QUIT) {
-								a.put<bool>("quit", true);
+								a.props().put<bool>("quit", true);
 								continue;
 							}
 						}
@@ -224,7 +224,7 @@ namespace tte {
 					[&config](Actor &a) {
 						a.importProps(config.props().get_child("input/sdl2"));
 						Input::append()(a);
-						a.put<bool>("quit", false);
+						a.props().put<bool>("quit", false);
 					} + initializer
 				);
 			}
