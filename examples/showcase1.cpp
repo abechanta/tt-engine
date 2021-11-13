@@ -89,8 +89,8 @@ public:
 			put<string>("state", "0")
 		));
 		scene->appendChild(new Actor(
-			rendererRender(),
-			loadProps(showcase.find(L"grid0.json")) + Transform::append() + Material::append(showcase.find(L"grid.png"))
+			renderAsTilemap(),
+			loadProps(showcase.find(L"tilemap0.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png"))
 		));
 		scene->appendChild(new Actor(
 			Transform::apply() + renderAsSprite(),
@@ -130,6 +130,37 @@ private:
 	function<void(Actor &)> renderAsSprite() {
 		return componentModifier<Renderer2d>("renderer:", [](Actor &a, auto &renderer) {
 			renderer.render(a);
+		});
+	}
+
+	function<void(Actor&)> renderAsTilemap() {
+		return componentModifier<Renderer2d>("renderer:", [](Actor& a, auto& renderer) {
+			a.findComponent<Transform, Material>([&a, &renderer](auto& transform, auto& material) {
+				const vector3 translation = transform.translation();
+				const vector2 uv0 = material.uv0();
+				const vector2 uv1 = material.uv1();
+				{
+					const vector2i size = Geometry::get<vec, int32_t, 2>(a.props("size"), 8);
+					const vector2i mapsize = Geometry::get<vec, int32_t, 2>(a.props("tilemap.size"), 16);
+					const vector2i cellsize = Geometry::get<vec, int32_t, 2>(a.props("tilemap.cell"), 8);
+					const int32_t cellBounds = X(material.size()) / X(cellsize);
+
+					for (int32_t y = 0; y < Y(mapsize); y++) {
+						transform.translation() = translation + _0X0<int32_t>(y * Y(size));
+						const vector<int32_t> vert = Geometry::get<vector, int32_t>(a.props("tilemap.tiles." + to_string(y)));
+						for (int32_t x = 0; x < X(mapsize); x++) {
+							auto code = vert[x];
+							material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellsize), ((code / cellBounds) + 0) * Y(cellsize), });
+							material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellsize), ((code / cellBounds) + 1) * Y(cellsize), });
+							renderer.render(a);
+							X(transform.translation()) += X(size);
+						}
+					}
+				}
+				transform.translation() = translation;
+				material.uv0() = uv0;
+				material.uv1() = uv1;
+			});
 		});
 	}
 

@@ -103,6 +103,10 @@ namespace tte {
 			return get_child_optional<property_tree::ptree>(m_props, key);
 		}
 
+		optional<const property_tree::ptree &> props(const string &key) const {
+			return get_child_optional<const property_tree::ptree>(m_props, key);
+		}
+
 		void props(const string &key, const function<void(property_tree::ptree &)> &operation) {
 			auto pNode = get_child_optional<property_tree::ptree>(m_props, key);
 			if (pNode) {

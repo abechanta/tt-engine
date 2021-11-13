@@ -16,6 +16,9 @@ namespace tte {
 	using vector3 = boost::qvm::vec<float, 3>;
 	using vector4 = boost::qvm::vec<float, 4>;
 	using matrix3x4 = boost::qvm::mat<float, 3, 4>;
+	using vector2i = boost::qvm::vec<int32_t, 2>;
+	using vector3i = boost::qvm::vec<int32_t, 3>;
+	using vector4i = boost::qvm::vec<int32_t, 4>;
 
 	struct Geometry {
 		static constexpr float pi = 3.14159265358979323846f;	// M_PI
@@ -29,7 +32,7 @@ namespace tte {
 		//using vector3r = boost::qvm::vec<Radian, 3>;	// TODO
 
 		template<typename V>
-		static V get(const initializer_list<float> &vec = {}, float defvalue = 0.f) {
+		static V get(const initializer_list<float> &vec = {}, const float &defvalue = 0.f) {
 			V ret;
 			auto it = vec.begin();
 			for (auto &e : ret.a) {
@@ -39,26 +42,50 @@ namespace tte {
 		}
 
 		template<template<typename, int> class C, typename V, int N>
-		static C<V, N> get(const property_tree::ptree &node, const string &key = "", V defvalue = 0) {
-			static const initializer_list<string> keys = { ".x", ".y", ".z", ".w", };
+		static C<V, N> get(const optional<property_tree::ptree &> &pNode, const V &defvalue = 0) {
+			static const initializer_list<string> keys = { "x", "y", "z", "w", };
+			C<V, N> ret;
+			auto it = keys.begin();
+			for (auto& e : ret.a) {
+				e = pNode ? pNode->get<V>(*it++, defvalue) : defvalue;
+			}
+			return ret;
+		}
+
+		template<template<typename, int> class C, typename V, int N>
+		static C<V, N> get(const optional<const property_tree::ptree &> &pNode, const V &defvalue = 0) {
+			static const initializer_list<string> keys = { "x", "y", "z", "w", };
 			C<V, N> ret;
 			auto it = keys.begin();
 			for (auto &e : ret.a) {
-				e = node.get<V>(key + *it++, defvalue);
+				e = pNode ? pNode->get<V>(*it++, defvalue) : defvalue;
 			}
 			return ret;
 		}
 
 		template<template<typename> class C, typename V>
-		static C<V> get(const property_tree::ptree &node, const string &key = "") {
+		static C<V> get(const optional<property_tree::ptree &> &pNode, const string &key = "") {
 			C<V> ret;
-			for (auto &ch : node.get_child(key)) {
-				ret.push_back(ch.second.get<V>(""));
+			if (pNode) {
+				for (auto &ch : pNode->get_child(key)) {
+					ret.push_back(ch.second.get<V>(""));
+				}
 			}
 			return ret;
 		}
 
-		static matrix3x4& identity(matrix3x4 &m) {
+		template<template<typename> class C, typename V>
+		static C<V> get(const optional<const property_tree::ptree &> &pNode, const string &key = "") {
+			C<V> ret;
+			if (pNode) {
+				for (auto &ch : pNode->get_child(key)) {
+					ret.push_back(ch.second.get<V>(""));
+				}
+			}
+			return ret;
+		}
+
+		static matrix3x4 & identity(matrix3x4 &m) {
 			m = del_row<3>(identity_mat<float, 4>());
 			return m;
 		}
