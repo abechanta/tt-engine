@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/property_tree/ptree.hpp>
 
 namespace tte {
@@ -77,9 +77,8 @@ namespace tte {
 		}
 
 		void act() {
-			props("", [](property_tree::ptree& node) {
-				node.put<int32_t>("count0", node.get<int32_t>("count0", -1) + 1);
-			});
+			auto count0 = m_props.get<int32_t>("count0", -1);
+			m_props.put<int32_t>("count0", ++count0);
 			m_actions(*this);
 		}
 
@@ -99,64 +98,20 @@ namespace tte {
 			return m_props;
 		}
 
-		optional<property_tree::ptree &> props(const string &key) {
-			return get_child_optional<property_tree::ptree>(m_props, key);
-		}
-
-		optional<const property_tree::ptree &> props(const string &key) const {
-			return get_child_optional<const property_tree::ptree>(m_props, key);
-		}
-
-		void props(const string &key, const function<void(property_tree::ptree &)> &operation) {
-			auto pNode = get_child_optional<property_tree::ptree>(m_props, key);
-			if (pNode) {
-				operation(*pNode);
-			}
-		}
-
-		void props(const string &key, const function<void(const property_tree::ptree &)> &operation) const {
-			auto pNode = get_child_optional<const property_tree::ptree>(m_props, key);
-			if (pNode) {
-				operation(*pNode);
-			}
-		}
-
-		template<typename Vp>
-		void put(const string &key, const Vp &value) {
-			if (auto pNode = get_child_optional<property_tree::ptree>(m_props, key)) {
-				pNode->put_value<Vp>(value);
-			}
+		std::optional<property_tree::ptree> props(const string &key) const {
+			return get_child_optional(m_props, key);
 		}
 
 		template<typename Vp>
 		Vp get(const string &key, const Vp &defvalue) const {
-			auto pNode = get_child_optional<const property_tree::ptree>(m_props, key);
+			auto pNode = get_child_optional(m_props, key);
 			return pNode ? pNode->get_value<Vp>(defvalue) : defvalue;
 		}
 
-		//template<typename Vt, typename Vp>
-		//Vt transform(const string &key, const Vt &defvalue, const function<Vt(const Vp &)> &operation) const {
-		//	auto pNode = get_child_optional<const property_tree::ptree>(m_props, key);
-		//	return pNode ? operation(pNode->get_value<Vp>()) : defvalue;
-		//}
-
-		//template<typename Vt, typename Vp>
-		//Vt transform(const string &key, const Vt &defvalue, const function<Vt(Vp &)> &operation) {
-		//	auto pNode = get_child_optional<property_tree::ptree>(m_props, key);
-		//	if (!pNode) {
-		//		return defvalue;
-		//	}
-		//	Vp value = pNode->get_value<Vp>();
-		//	Vt rv = operation(value);
-		//	pNode->put_value<Vp>(value);
-		//	return rv;
-		//}
-
 	private:
-		template<typename V>
-		static optional<V &> get_child_optional(V &node, property_tree::ptree::path_type key) {
+		static std::optional<const property_tree::ptree> get_child_optional(const property_tree::ptree &node, property_tree::ptree::path_type key) {
 			if (key.empty()) {
-				return optional<V &>(node);
+				return node;
 			}
 
 			auto head = key.reduce();
@@ -165,7 +120,7 @@ namespace tte {
 
 			auto matches = node.equal_range(name);
 			if (matches.first == matches.second) {
-				return optional<V &>();
+				return std::nullopt;
 			}
 
 			while ((index > 0) && (matches.first != matches.second)) {
@@ -173,7 +128,7 @@ namespace tte {
 				++matches.first;
 			}
 			if ((index > 0) || (matches.first == matches.second)) {
-				return optional<V &>();
+				return std::nullopt;
 			}
 
 			return get_child_optional(matches.first->second, key);

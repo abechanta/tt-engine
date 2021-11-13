@@ -43,8 +43,8 @@ namespace tte {
 			X(m_size) = asset.props().get<int32_t>("size.w", 8);
 			Y(m_size) = asset.props().get<int32_t>("size.h", 8);
 			m_diffuse = Geometry::get<vec, float, 4>(a.props(key + ".diffuse"), 1.f);
-			auto pNode = a.props(key + ".uvUnit");
-			if (pNode && (pNode->get<string>("") == "px")) {
+			auto unit = a.get<string>(key + ".uvUnit", "ratio");
+			if (unit == "px") {
 				m_uv0 = to_vector2(Geometry::get<vec, int32_t, 2>(a.props(key + ".uv.0"), 0));
 				m_uv1 = to_vector2(Geometry::get<vec, int32_t, 2>(a.props(key + ".uv.1"), 8));
 			} else {
