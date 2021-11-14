@@ -20,9 +20,9 @@ namespace Tutorial10 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
 		AssetHandler::clear();
-		AssetHandler::appendInitializer({ L"<undef>", AssetHandler::initializerUnknown, });
-		AssetHandler::appendInitializer({ L".json", AssetHandler::initializerJson, });
-		AssetHandler::appendInitializer({ L"", AssetHandler::initializerDir, });
+		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
+		AssetHandler::append({ L".json", AssetHandler::typeJson, });
+		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		auto assetRoot = make_unique<Asset>(L"asset/tutorial10", AssetHandler::factory(L""));
 		cout << "--- ctor" << endl;
 		auto actor1 = make_unique<Actor>(
@@ -47,9 +47,9 @@ namespace Tutorial10 {
 	void test2() {
 		cout << __FUNCTION__ << endl;
 		AssetHandler::clear();
-		AssetHandler::appendInitializer({ L"<undef>", AssetHandler::initializerUnknown, });
-		AssetHandler::appendInitializer({ L".json", AssetHandler::initializerJson, });
-		AssetHandler::appendInitializer({ L"", AssetHandler::initializerDir, });
+		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
+		AssetHandler::append({ L".json", AssetHandler::typeJson, });
+		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		auto assetRoot = make_unique<Asset>(L"asset/tutorial10", AssetHandler::factory(L""));
 		cout << "--- ctor" << endl;
 		auto actor1 = make_unique<Actor>(

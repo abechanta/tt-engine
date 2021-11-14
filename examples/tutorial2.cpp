@@ -9,7 +9,7 @@ using namespace tte;
 namespace Tutorial2 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		Asset asset1(L"asset/tutorial2/tutorial2.json", AssetHandler::initializerJson);
+		Asset asset1(L"asset/tutorial2/tutorial2.json", AssetHandler::typeJson);
 		cout << "--- load" << endl;
 		asset1.load();
 		cout << "--- unload" << endl;
@@ -20,9 +20,9 @@ namespace Tutorial2 {
 	void test2() {
 		cout << __FUNCTION__ << endl;
 		AssetHandler::clear();
-		AssetHandler::appendInitializer({ L"<undef>", AssetHandler::initializerUnknown, });
-		AssetHandler::appendInitializer({ L".json", AssetHandler::initializerJson, });
-		AssetHandler::appendInitializer({ L"", AssetHandler::initializerDir, });
+		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
+		AssetHandler::append({ L".json", AssetHandler::typeJson, });
+		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		cout << "--- ctor" << endl;
 		Asset assetRoot(L"asset/tutorial2", AssetHandler::factory(L""));
 		cout << "--- dtor" << endl;
@@ -31,9 +31,9 @@ namespace Tutorial2 {
 	void test3() {
 		cout << __FUNCTION__ << endl;
 		AssetHandler::clear();
-		AssetHandler::appendInitializer({ L"<undef>", AssetHandler::initializerUnknown, });
-		AssetHandler::appendInitializer({ L".json", AssetHandler::initializerJson, });
-		AssetHandler::appendInitializer({ L"", AssetHandler::initializerDir, });
+		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
+		AssetHandler::append({ L".json", AssetHandler::typeJson, });
+		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		cout << "--- ctor" << endl;
 		Asset assetRoot(L"asset/tutorial2", AssetHandler::factory(L""));
 		auto &asset1 = assetRoot.find(L"font/font1.json");

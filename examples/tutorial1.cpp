@@ -8,7 +8,7 @@ using namespace tte;
 namespace Tutorial1 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		Asset asset1(L"asset/tutorial1.json", AssetHandler::initializerJson);
+		Asset asset1(L"asset/tutorial1.json", AssetHandler::typeJson);
 		cout << "--- load" << endl;
 		asset1.load();
 		cout << "--- unload" << endl;

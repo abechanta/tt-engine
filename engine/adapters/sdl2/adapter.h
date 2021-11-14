@@ -258,7 +258,7 @@ namespace tte {
 			}
 
 		public:
-			static function<void(Asset &)> initializerPng(Adapter &adapter) {
+			static function<void(Asset &)> typePng(Adapter &adapter) {
 				return [&adapter](Asset &a) {
 					cout << __FUNCTION__ << ": " << a.path() << endl;
 					assert(filesystem::is_regular_file(a.path()));

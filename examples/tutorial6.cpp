@@ -26,7 +26,7 @@ namespace Tutorial6 {
 
 	void test2() {
 		cout << __FUNCTION__ << endl;
-		auto asset1 = make_unique<Asset>(L"asset/tutorial6.json", AssetHandler::initializerJson);
+		auto asset1 = make_unique<Asset>(L"asset/tutorial6.json", AssetHandler::typeJson);
 		cout << "--- load" << endl;
 		asset1->load();
 		cout << "--- ctor" << endl;

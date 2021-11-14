@@ -12,7 +12,7 @@ using namespace tte;
 namespace Tutorial4 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		auto asset1 = make_unique<Asset>(L"asset/tutorial4/tutorial4.json", AssetHandler::initializerJson);
+		auto asset1 = make_unique<Asset>(L"asset/tutorial4/tutorial4.json", AssetHandler::typeJson);
 		cout << "--- load" << endl;
 		auto resource1 = make_unique<Resource>(*asset1);
 		cout << "--- dtor" << endl;
@@ -22,9 +22,9 @@ namespace Tutorial4 {
 		cout << __FUNCTION__ << endl;
 		cout << "--- ctor" << endl;
 		AssetHandler::clear();
-		AssetHandler::appendInitializer({ L"<undef>", AssetHandler::initializerUnknown, });
-		AssetHandler::appendInitializer({ L".json", AssetHandler::initializerJson, });
-		AssetHandler::appendInitializer({ L"", AssetHandler::initializerDir, });
+		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
+		AssetHandler::append({ L".json", AssetHandler::typeJson, });
+		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		auto assetRoot = make_unique<Asset>(L"asset/tutorial4/font", AssetHandler::factory(L""));
 		cout << "--- load" << endl;
 		unique_ptr<Actor> actor1 = make_unique<Actor>(
