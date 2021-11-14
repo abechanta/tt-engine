@@ -48,7 +48,7 @@ namespace Tutorial8 {
 		cout << "--- unload" << endl;
 		asset1->unload();
 		cout << "--- play" << endl;
-		actor1->findComponent<Animator>([](auto &animator) {
+		actor1->getComponent<Animator>([](auto &animator) {
 			animator.play("falling");
 		});
 		cout << "--- tick" << endl;

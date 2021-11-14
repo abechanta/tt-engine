@@ -49,7 +49,7 @@ namespace tte {
 		}
 
 		template<typename V>
-		V * find() {
+		V * get() {
 			for (CList *p = next(); p != end(); p = p->next()) {
 				if (p->tag() == V::tag) {
 					return reinterpret_cast<V *>(p);

@@ -72,7 +72,7 @@ namespace tte {
 	{
 		return [alias, range](Actor &) -> bool {
 			return Finder<Actor>::find<bool>("input:", false, [alias, range](Actor &a) -> bool {
-				return a.findComponent<bool, Input>(false, [alias, range](auto &input) -> bool {
+				return a.getComponent<bool, Input>(false, [alias, range](auto &input) -> bool {
 					return input.buttons(alias).on(range);
 				});
 			});
@@ -87,7 +87,7 @@ namespace tte {
 	{
 		return [alias, range](Actor &) -> bool {
 			return Finder<Actor>::find<bool>("input:", false, [alias, range](Actor &a) -> bool {
-				return a.findComponent<bool, Input>(false, [alias, range](auto &input) -> bool {
+				return a.getComponent<bool, Input>(false, [alias, range](auto &input) -> bool {
 					return input.buttons(alias).off(range);
 				});
 			});
@@ -102,7 +102,7 @@ namespace tte {
 	{
 		return [alias, range, needs](Actor &) -> bool {
 			return Finder<Actor>::find<bool>("input:", false, [alias, range, needs](Actor &a) -> bool {
-				return a.findComponent<bool, Input>(false, [alias, range, needs](auto &input) -> bool {
+				return a.getComponent<bool, Input>(false, [alias, range, needs](auto &input) -> bool {
 					return (input.buttons(alias).pressed(range) >= needs);
 				});
 			});
@@ -117,7 +117,7 @@ namespace tte {
 	{
 		return [alias, range, needs](Actor &) -> bool {
 			return Finder<Actor>::find<bool>("input:", false, [alias, range, needs](Actor &a) -> bool {
-				return a.findComponent<bool, Input>(false, [alias, range, needs](auto &input) -> bool {
+				return a.getComponent<bool, Input>(false, [alias, range, needs](auto &input) -> bool {
 					return (input.buttons(alias).released(range) >= needs);
 				});
 			});

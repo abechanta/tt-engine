@@ -47,7 +47,7 @@ namespace Tutorial7 {
 		assetProp->unload();
 		assetImg->unload();
 		cout << "--- material" << endl;
-		actor1->findComponent<Material>([](Material &material) {
+		actor1->getComponent<Material>([](Material &material) {
 			vector4 d = material.diffuse();
 			cout << "d=" << X(d) << " " << Y(d) << " " << Z(d) << " " << W(d) << endl;
 			vector2 uv0 = material.uv0();

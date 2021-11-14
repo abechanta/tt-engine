@@ -144,7 +144,7 @@ namespace tte {
 			Actor * createRendererActor(const Asset &config, const Actor::Action &initializer) {
 				return new Actor(
 					[this](Actor &a) {
-						a.findComponent<tte::Renderer2d>([this, &a](auto &renderer) {
+						a.getComponent<tte::Renderer2d>([this, &a](auto &renderer) {
 							SDL_RenderPresent(sdl2::Renderer2d::get(renderer));
 							SDL_SetRenderDrawColor(
 								sdl2::Renderer2d::get(renderer),
@@ -167,7 +167,7 @@ namespace tte {
 							));
 							assert(renderer.handle<SDL_Renderer>());
 							renderer.setRenderer([this](tte::Renderer2d &renderer, Actor &a) {
-								a.findComponent<tte::Transform, tte::Material>([this, &renderer, &a](auto &transform, auto &material) {
+								a.getComponent<tte::Transform, tte::Material>([this, &renderer, &a](auto &transform, auto &material) {
 									draw(renderer, transform, material, a);
 								});
 							});
@@ -222,7 +222,7 @@ namespace tte {
 								continue;
 							}
 						}
-						a.findComponent<Input>([](auto &input) {
+						a.getComponent<Input>([](auto &input) {
 							input.update();
 						});
 					},

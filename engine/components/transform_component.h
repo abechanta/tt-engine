@@ -62,7 +62,7 @@ namespace tte {
 				{ "fixed32", Geometry::fixed2rad, },
 			};
 			return [key](Actor &a) {
-				a.findComponent<Transform>([key, &a](auto &transform) {
+				a.getComponent<Transform>([key, &a](auto &transform) {
 					auto t = Geometry::get<vec, float, 3>(a.props(key + ".translation"), 0.f);
 					auto r = Geometry::get<vec, float, 3>(a.props(key + ".rotation"), 0.f);
 					const string rUnit = a.get<string>(key + ".rotation.unit", "degree");

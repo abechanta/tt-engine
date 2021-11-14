@@ -27,9 +27,9 @@ namespace Tutorial10 {
 		cout << "--- ctor" << endl;
 		auto actor1 = make_unique<Actor>(
 			[](Actor &a) {
-				a.findComponent<Input>([&a](auto &input) {
+				a.getComponent<Input>([&a](auto &input) {
 					if (input.buttons("down").pressed()) {
-						a.findComponent<Animator>([](auto &animator) {
+						a.getComponent<Animator>([](auto &animator) {
 							animator.play("0");
 						});
 					}

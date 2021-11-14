@@ -44,7 +44,7 @@ namespace tte {
 		}
 
 		static Asset & find(Actor &a, const Asset::Path &path) {
-			return a.findComponent<Asset &, Resource>(Asset::noAsset(), [&path](auto &resource) -> Asset & {
+			return a.getComponent<Asset &, Resource>(Asset::noAsset(), [&path](auto &resource) -> Asset & {
 				return resource.find(path);
 			});
 		}

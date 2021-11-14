@@ -143,24 +143,24 @@ namespace tte {
 		}
 
 		template<typename Vp>
-		void findComponent(const function<void(Vp &)> &operation) {
-			if (auto pComponent = m_components.find<Vp>()) {
+		void getComponent(const function<void(Vp &)> &operation) {
+			if (auto pComponent = m_components.get<Vp>()) {
 				operation(*pComponent);
 			}
 		}
 
 		template<typename Vp1, typename Vp2>
-		void findComponent(const function<void(Vp1 &, Vp2 &)> &operation) {
-			if (auto pComponent1 = m_components.find<Vp1>()) {
-				if (auto pComponent2 = m_components.find<Vp2>()) {
+		void getComponent(const function<void(Vp1 &, Vp2 &)> &operation) {
+			if (auto pComponent1 = m_components.get<Vp1>()) {
+				if (auto pComponent2 = m_components.get<Vp2>()) {
 					operation(*pComponent1, *pComponent2);
 				}
 			}
 		}
 
 		template<typename Vt, typename Vp>
-		Vt findComponent(Vt &&defvalue, const function<Vt(Vp &)> &operation) {
-			if (auto pComponent = m_components.find<Vp>()) {
+		Vt getComponent(Vt &&defvalue, const function<Vt(Vp &)> &operation) {
+			if (auto pComponent = m_components.get<Vp>()) {
 				return operation(*pComponent);
 			}
 			return defvalue;
