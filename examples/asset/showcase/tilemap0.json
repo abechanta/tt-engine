@@ -6,7 +6,7 @@
   },
   "transform": {
     "translation": {
-      "x": 0,
+      "x": 256,
       "y": 0
     },
     "rotation": {
@@ -28,11 +28,19 @@
   },
   "tilemap": {
     "size": {
-      "x": 16,
+      "x": 256,
+      "y": 192
+    },
+    "cellSize": {
+      "x": 8,
       "y": 8
     },
-    "cell": {
-      "x": 8,
+    "blitSize": {
+      "x": 16,
+      "y": 24
+    },
+    "mapSize": {
+      "x": 16,
       "y": 8
     },
     "tiles": [

@@ -77,16 +77,30 @@ public:
 		));
 
 		scene->appendChild(new Actor(
-			inState("7") * onButtonPressed("down") * (changeState("8") + componentModifier<Animator>("chara3", play<Animator>("left"))) +
-			inState("6") * onButtonPressed("down") * (changeState("7") + componentModifier<Animator>("chara2", play<Animator>("left"))) +
-			inState("5") * onButtonPressed("down") * (changeState("6") + componentModifier<Animator>("chara1", play<Animator>("left"))) +
-			inState("4") * onButtonPressed("down") * (changeState("5") + componentModifier<Animator>("chara0", play<Animator>("left"))) +
-			inState("3") * onButtonPressed("down") * (changeState("4") + componentModifier<Animator>("chara3", play<Animator>("right"))) +
-			inState("2") * onButtonPressed("down") * (changeState("3") + componentModifier<Animator>("chara2", play<Animator>("right"))) +
-			inState("1") * onButtonPressed("down") * (changeState("2") + componentModifier<Animator>("chara1", play<Animator>("right"))) +
-			inState("0") * onButtonPressed("down") * (changeState("1") + componentModifier<Animator>("chara0", play<Animator>("right"))) +
-			inState("8") * changeState("0"),
+			inState("1") * onButtonPressed("left") * (
+				changeState("2") +
+				componentModifier<Animator>("chara0", play("left")) +
+				componentModifier<Animator>("chara1", play("left")) +
+				componentModifier<Animator>("chara2", play("left")) +
+				componentModifier<Animator>("chara3", play("left"))
+			) +
+			inState("0") * onButtonPressed("right") * (
+				changeState("1") +
+				componentModifier<Animator>("chara0", play("right")) +
+				componentModifier<Animator>("chara1", play("right")) +
+				componentModifier<Animator>("chara2", play("right")) +
+				componentModifier<Animator>("chara3", play("right"))
+			) +
+			inState("2") * changeState("0"),
 			put<string>("state", "0")
+		));
+		scene->appendChild(new Actor(
+			renderAsTilemap() +
+			[](Actor &a) {
+				auto x = a.props().get<int32_t>("tilemap.viewOffset.x");
+				a.props().put<int32_t>("tilemap.viewOffset.x", ++x);
+			},
+			loadProps(showcase.find(L"tilemap1.json")) + Transform::append() + Material::append(showcase.find(L"SMB_BANK0@16.png"))
 		));
 		scene->appendChild(new Actor(
 			renderAsTilemap(),
@@ -133,27 +147,61 @@ private:
 		});
 	}
 
-	function<void(Actor&)> renderAsTilemap() {
-		return componentModifier<Renderer2d>("renderer:", [](Actor& a, auto& renderer) {
-			a.findComponent<Transform, Material>([&a, &renderer](auto& transform, auto& material) {
+	function<void(Actor &)> renderAsTilemap() {
+		return componentModifier<Renderer2d>("renderer:", [](Actor &a, auto &renderer) {
+			a.findComponent<Transform, Material>([&a, &renderer](auto &transform, auto &material) {
 				const vector3 translation = transform.translation();
 				const vector2 uv0 = material.uv0();
 				const vector2 uv1 = material.uv1();
 				{
-					const vector2i size = Geometry::get<vec, int32_t, 2>(a.props("size"), 8);
-					const vector2i mapsize = Geometry::get<vec, int32_t, 2>(a.props("tilemap.size"), 16);
-					const vector2i cellsize = Geometry::get<vec, int32_t, 2>(a.props("tilemap.cell"), 8);
-					const int32_t cellBounds = X(material.size()) / X(cellsize);
+					const vector2i cellSize = Geometry::get<vec, int32_t, 2>(a.props("tilemap.cellSize"), 8);
+					const vector2i blitSize = Geometry::get<vec, int32_t, 2>(a.props("tilemap.blitSize"), 8);
+					const int32_t cellBounds = X(material.size()) / X(cellSize);
+					const vector2i viewPort = Geometry::get<vec, int32_t, 2>(a.props("tilemap.size"), 8);
+					const vector2i viewOffset = Geometry::get<vec, int32_t, 2>(a.props("tilemap.viewOffset"), 0);
+					const bool transpose = a.get<bool>("tilemap.transpose", false);
+					const vector2i mapSize_ = Geometry::get<vec, int32_t, 2>(a.props("tilemap.mapSize"), 8);
+					const vector2i mapSize = transpose ? vector2i{ Y(mapSize_), X(mapSize_), } : mapSize_;
 
-					for (int32_t y = 0; y < Y(mapsize); y++) {
-						transform.translation() = translation + _0X0<int32_t>(y * Y(size));
-						const vector<int32_t> vert = Geometry::get<vector, int32_t>(a.props("tilemap.tiles." + to_string(y)));
-						for (int32_t x = 0; x < X(mapsize); x++) {
-							auto code = vert[x];
-							material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellsize), ((code / cellBounds) + 0) * Y(cellsize), });
-							material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellsize), ((code / cellBounds) + 1) * Y(cellsize), });
-							renderer.render(a);
-							X(transform.translation()) += X(size);
+					if (transpose) {
+						for (int32_t rp = -(X(viewOffset) % X(blitSize)); rp < X(viewPort); rp += X(blitSize)) {
+							int32_t ri = (X(viewOffset) + rp) / X(blitSize);
+							if (ri >= X(mapSize)) {
+								break;
+							}
+							transform.translation() = translation + X00<int32_t>(rp);
+							const vector<int32_t> vertical = Geometry::get<vector, int32_t>(a.props("tilemap.tiles." + to_string(ri)));
+							for (int32_t cp = -(Y(viewOffset) % Y(blitSize)); cp < Y(viewPort); cp += Y(blitSize)) {
+								int32_t ci = (Y(viewOffset) + cp) / Y(blitSize);
+								if (ci >= Y(mapSize)) {
+									break;
+								}
+								auto code = vertical[ci];
+								material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize), ((code / cellBounds) + 0) * Y(cellSize), });
+								material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize), ((code / cellBounds) + 1) * Y(cellSize), });
+								renderer.render(a);
+								Y(transform.translation()) += Y(blitSize);
+							}
+						}
+					} else {
+						for (int32_t rp = -(Y(viewOffset) % Y(blitSize)); rp < Y(viewPort); rp += Y(blitSize)) {
+							int32_t ri = (Y(viewOffset) + rp) / Y(blitSize);
+							if (ri >= Y(mapSize)) {
+								break;
+							}
+							transform.translation() = translation + _0X0<int32_t>(rp);
+							const vector<int32_t> holizontal = Geometry::get<vector, int32_t>(a.props("tilemap.tiles." + to_string(ri)));
+							for (int32_t cp = -(X(viewOffset) % X(blitSize)); cp < X(viewPort); cp += X(blitSize)) {
+								int32_t ci = (X(viewOffset) + cp) / X(blitSize);
+								if (ci >= X(mapSize)) {
+									break;
+								}
+								auto code = holizontal[ci];
+								material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize), ((code / cellBounds) + 0) * Y(cellSize), });
+								material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize), ((code / cellBounds) + 1) * Y(cellSize), });
+								renderer.render(a);
+								X(transform.translation()) += X(blitSize);
+							}
 						}
 					}
 				}
@@ -164,10 +212,9 @@ private:
 		});
 	}
 
-	template<typename Tc>
-	function<void(Actor &, Tc &)> play(const string &arg1) {
-		return [arg1](Actor &, Tc &component) {
-			component.play(arg1);
+	function<void(Actor &, Animator &)> play(const string &arg1) {
+		return [arg1](Actor &, Animator &animator) {
+			animator.play(arg1);
 		};
 	}
 };
