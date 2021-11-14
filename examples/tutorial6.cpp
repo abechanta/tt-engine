@@ -40,7 +40,7 @@ namespace Tutorial6 {
 		cout << "--- unload" << endl;
 		asset1->unload();
 		cout << "--- transformation" << endl;
-		actor1->findComponent<Transform>([](Transform &transform) {
+		actor1->getComponent<Transform>([](Transform &transform) {
 			vector3 &t = transform.translation();
 			vector3 p = { 1.f, 2.f, 3.f, };
 			vector3 q = Geometry::pos(transform.trs2d(Geometry::identity(matrix3x4())), p);

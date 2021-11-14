@@ -39,7 +39,7 @@ namespace tte {
 				auto &props = asset.props().get_child(key);
 				a.appendComponent(new Animator(props));
 				a.appendAction([](Actor &a) {
-					a.findComponent<Animator>([&a](auto &animator) {
+					a.getComponent<Animator>([&a](auto &animator) {
 						animator.tick(a);
 					});
 				});

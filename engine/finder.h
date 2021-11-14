@@ -67,7 +67,7 @@ namespace tte {
 		template<typename Vc1>
 		static void find(const string &key, const function<void(Vc1 &)> &operation) {
 			if (auto it = s_registory[key]) {
-				it->findComponent<Vc1>([&operation](Vc1 &component1) {
+				it->getComponent<Vc1>([&operation](Vc1 &component1) {
 					operation(component1);
 				});
 			}
@@ -76,8 +76,8 @@ namespace tte {
 		template<typename Vc1, typename Vc2>
 		static void find(const string &key, const function<void(Vc1 &, Vc2 &)> &operation) {
 			if (auto it = s_registory[key]) {
-				it->findComponent<Vc1>([it, &operation](Vc1 &component1) {
-					it->findComponent<Vc2>([&operation, &component1](Vc2 &component2) {
+				it->getComponent<Vc1>([it, &operation](Vc1 &component1) {
+					it->getComponent<Vc2>([&operation, &component1](Vc2 &component2) {
 						operation(component1, component2);
 					});
 				});

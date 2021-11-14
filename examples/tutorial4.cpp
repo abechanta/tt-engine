@@ -29,7 +29,7 @@ namespace Tutorial4 {
 		cout << "--- load" << endl;
 		unique_ptr<Actor> actor1 = make_unique<Actor>(
 			[](Actor &a) {
-				a.findComponent<Resource>([&a](auto &resource) {
+				a.getComponent<Resource>([&a](auto &resource) {
 					auto &js = resource.find(L"font1.json");
 					cout << "contentType=" << js.props().get<string>("contentType", "<undef>") << endl;
 				});

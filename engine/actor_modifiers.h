@@ -39,7 +39,7 @@ namespace tte {
 	template<typename Vc1>
 	Actor::Action componentModifier(const function<void(Actor &, Vc1 &)> &action) {
 		return [action](Actor &a) {
-			a.findComponent<Vc1>([action, &a](Vc1 &component1) {
+			a.getComponent<Vc1>([action, &a](Vc1 &component1) {
 				action(a, component1);
 			});
 		};
@@ -57,8 +57,8 @@ namespace tte {
 	template<typename Vc1, typename Vc2>
 	Actor::Action componentModifier(const function<void(Actor &, Vc1 &, Vc2 &)> &action) {
 		return [action](Actor &a) {
-			a.findComponent<Vc1>([action, &a](Vc1 &component1) {
-				a.findComponent<Vc1>([action, &a, &component1](Vc2 &component2) {
+			a.getComponent<Vc1>([action, &a](Vc1 &component1) {
+				a.getComponent<Vc1>([action, &a, &component1](Vc2 &component2) {
 					action(a, component1, component2);
 				});
 			});

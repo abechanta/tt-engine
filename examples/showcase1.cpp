@@ -149,7 +149,7 @@ private:
 
 	function<void(Actor &)> renderAsTilemap() {
 		return componentModifier<Renderer2d>("renderer:", [](Actor &a, auto &renderer) {
-			a.findComponent<Transform, Material>([&a, &renderer](auto &transform, auto &material) {
+			a.getComponent<Transform, Material>([&a, &renderer](auto &transform, auto &material) {
 				const vector3 translation = transform.translation();
 				const vector2 uv0 = material.uv0();
 				const vector2 uv1 = material.uv1();
