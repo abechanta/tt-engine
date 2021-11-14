@@ -12,7 +12,7 @@ using namespace tte;
 namespace Tutorial8 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		auto asset1 = make_unique<Asset>(L"asset/tutorial8.json", AssetHandler::initializerJson);
+		auto asset1 = make_unique<Asset>(L"asset/tutorial8.json", AssetHandler::typeJson);
 		cout << "--- load" << endl;
 		asset1->load();
 		cout << "--- ctor" << endl;
@@ -32,7 +32,7 @@ namespace Tutorial8 {
 
 	void test2() {
 		cout << __FUNCTION__ << endl;
-		auto asset1 = make_unique<Asset>(L"asset/tutorial8.json", AssetHandler::initializerJson);
+		auto asset1 = make_unique<Asset>(L"asset/tutorial8.json", AssetHandler::typeJson);
 		cout << "--- load" << endl;
 		asset1->load();
 		cout << "--- ctor" << endl;

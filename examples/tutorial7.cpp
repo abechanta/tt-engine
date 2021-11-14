@@ -12,7 +12,7 @@ using namespace tte;
 namespace Tutorial7 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		auto asset1 = make_unique<Asset>(L"asset/tutorial7/font1.png", AssetHandler::initializerUnknown);
+		auto asset1 = make_unique<Asset>(L"asset/tutorial7/font1.png", AssetHandler::typeUnknown);
 		cout << "--- load" << endl;
 		asset1->load();
 		auto material1 = make_unique<Material>(*asset1, vector4{ 1, 1, 1, 0.5f, }, vector2{ 0.f, 0.f, }, vector2{ 0.5f, 0.5f, });
@@ -31,8 +31,8 @@ namespace Tutorial7 {
 
 	void test2() {
 		cout << __FUNCTION__ << endl;
-		auto assetImg = make_unique<Asset>(L"asset/tutorial7/font1.png", AssetHandler::initializerUnknown);
-		auto assetProp = make_unique<Asset>(L"asset/tutorial7/tutorial7.json", AssetHandler::initializerJson);
+		auto assetImg = make_unique<Asset>(L"asset/tutorial7/font1.png", AssetHandler::typeUnknown);
+		auto assetProp = make_unique<Asset>(L"asset/tutorial7/tutorial7.json", AssetHandler::typeJson);
 		cout << "--- load" << endl;
 		assetImg->load();
 		assetProp->load();

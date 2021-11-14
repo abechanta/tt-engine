@@ -35,10 +35,10 @@ public:
 	Showcase1() : App(), m_adapter(sdl2::Adapter::create()), m_assets(), m_actors() {
 		cout << __FUNCTION__ << endl;
 		AssetHandler::clear();
-		AssetHandler::appendInitializer({ AssetHandler::extensionUnknown, AssetHandler::initializerUnknown, });
-		AssetHandler::appendInitializer({ L".json", AssetHandler::initializerJson, });
-		AssetHandler::appendInitializer({ L".png", sdl2::Adapter::initializerPng(*m_adapter), });
-		AssetHandler::appendInitializer({ L"", AssetHandler::initializerDir, });
+		AssetHandler::append({ AssetHandler::extensionUnknown, AssetHandler::typeUnknown, });
+		AssetHandler::append({ L".json", AssetHandler::typeJson, });
+		AssetHandler::append({ L".png", sdl2::Adapter::typePng(*m_adapter), });
+		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		m_assets = std::make_unique<Asset>(L"asset", AssetHandler::factory(L"asset:"));
 	}
 

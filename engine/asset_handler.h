@@ -23,31 +23,31 @@ namespace tte {
 		// member variables
 		//
 	private:
-		static unordered_map<Asset::Path, function<void(Asset &)> > s_initializerRegistry;
+		static unordered_map<Asset::Path, function<void(Asset &)> > s_handlers;
 
 		//
 		// public methods
 		//
 	public:
 		static void clear() {
-			s_initializerRegistry.clear();
+			s_handlers.clear();
 		}
 
-		static void appendInitializer(const pair<Asset::Path, function<void(Asset &)> > &entry) {
-			s_initializerRegistry[entry.first] = entry.second;	
+		static void append(const pair<Asset::Path, function<void(Asset &)> > &entry) {
+			s_handlers[entry.first] = entry.second;	
 		}
 
 		static const function<void(Asset &)> & factory(const Asset::Path &filename) {
 			Asset::Path &extension = filename.extension();
-			auto &it = s_initializerRegistry[extension];
-			return it ? it : s_initializerRegistry[extensionUnknown];
+			auto &it = s_handlers[extension];
+			return it ? it : s_handlers[extensionUnknown];
 		}
 
 		//
 		// default loader
 		//
 	public:
-		static void initializerDir(Asset &a) {
+		static void typeDir(Asset &a) {
 			cout << __FUNCTION__ << ": " << a.path() << endl;
 			a.setLoader([](Asset &a, bool bLoad) -> bool {
 				for_each(a.begin_children(), a.end_children(), [bLoad](Asset &a) {
@@ -62,11 +62,11 @@ namespace tte {
 			}
 		}
 
-		static void initializerUnknown(Asset &a) {
+		static void typeUnknown(Asset &a) {
 			cout << __FUNCTION__ << ": " << a.path() << endl;
 		}
 
-		static void initializerJson(Asset &a) {
+		static void typeJson(Asset &a) {
 			cout << __FUNCTION__ << ": " << a.path() << endl;
 			assert(filesystem::is_regular_file(a.path()));
 			a.setLoader([](Asset &a, bool bLoad) -> bool {
@@ -91,6 +91,6 @@ namespace tte {
 	};
 
 #if defined(tte_declare_static_variables)
-	unordered_map<Asset::Path, function<void(Asset &)> > AssetHandler::s_initializerRegistry = {};
+	unordered_map<Asset::Path, function<void(Asset &)> > AssetHandler::s_handlers = {};
 #endif	// defined(tte_declare_static_variables)
 }
