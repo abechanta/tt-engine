@@ -72,7 +72,9 @@ namespace tte {
 			a.setLoader([](Asset &a, bool bLoad) -> bool {
 				if (bLoad) {
 					read_json(ifstream(a.path()), a.props());
+#if defined(_DEBUG)
 					write_json(cout, a.props());
+#endif
 				} else {
 					a.props().clear();
 				}
