@@ -37,7 +37,7 @@ namespace Tutorial3 {
 
 		auto put = [](const string &key, const string &value) -> Actor::Action {
 			return [key, value](Actor &a) {
-				a.put<string>(key, value);
+				a.props().put<string>(key, value);
 			};
 		};
 
@@ -59,7 +59,7 @@ namespace Tutorial3 {
 		Actor *f = new Actor(
 			action,
 			[&](Actor &a) {
-				a.put<string>("name", "f");
+				a.props().put<string>("name", "f");
 				a.appendAction(action);
 			}
 		);

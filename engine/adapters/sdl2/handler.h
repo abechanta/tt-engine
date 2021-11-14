@@ -48,36 +48,6 @@ namespace tte {
 		static constexpr char rendererActor[] = "renderer:";
 		static constexpr char inputActor[] = "input:";
 
-		struct Transform : public tte::Transform {
-			typedef tte::Transform Component;
-			typedef struct {
-				SDL_Rect rect;
-				SDL_Point center;
-			} Handle;
-
-			static Handle get(const Component &transform, const Actor &a) {
-				vec<int32_t, 3> t = transform.translation();
-				vec<int32_t, 2> s = Geometry::get<vector2>(a.props(), "size");
-				//vec<int32_t, 2> c = Geometry::get<vector2>(a.props(), "center");
-				vec<int32_t, 2> c = Geometry::get<vector2>(a.props(), "size") / 2;
-				return Handle{
-					SDL_Rect{ X(t), Y(t), X(s), Y(s), },
-					SDL_Point{ X(c), Y(c), },
-				};
-			}
-		};
-
-		struct Primitive : public tte::Primitive {
-			typedef tte::Primitive Component;
-			typedef SDL_Rect Handle;
-
-			static Handle get(const Component &transform) {
-				vec<int32_t, 3> p = transform.pos();
-				vec<int32_t, 3> s = transform.size();
-				return Handle{ X(p), Y(p), X(s), Y(s), };
-			}
-		};
-
 		struct Material : public tte::Material {
 			typedef tte::Material Component;
 			typedef SDL_Texture Handle;

@@ -23,6 +23,7 @@ namespace tte {
 		vector4 m_diffuse;
 		vector2 m_uv0;
 		vector2 m_uv1;
+		vector2i m_size;
 
 		//
 		// public methods
@@ -30,35 +31,35 @@ namespace tte {
 	public:
 		Material(
 			const Asset &asset, const vector4 &diffuse, const vector2 &uv0, const vector2 &uv1
-		) : CList(tag), m_asset(asset), m_diffuse(diffuse), m_uv0(uv0), m_uv1(uv1) {
+		) : CList(tag), m_asset(asset), m_diffuse(diffuse), m_uv0(uv0), m_uv1(uv1), m_size() {
+			X(m_size) = asset.props().get<int32_t>("size.w", 8);
+			Y(m_size) = asset.props().get<int32_t>("size.h", 8);
+		}
+
+		Material(
+			const Asset& asset, const Actor &a
+		) : CList(tag), m_asset(asset), m_diffuse(), m_uv0(), m_uv1(), m_size() {
+			const string &key = "material";
+			X(m_size) = asset.props().get<int32_t>("size.w", 8);
+			Y(m_size) = asset.props().get<int32_t>("size.h", 8);
+			m_diffuse = Geometry::get<vec, float, 4>(a.props(key + ".diffuse"), 1.f);
+			auto unit = a.get<string>(key + ".uvUnit", "ratio");
+			if (unit == "px") {
+				m_uv0 = to_vector2(Geometry::get<vec, int32_t, 2>(a.props(key + ".uv.0"), 0));
+				m_uv1 = to_vector2(Geometry::get<vec, int32_t, 2>(a.props(key + ".uv.1"), 8));
+			} else {
+				m_uv0 = Geometry::get<vec, float, 2>(a.props(key + ".uv.0"), 0.f);
+				m_uv1 = Geometry::get<vec, float, 2>(a.props(key + ".uv.1"), 1.f);
+			}
 		}
 
 		virtual ~Material() override {
 		}
 
-		static Actor::Action append(const Asset &asset, const string &key = "material") {
-			return [&asset, key](Actor &a) {
-				if (a.get<float>("size.x", FP_NAN) == FP_NAN) {
-					// filler
-					float w = asset.props().get<float>("size.w", 8.f);
-					a.put<float>("size.x", w);
-					float h = asset.props().get<float>("size.h", 8.f);
-					a.put<float>("size.y", h);
-				}
-				vector4 d = Geometry::get<vector4>(a.props(), key + ".diffuse", 1.f);
-				vector2 uv0 = Geometry::get<vector2>(a.props(), key + ".uv.0", 0.f);
-				vector2 uv1 = Geometry::get<vector2>(a.props(), key + ".uv.1", 1.f);
-				a.transform<bool, string>(key + ".uv.unit", false, [&a, &uv0, &uv1](const string &unit) -> bool {
-					if (unit == "px") {
-						vector2 size = Geometry::get<vector2>(a.props(), "size", 1.f);
-						X(uv0) /= X(size);
-						Y(uv0) /= Y(size);
-						X(uv1) /= X(size);
-						Y(uv1) /= Y(size);
-					}
-					return true;
-				});
-				a.appendComponent(new Material(asset, d, uv0, uv1));
+		static Actor::Action append(const Asset &asset) {
+			return [&asset](Actor &a) {
+				auto pMaterial = new Material(asset, a);
+				a.appendComponent(pMaterial);
 			};
 		}
 
@@ -92,6 +93,21 @@ namespace tte {
 
 		const vector2 & uv1() const {
 			return m_uv1;
+		}
+
+		const vector2i & size() const {
+			return m_size;
+		}
+
+		vector2i to_vector2i(const vector2 &uv) const {
+			return vector2i{ static_cast<int32_t>(X(uv) * X(m_size)), static_cast<int32_t>(Y(uv) * Y(m_size)), };
+		}
+
+		vector2 to_vector2(const vector2i &uvi) const {
+			vector2 uv = uvi;
+			X(uv) /= X(m_size);
+			Y(uv) /= Y(m_size);
+			return uv;
 		}
 	};
 }

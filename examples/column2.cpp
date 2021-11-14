@@ -11,7 +11,7 @@ namespace Column2 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
 		property_tree::ptree pt;
-		property_tree::json_parser::read_json(ifstream("asset/tutorial/tutorial1.json"), pt);
+		property_tree::json_parser::read_json(ifstream("asset/tutorial1.json"), pt);
 		cout << "--- access1" << endl;
 		cout << "\ttag1=" << pt.get<int32_t>("tag1") << endl;
 		cout << "--- access2" << endl;

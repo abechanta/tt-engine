@@ -4,9 +4,11 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cctype>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <optional>
 #include <boost/property_tree/ptree.hpp>
 
 namespace tte {
@@ -75,9 +77,8 @@ namespace tte {
 		}
 
 		void act() {
-			transform<bool, int32_t>("count0", false, [](auto &count0) -> bool {
-				return true, ++count0;
-			}) || put<int32_t>("count0", 0);
+			auto count0 = m_props.get<int32_t>("count0", -1);
+			m_props.put<int32_t>("count0", ++count0);
 			m_actions(*this);
 		}
 
@@ -97,33 +98,40 @@ namespace tte {
 			return m_props;
 		}
 
-		template<typename Vp>
-		const Vp & put(const string &key, const Vp &value) {
-			m_props.put<Vp>(key, value);
-			return value;
+		std::optional<property_tree::ptree> props(const string &key) const {
+			return get_child_optional(m_props, key);
 		}
 
 		template<typename Vp>
 		Vp get(const string &key, const Vp &defvalue) const {
-			return m_props.get<Vp>(key, defvalue);
+			auto pNode = get_child_optional(m_props, key);
+			return pNode ? pNode->get_value<Vp>(defvalue) : defvalue;
 		}
 
-		template<typename Vt, typename Vp>
-		Vt transform(const string &key, const Vt &defvalue, const function<Vt(const Vp &)> &operation) const {
-			auto pNode = m_props.get_child_optional(key);
-			return (pNode) ? operation(pNode->get_value<Vp>()) : defvalue;
-		}
-
-		template<typename Vt, typename Vp>
-		Vt transform(const string &key, const Vt &defvalue, const function<Vt(Vp &)> &operation) {
-			auto pNode = m_props.get_child_optional(key);
-			if (!pNode) {
-				return defvalue;
+	private:
+		static std::optional<const property_tree::ptree> get_child_optional(const property_tree::ptree &node, property_tree::ptree::path_type key) {
+			if (key.empty()) {
+				return node;
 			}
-			Vp value = pNode->get_value<Vp>();
-			Vt rv = operation(value);
-			pNode->put_value<Vp>(value);
-			return rv;
+
+			auto head = key.reduce();
+			auto name = !head.empty() && isdigit(head.front()) ? "" : head;
+			auto index = !head.empty() && name.empty() ? std::stoul(head) : 0;
+
+			auto matches = node.equal_range(name);
+			if (matches.first == matches.second) {
+				return std::nullopt;
+			}
+
+			while ((index > 0) && (matches.first != matches.second)) {
+				--index;
+				++matches.first;
+			}
+			if ((index > 0) || (matches.first == matches.second)) {
+				return std::nullopt;
+			}
+
+			return get_child_optional(matches.first->second, key);
 		}
 
 		//

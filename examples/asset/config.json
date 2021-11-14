@@ -1,46 +1,5 @@
 {
 	"contentType": "text/json",
-	"animation": {
-		"0": {
-			"frameLength": 10,
-			"frameDelay": 0,
-			"repeatCount": 0,
-			"channels": [
-				{
-					"access": "overwrite",
-					"target": "transform.translation.x",
-					"type": "float",
-					"keys": [
-						{
-							"frame": 0,
-							"value": 10
-						},
-						{
-							"frame": 10,
-							"easing": "linear:in",
-							"value": 40
-						}
-					]
-				},
-				{
-					"access": "overwrite",
-					"target": "transform.translation.y",
-					"type": "float",
-					"keys": [
-						{
-							"frame": 0,
-							"value": 20
-						},
-						{
-							"frame": 10,
-							"easing": "linear:in",
-							"value": 30
-						}
-					]
-				}
-			]
-		}
-	},
 	"window/sdl2": {
 		"title": "TT Engine Showcase",
 		"pos": {
@@ -51,7 +10,7 @@
 		},
 		"size": {
 			"w": 512,
-			"h": 240
+			"h": 224
 		}
 	},
 	"renderer/sdl2": {
@@ -91,6 +50,16 @@
 				"alias": "right",
 				"scancode": 79,
 				"scancode.comment": "SDL_SCANCODE_RIGHT"
+			},
+			{
+				"alias": "z",
+				"scancode": 29,
+				"scancode.comment": "SDL_SCANCODE_Z"
+			},
+			{
+				"alias": "x",
+				"scancode": 27,
+				"scancode.comment": "SDL_SCANCODE_X"
 			}
 		]
 	}

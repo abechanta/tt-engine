@@ -28,14 +28,14 @@ namespace tte {
 			struct Window {
 				typedef Window this_type;
 				string title;
-				vec<int32_t, 2> pos, size;
+				vector2i	 pos, size;
 				uint32_t flags;
 
 				static this_type load(const property_tree::ptree &pt) {
 					this_type v;
 					PTree::setter<this_type, string>("title", "<title>", [](this_type &v) -> string & { return v.title; })(v, pt);
-					PTree::setter<this_type, vec<int32_t, 2>, int32_t>("pos", { ".x", ".y", }, { SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, }, [](this_type &v) -> vec<int32_t, 2> & { return v.pos; })(v, pt);
-					PTree::setter<this_type, vec<int32_t, 2>, int32_t>("size", { ".w", ".h", }, { 640, 480, }, [](this_type &v) -> vec<int32_t, 2> & { return v.size; })(v, pt);
+					PTree::setter<this_type, vector2i, int32_t>("pos", { ".x", ".y", }, { SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, }, [](this_type &v) -> vector2i & { return v.pos; })(v, pt);
+					PTree::setter<this_type, vector2i, int32_t>("size", { ".w", ".h", }, { 640, 480, }, [](this_type &v) -> vector2i & { return v.size; })(v, pt);
 					PTree::setter<this_type, uint32_t>("flags", SDL_WINDOW_SHOWN, [](this_type &v) -> uint32_t & { return v.flags; })(v, pt);
 					return v;
 				}
@@ -168,7 +168,7 @@ namespace tte {
 							assert(renderer.handle<SDL_Renderer>());
 							renderer.setRenderer([this](tte::Renderer2d &renderer, Actor &a) {
 								a.findComponent<tte::Transform, tte::Material>([this, &renderer, &a](auto &transform, auto &material) {
-									render(renderer, transform, material, a);
+									draw(renderer, transform, material, a);
 								});
 							});
 						})(a);
@@ -176,23 +176,28 @@ namespace tte {
 				);
 			}
 
-			void render(tte::Renderer2d &renderer, tte::Transform &transform, tte::Material &material, Actor &a) {
+			void draw(tte::Renderer2d &renderer, tte::Transform &transform, tte::Material &material, Actor &a) {
 				renderer.pushMatrix();
 				transform.trs2d(renderer.mat());
-				vec<int32_t, 3> t = Geometry::pos(renderer.mat(), { 0.f, 0.f, 0.f, });
+				auto &uv0 = material.to_vector2i(material.uv0());
+				auto &uv1 = material.to_vector2i(material.uv1());
+				auto srcRect = SDL_Rect{ X(uv0), Y(uv0), X(uv1) - X(uv0), Y(uv1) - Y(uv0), };
+				const vector3i &t = Geometry::pos(renderer.mat(), { 0.f, 0.f, 0.f, });
+				auto s = Geometry::get<vec, int32_t, 2>(a.props("size"), 8);
+				auto dstRect = SDL_Rect{ X(t), Y(t), X(s), Y(s), };
 				float rotZ = Geometry::angZ(renderer.mat()) * Geometry::rad2deg;
-				Transform::Handle &hTransform = Transform::get(transform, a);
-				auto center = hTransform.center;
-				SDL_Rect rect = hTransform.rect;
-				rect.x = X(t);
-				rect.y = Y(t);
-				SDL_RenderCopyEx(Renderer2d::get(renderer), Material::get(material), nullptr, &rect, rotZ, &center, SDL_FLIP_NONE);
+				auto c = s / 2;
+				auto center = SDL_Point{ X(c), Y(c), };
+				SDL_RenderCopyEx(Renderer2d::get(renderer), Material::get(material), &srcRect, &dstRect, rotZ, &center, SDL_FLIP_NONE);
 				renderer.popMatrix();
 			}
 
 			void draw(tte::Renderer2d &renderer, tte::Transform &transform, tte::Primitive &primitive, Actor &a) {
+				const vector3i &p = primitive.pos();
+				const vector3i &s = primitive.size();
+				auto dstRect = SDL_Rect{ X(p), Y(p), X(s), Y(s), };
 				SDL_SetRenderDrawColor(Renderer2d::get(renderer), 255, 0, 0, 0);
-				SDL_RenderDrawRect(Renderer2d::get(renderer), &Primitive::get(primitive));
+				SDL_RenderDrawRect(Renderer2d::get(renderer), &dstRect);
 			}
 
 			//
@@ -213,7 +218,7 @@ namespace tte {
 							//	continue;
 							//}
 							if (e.type == SDL_QUIT) {
-								a.put<bool>("quit", true);
+								a.props().put<bool>("quit", true);
 								continue;
 							}
 						}
@@ -224,7 +229,7 @@ namespace tte {
 					[&config](Actor &a) {
 						a.importProps(config.props().get_child("input/sdl2"));
 						Input::append()(a);
-						a.put<bool>("quit", false);
+						a.props().put<bool>("quit", false);
 					} + initializer
 				);
 			}
@@ -262,8 +267,8 @@ namespace tte {
 							std::unique_ptr<SDL_Surface> surface(IMG_Load(a.path().string().c_str()));
 							assert(surface);
 							a.props().put<string>("contentType", "image/png");
-							a.props().put<uint32_t>("size.w", surface->w);
-							a.props().put<uint32_t>("size.h", surface->h);
+							a.props().put<int32_t>("size.w", surface->w);
+							a.props().put<int32_t>("size.h", surface->h);
 							a.props().put<uint32_t>("format", surface->format->format);
 							Finder<Actor>::find<tte::Renderer2d>(rendererActor, [&a, &surface](auto &renderer) {
 								a.handle<SDL_Texture>().reset(SDL_CreateTextureFromSurface(sdl2::Renderer2d::get(renderer), surface.get()));
