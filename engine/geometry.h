@@ -34,7 +34,7 @@ namespace tte {
 
 		template<typename V>
 		static V get(const initializer_list<float> &vec = {}, const float &defvalue = 0.f) {
-			V ret;
+			V ret = {};
 			auto it = vec.begin();
 			for (auto &e : ret.a) {
 				e = it ? *it++ : defvalue;
@@ -43,10 +43,10 @@ namespace tte {
 		}
 
 		template<template<typename> class C, typename V>
-		static C<V> get(const std::optional<property_tree::ptree>& pNode, const string& key = "") {
-			C<V> ret;
+		static C<V> get(const std::optional<property_tree::ptree> &pNode, const string &key = "") {
+			C<V> ret = {};
 			if (pNode) {
-				for (auto& ch : pNode->get_child(key)) {
+				for (auto &ch : pNode->get_child(key)) {
 					ret.push_back(ch.second.get<V>(""));
 				}
 			}
@@ -56,9 +56,9 @@ namespace tte {
 		template<template<typename, int> class C, typename V, int N>
 		static C<V, N> get(const std::optional<property_tree::ptree> &pNode, const V &defvalue = 0) {
 			static const initializer_list<string> keys = { "x", "y", "z", "w", };
-			C<V, N> ret;
+			C<V, N> ret = {};
 			auto it = keys.begin();
-			for (auto& e : ret.a) {
+			for (auto &e : ret.a) {
 				e = pNode ? pNode->get<V>(*it++, defvalue) : defvalue;
 			}
 			return ret;

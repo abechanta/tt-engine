@@ -15,6 +15,7 @@
 #include <components/primitive_component.h>
 #include <components/renderer2d_component.h>
 #include <components/resource_component.h>
+#include <components/shape_component.h>
 #include <timeline.h>
 #include <components/transform_component.h>
 #include <cassert>
@@ -107,20 +108,24 @@ public:
 			loadProps(showcase.find(L"tilemap0.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png"))
 		));
 		scene->appendChild(new Actor(
-			Transform::apply() + renderAsSprite(),
-			loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara0.anim.json"))
+			Transform::apply(),
+			loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara0.anim.json")) +
+			Shape::append<ShapeSprite>("renderer:")
 		));
 		scene->appendChild(new Actor(
-			Transform::apply() + renderAsSprite(),
-			loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara1.anim.json"))
+			Transform::apply(),
+			loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara1.anim.json")) +
+			Shape::append<ShapeSprite>("renderer:")
 		));
 		scene->appendChild(new Actor(
-			Transform::apply() + renderAsSprite(),
-			loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara2.anim.json"))
+			Transform::apply(),
+			loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara2.anim.json")) +
+			Shape::append<ShapeSprite>("renderer:")
 		));
 		scene->appendChild(new Actor(
-			Transform::apply() + renderAsSprite(),
-			loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara3.anim.json"))
+			Transform::apply(),
+			loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara3.anim.json")) +
+			Shape::append<ShapeSprite>("renderer:")
 		));
 	}
 
@@ -141,12 +146,6 @@ public:
 	}
 
 private:
-	function<void(Actor &)> renderAsSprite() {
-		return componentModifier<Renderer2d>("renderer:", [](Actor &a, auto &renderer) {
-			renderer.render(a);
-		});
-	}
-
 	function<void(Actor &)> renderAsTilemap() {
 		return componentModifier<Renderer2d>("renderer:", [](Actor &a, auto &renderer) {
 			a.getComponent<Transform, Material>([&a, &renderer](auto &transform, auto &material) {
@@ -179,7 +178,7 @@ private:
 								auto code = vertical[ci];
 								material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize), ((code / cellBounds) + 0) * Y(cellSize), });
 								material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize), ((code / cellBounds) + 1) * Y(cellSize), });
-								renderer.render(a);
+								renderer.drawRect(a);
 								Y(transform.translation()) += Y(blitSize);
 							}
 						}
@@ -199,7 +198,7 @@ private:
 								auto code = holizontal[ci];
 								material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize), ((code / cellBounds) + 0) * Y(cellSize), });
 								material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize), ((code / cellBounds) + 1) * Y(cellSize), });
-								renderer.render(a);
+								renderer.drawRect(a);
 								X(transform.translation()) += X(blitSize);
 							}
 						}

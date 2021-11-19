@@ -168,7 +168,7 @@ namespace tte {
 							assert(renderer.handle<SDL_Renderer>());
 							renderer.setRenderer([this](tte::Renderer2d &renderer, Actor &a) {
 								a.getComponent<tte::Transform, tte::Material>([this, &renderer, &a](auto &transform, auto &material) {
-									draw(renderer, transform, material, a);
+									drawRect(renderer, transform, material, a);
 								});
 							});
 						})(a);
@@ -176,7 +176,7 @@ namespace tte {
 				);
 			}
 
-			void draw(tte::Renderer2d &renderer, tte::Transform &transform, tte::Material &material, Actor &a) {
+			void drawRect(tte::Renderer2d &renderer, tte::Transform &transform, tte::Material &material, Actor &a) {
 				renderer.pushMatrix();
 				transform.trs2d(renderer.mat());
 				auto &uv0 = material.to_vector2i(material.uv0());

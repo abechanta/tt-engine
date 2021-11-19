@@ -4,6 +4,20 @@
 		"x": 32,
 		"y": 32
 	},
+	"sprite": {
+		"size": {
+			"x": 32,
+			"y": 32
+		},
+		"anchor": {
+			"x": 0.5,
+			"y": 0.5
+		},
+		"flip": {
+			"x": false,
+			"y": false
+		}
+	},
 	"transform": {
 		"translation": {
 			"x": 64,

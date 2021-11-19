@@ -64,7 +64,7 @@ namespace tte {
 			return m_matrixStack.back();
 		}
 
-		void render(Actor &a) {
+		void drawRect(Actor &a) {
 			m_renderer(self(), a);
 		}
 
