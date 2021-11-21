@@ -1,7 +1,7 @@
 #pragma once
 #include <geometry.h>
 #include <ptree.h>
-#include <components/renderer2d_component.h>
+#include <renderer2d.h>
 #include <cassert>
 #include <climits>
 #include <cstdint>
@@ -16,6 +16,14 @@
 namespace tte {
 	using namespace boost;
 	using namespace std;
+
+	struct Point {
+		// TODO
+	};
+
+	struct Line {
+		// TODO
+	};
 
 	struct Sprite {
 		typedef Sprite this_type;
@@ -34,8 +42,16 @@ namespace tte {
 			return v;
 		}
 
-		void draw(Renderer2d &renderer, Actor &a) {
-			renderer.drawRect(a);
+		void draw(const Renderer2dInterface &renderer, Actor &a) {
+			renderer.drawRect(a, size, anchor, flip);
 		}
+	};
+
+	struct Tilemap {
+		// TODO
+	};
+
+	struct Window {
+		// TODO
 	};
 }

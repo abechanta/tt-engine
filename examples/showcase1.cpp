@@ -148,7 +148,8 @@ public:
 private:
 	function<void(Actor &)> renderAsTilemap() {
 		return componentModifier<Renderer2d>("renderer:", [](Actor &a, auto &renderer) {
-			a.getComponent<Transform, Material>([&a, &renderer](auto &transform, auto &material) {
+			const Renderer2dInterface &renderer2d = renderer;
+			a.getComponent<Transform, Material>([&a, &renderer2d](auto &transform, auto &material) {
 				const vector3 translation = transform.translation();
 				const vector2 uv0 = material.uv0();
 				const vector2 uv1 = material.uv1();
@@ -178,7 +179,7 @@ private:
 								auto code = vertical[ci];
 								material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize), ((code / cellBounds) + 0) * Y(cellSize), });
 								material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize), ((code / cellBounds) + 1) * Y(cellSize), });
-								renderer.drawRect(a);
+								renderer2d.drawRect(a);
 								Y(transform.translation()) += Y(blitSize);
 							}
 						}
@@ -198,7 +199,7 @@ private:
 								auto code = holizontal[ci];
 								material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize), ((code / cellBounds) + 0) * Y(cellSize), });
 								material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize), ((code / cellBounds) + 1) * Y(cellSize), });
-								renderer.drawRect(a);
+								renderer2d.drawRect(a);
 								X(transform.translation()) += X(blitSize);
 							}
 						}

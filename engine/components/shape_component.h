@@ -2,7 +2,8 @@
 #include <actor.h>
 #include <clist.h>
 #include <geometry.h>
-#include <shape.h>
+#include <components/renderer2d_component.h>
+#include <shape2d.h>
 #include <cassert>
 #include <cstdint>
 #include <functional>

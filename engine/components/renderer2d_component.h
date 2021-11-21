@@ -3,6 +3,7 @@
 #include <asset.h>
 #include <clist.h>
 #include <geometry.h>
+#include <renderer2d.h>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -24,9 +25,8 @@ namespace tte {
 		// member variables
 		//
 	private:
-		std::unique_ptr<uint32_t, empty_delete<uint32_t> > m_handle;
+		std::unique_ptr<Renderer2dInterface> m_handle;
 		vector<matrix3x4> m_matrixStack;
-		function<void(Renderer2d &, Actor &)> m_renderer;
 
 		//
 		// public methods
@@ -35,10 +35,10 @@ namespace tte {
 		Renderer2d(
 			Actor &a,
 			const function<void(Actor &, Renderer2d &)> &initializer
-		) : CList(tag), m_matrixStack(), m_renderer(noRenderer) {
+		) : CList(tag), m_matrixStack() {
 			matrix3x4 id = Geometry::identity(matrix3x4());
 			m_matrixStack.push_back(id);
-			initializer(a, *this);
+			initializer(a, self());
 		}
 
 		virtual ~Renderer2d() override {
@@ -52,47 +52,33 @@ namespace tte {
 
 		Renderer2d & pushMatrix() {
 			m_matrixStack.push_back(m_matrixStack.back());
-			return *this;
+			return self();
 		}
 
 		Renderer2d & popMatrix() {
 			m_matrixStack.pop_back();
-			return *this;
+			return self();
 		}
 
 		matrix3x4 & mat() {
 			return m_matrixStack.back();
 		}
 
-		void drawRect(Actor &a) {
-			m_renderer(self(), a);
-		}
-
 		//
 		// property methods
 		//
 	public:
-		template<typename V>
-		std::unique_ptr<V> & handle() {
-			return *reinterpret_cast<std::unique_ptr<V> *>(&m_handle);
+		void setRenderer(Renderer2dInterface *renderer) {
+			m_handle.reset(renderer);
 		}
 
-		template<typename V>
-		const std::unique_ptr<V> & handle() const {
-			return *reinterpret_cast<const std::unique_ptr<V> *>(&m_handle);
-		}
-
-		void setRenderer(const function<void(Renderer2d &, Actor &)> &renderer) {
-			m_renderer = renderer;
+		operator const Renderer2dInterface & () const {
+			return *m_handle.get();
 		}
 
 		//
 		// utility operators
 		//
-	public:
-		static void noRenderer(Renderer2d &, Actor &) {
-		}
-
 	private:
 		Renderer2d & self() {
 			return *this;

@@ -7,6 +7,7 @@
 #include <components/input_component.h>
 #include <components/material_component.h>
 #include <ptree.h>
+#include <renderer2d.h>
 #include <components/renderer2d_component.h>
 #include <components/transform_component.h>
 #include <SDL.h>
@@ -53,6 +54,71 @@ namespace tte {
 					PTree::setter<this_type, uint32_t>("flags", SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC, [](this_type &v) -> uint32_t & { return v.flags; })(v, pt);
 					PTree::setter<this_type, vec<uint8_t, 4>, uint8_t>("clearColor", { ".r", ".g", ".b", ".a", }, { 0, 0, 0, 255, }, [](this_type &v) -> vec<uint8_t, 4> & { return v.clearColor; })(v, pt);
 					return v;
+				}
+			};
+
+			class Renderer2dInterface : public tte::Renderer2dInterface {
+			private:
+				tte::Renderer2d &m_renderer;
+
+			public:
+				Renderer2dInterface(
+					std::unique_ptr<SDL_Window> &mainWindow,
+					Renderer &rendererProps,
+					tte::Renderer2d &renderer
+				) : m_renderer(renderer) {
+					handle<SDL_Renderer>().reset(SDL_CreateRenderer(
+						mainWindow.get(),
+						rendererProps.index,
+						rendererProps.flags
+					));
+					assert(handle<SDL_Renderer>());
+					m_renderer.setRenderer(this);
+				}
+
+				virtual ~Renderer2dInterface() {
+					cout << "end" << endl;
+				}
+
+				virtual void drawPoint(Actor &a, const vector2 &point) const override {}
+				virtual void drawPoints(Actor &a, const vector<vector2> &points) const override {}
+				virtual void drawLine(Actor &a, const vector2 &lineS, const vector2 &lineE) const override {}
+				virtual void drawLines(Actor &a, const vector<vector2> &lineS, const vector<vector2> &lineE) const override {}
+				virtual void drawLines(Actor &a, const vector<vector2> &points, const vector<int32_t> &lines) const override {}
+
+				virtual void drawRect(Actor &a) const override {
+					a.getComponent<tte::Transform, tte::Material>([this, &a](auto &transform, auto &material) {
+						drawRect(m_renderer, transform, material, a);
+					});
+				}
+				virtual void drawRect(Actor &a, const vector2 &pos, const vector2 &anchor, const vec<bool, 2> &flip) const override {
+					a.getComponent<tte::Transform, tte::Material>([this, &a](auto &transform, auto &material) {
+						drawRect(m_renderer, transform, material, a);
+					});
+				}
+
+				void drawRect(tte::Renderer2d &renderer, tte::Transform &transform, tte::Material &material, Actor &a) const {
+					renderer.pushMatrix();
+					transform.trs2d(renderer.mat());
+					auto &uv0 = material.to_vector2i(material.uv0());
+					auto &uv1 = material.to_vector2i(material.uv1());
+					auto srcRect = SDL_Rect{ X(uv0), Y(uv0), X(uv1) - X(uv0), Y(uv1) - Y(uv0), };
+					const vector3i &t = Geometry::pos(renderer.mat(), { 0.f, 0.f, 0.f, });
+					auto s = Geometry::get<vec, int32_t, 2>(a.props("size"), 8);
+					auto dstRect = SDL_Rect{ X(t), Y(t), X(s), Y(s), };
+					float rotZ = Geometry::angZ(renderer.mat()) * Geometry::rad2deg;
+					auto c = s / 2;
+					auto center = SDL_Point{ X(c), Y(c), };
+					SDL_RenderCopyEx(Renderer2d::get(renderer), Material::get(material), &srcRect, &dstRect, rotZ, &center, SDL_FLIP_NONE);
+					renderer.popMatrix();
+				}
+
+				void draw(tte::Renderer2d &renderer, tte::Transform &transform, tte::Primitive &primitive, Actor &a) const {
+					const vector3i &p = primitive.pos();
+					const vector3i &s = primitive.size();
+					auto dstRect = SDL_Rect{ X(p), Y(p), X(s), Y(s), };
+					SDL_SetRenderDrawColor(Renderer2d::get(renderer), 255, 0, 0, 0);
+					SDL_RenderDrawRect(Renderer2d::get(renderer), &dstRect);
 				}
 			};
 
@@ -160,44 +226,10 @@ namespace tte {
 						a.importProps(config.props().get_child("renderer/sdl2"));
 						m_renderer = Renderer::load(a.props());
 						tte::Renderer2d::append([this](Actor &, tte::Renderer2d &renderer) {
-							renderer.handle<SDL_Renderer>().reset(SDL_CreateRenderer(
-								m_mainWindow.get(),
-								m_renderer.index,
-								m_renderer.flags
-							));
-							assert(renderer.handle<SDL_Renderer>());
-							renderer.setRenderer([this](tte::Renderer2d &renderer, Actor &a) {
-								a.getComponent<tte::Transform, tte::Material>([this, &renderer, &a](auto &transform, auto &material) {
-									drawRect(renderer, transform, material, a);
-								});
-							});
+							new Renderer2dInterface(m_mainWindow, m_renderer, renderer);
 						})(a);
 					} + initializer
 				);
-			}
-
-			void drawRect(tte::Renderer2d &renderer, tte::Transform &transform, tte::Material &material, Actor &a) {
-				renderer.pushMatrix();
-				transform.trs2d(renderer.mat());
-				auto &uv0 = material.to_vector2i(material.uv0());
-				auto &uv1 = material.to_vector2i(material.uv1());
-				auto srcRect = SDL_Rect{ X(uv0), Y(uv0), X(uv1) - X(uv0), Y(uv1) - Y(uv0), };
-				const vector3i &t = Geometry::pos(renderer.mat(), { 0.f, 0.f, 0.f, });
-				auto s = Geometry::get<vec, int32_t, 2>(a.props("size"), 8);
-				auto dstRect = SDL_Rect{ X(t), Y(t), X(s), Y(s), };
-				float rotZ = Geometry::angZ(renderer.mat()) * Geometry::rad2deg;
-				auto c = s / 2;
-				auto center = SDL_Point{ X(c), Y(c), };
-				SDL_RenderCopyEx(Renderer2d::get(renderer), Material::get(material), &srcRect, &dstRect, rotZ, &center, SDL_FLIP_NONE);
-				renderer.popMatrix();
-			}
-
-			void draw(tte::Renderer2d &renderer, tte::Transform &transform, tte::Primitive &primitive, Actor &a) {
-				const vector3i &p = primitive.pos();
-				const vector3i &s = primitive.size();
-				auto dstRect = SDL_Rect{ X(p), Y(p), X(s), Y(s), };
-				SDL_SetRenderDrawColor(Renderer2d::get(renderer), 255, 0, 0, 0);
-				SDL_RenderDrawRect(Renderer2d::get(renderer), &dstRect);
 			}
 
 			//

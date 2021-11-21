@@ -63,7 +63,8 @@ namespace tte {
 			typedef SDL_Renderer Handle;
 
 			static Handle * get(const Component &renderer) {
-				return renderer.handle<Handle>().get();
+				const tte::Renderer2dInterface &renderer2d = renderer;
+				return renderer2d.handle<Handle>().get();
 			}
 		};
 	}
