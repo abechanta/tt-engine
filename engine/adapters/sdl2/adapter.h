@@ -77,7 +77,6 @@ namespace tte {
 				}
 
 				virtual ~Renderer2dInterface() {
-					cout << "end" << endl;
 				}
 
 				virtual void drawPoint(Actor &a, const vector2 &point) const override {}
@@ -86,39 +85,24 @@ namespace tte {
 				virtual void drawLines(Actor &a, const vector<vector2> &lineS, const vector<vector2> &lineE) const override {}
 				virtual void drawLines(Actor &a, const vector<vector2> &points, const vector<int32_t> &lines) const override {}
 
-				virtual void drawRect(Actor &a) const override {
-					a.getComponent<tte::Transform, tte::Material>([this, &a](auto &transform, auto &material) {
-						drawRect(m_renderer, transform, material, a);
+				virtual void drawRect(Actor &a, const vector2 &size, const vector2 &anchor, const vec<bool, 2> &flip) const override {
+					a.getComponent<tte::Transform, tte::Material>([this, &size, &anchor, &flip, &a](auto &transform, auto &material) {
+						m_renderer.pushMatrix();
+						transform.trs2d(m_renderer.mat());
+						{
+							const vector2i s = size;
+							auto &uv0 = material.to_vector2i(material.uv0());
+							auto &uv1 = material.to_vector2i(material.uv1());
+							auto srcRect = SDL_Rect{ X(uv0), Y(uv0), X(uv1) - X(uv0), Y(uv1) - Y(uv0), };
+							const vector3i &t = Geometry::pos(m_renderer.mat(), { 0.f, 0.f, 0.f, });
+							auto dstRect = SDL_Rect{ X(t), Y(t), X(s), Y(s), };
+							float rotZ = Geometry::angZ(m_renderer.mat()) * Geometry::rad2deg;
+							auto center = SDL_Point{ static_cast<int32_t>(X(anchor) * X(s)), static_cast<int32_t>(Y(anchor) * Y(s)), };
+							auto flipFlag = (X(flip) ? SDL_FLIP_HORIZONTAL : 0) | (Y(flip) ? SDL_FLIP_VERTICAL : 0);
+							SDL_RenderCopyEx(Renderer2d::get(m_renderer), Material::get(material), &srcRect, &dstRect, rotZ, &center, static_cast<SDL_RendererFlip>(flipFlag));
+						}
+						m_renderer.popMatrix();
 					});
-				}
-				virtual void drawRect(Actor &a, const vector2 &pos, const vector2 &anchor, const vec<bool, 2> &flip) const override {
-					a.getComponent<tte::Transform, tte::Material>([this, &a](auto &transform, auto &material) {
-						drawRect(m_renderer, transform, material, a);
-					});
-				}
-
-				void drawRect(tte::Renderer2d &renderer, tte::Transform &transform, tte::Material &material, Actor &a) const {
-					renderer.pushMatrix();
-					transform.trs2d(renderer.mat());
-					auto &uv0 = material.to_vector2i(material.uv0());
-					auto &uv1 = material.to_vector2i(material.uv1());
-					auto srcRect = SDL_Rect{ X(uv0), Y(uv0), X(uv1) - X(uv0), Y(uv1) - Y(uv0), };
-					const vector3i &t = Geometry::pos(renderer.mat(), { 0.f, 0.f, 0.f, });
-					auto s = Geometry::get<vec, int32_t, 2>(a.props("size"), 8);
-					auto dstRect = SDL_Rect{ X(t), Y(t), X(s), Y(s), };
-					float rotZ = Geometry::angZ(renderer.mat()) * Geometry::rad2deg;
-					auto c = s / 2;
-					auto center = SDL_Point{ X(c), Y(c), };
-					SDL_RenderCopyEx(Renderer2d::get(renderer), Material::get(material), &srcRect, &dstRect, rotZ, &center, SDL_FLIP_NONE);
-					renderer.popMatrix();
-				}
-
-				void draw(tte::Renderer2d &renderer, tte::Transform &transform, tte::Primitive &primitive, Actor &a) const {
-					const vector3i &p = primitive.pos();
-					const vector3i &s = primitive.size();
-					auto dstRect = SDL_Rect{ X(p), Y(p), X(s), Y(s), };
-					SDL_SetRenderDrawColor(Renderer2d::get(renderer), 255, 0, 0, 0);
-					SDL_RenderDrawRect(Renderer2d::get(renderer), &dstRect);
 				}
 			};
 

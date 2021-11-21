@@ -53,15 +53,33 @@ namespace tte {
 
 	class ShapeSprite : public Shape {
 	private:
-		Sprite m_data;
+		Shape2d::Sprite m_data;
 
 	public:
 		explicit ShapeSprite(
 			const property_tree::ptree &props
-		) : Shape(), m_data(Sprite::load(props.get_child("sprite"))) {
+		) : Shape(), m_data(Shape2d::Sprite::load(props.get_child("sprite"))) {
 		}
 
 		virtual ~ShapeSprite() override {
+		}
+
+		virtual void draw(Renderer2d &renderer, Actor &a) override {
+			m_data.draw(renderer, a);
+		}
+	};
+
+	class ShapeTilemap : public Shape {
+	private:
+		Shape2d::Tilemap m_data;
+
+	public:
+		explicit ShapeTilemap(
+			const property_tree::ptree &props
+		) : Shape(), m_data(Shape2d::Tilemap::load(props.get_child("tilemap"))) {
+		}
+
+		virtual ~ShapeTilemap() override {
 		}
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
