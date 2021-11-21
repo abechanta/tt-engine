@@ -1,9 +1,5 @@
 {
 	"contentType": "text/json",
-	"size": {
-		"x": 32,
-		"y": 32
-	},
 	"sprite": {
 		"size": {
 			"x": 32,
@@ -14,8 +10,8 @@
 			"y": 0.5
 		},
 		"flip": {
-			"x": false,
-			"y": false
+			"x": true,
+			"y": true
 		}
 	},
 	"transform": {

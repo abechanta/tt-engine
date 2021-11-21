@@ -1,9 +1,5 @@
 {
   "contentType": "text/json",
-  "size": {
-    "x": 16,
-    "y": 16
-  },
   "transform": {
     "translation": {
       "x": 0,
