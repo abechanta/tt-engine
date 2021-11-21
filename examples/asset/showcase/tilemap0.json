@@ -1,9 +1,5 @@
 {
   "contentType": "text/json",
-  "size": {
-    "x": 16,
-    "y": 24
-  },
   "transform": {
     "translation": {
       "x": 256,
@@ -30,6 +26,10 @@
     "size": {
       "x": 256,
       "y": 192
+    },
+    "viewOffset": {
+      "x": 0,
+      "y": 0
     },
     "cellSize": {
       "x": 8,
