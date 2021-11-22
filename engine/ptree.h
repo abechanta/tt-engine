@@ -5,6 +5,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <string>
 
 namespace tte {
@@ -40,6 +41,60 @@ namespace tte {
 			}
 		};
 
+		template<class C>
+		class PropertyA {
+		private:
+			property_tree::ptree &m_node;
+			const string m_key;
+
+		public:
+			PropertyA(property_tree::ptree &node, const string &key)
+				: m_node(node), m_key(key)
+			{
+				if (!m_node.get_child_optional(m_key)) {
+					m_node.add_child(m_key, property_tree::ptree());
+				}
+			}
+
+			C operator() () {
+				C val = {};
+				for (auto &ch : m_node.get_child(m_key)) {
+					val.push_back(ch.second.get<C::value_type>(""));
+				}
+				return val;
+			}
+
+			void operator = (const C &val) {
+				m_node.get_child(m_key).clear();
+				property_tree::ptree &node = m_node.get_child(m_key);
+				for (auto elm : val) {
+					property_tree::ptree ch;
+					ch.put("", elm);
+					node.push_back(make_pair("", ch));
+				}
+			}
+		};
+
+		template<class C>
+		class PropertyAA : public vector<PTree::PropertyA<C>> {
+		private:
+			property_tree::ptree &m_node;
+			const string m_key;
+
+		public:
+			PropertyAA(property_tree::ptree &node, const string &key)
+				: m_node(node), m_key(key)
+			{
+				if (!m_node.get_child_optional(m_key)) {
+					m_node.add_child(m_key, property_tree::ptree());
+				}
+				for (auto &ch : m_node.get_child(m_key)) {
+					PTree::PropertyA<C> val(ch.second, "");
+					push_back(val);
+				}
+			}
+		};
+
 		template<template<typename, int> class C, typename V, int N>
 		class PropertyV {
 		private:
@@ -49,7 +104,7 @@ namespace tte {
 			const initializer_list<string> m_subkeys;
 
 		public:
-			PropertyV(property_tree::ptree &node, const string &key, const V &defval = 0, const initializer_list<string> subkeys = subkeysXYZW)
+			PropertyV(property_tree::ptree &node, const string &key, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW)
 				: m_node(node), m_key(key), m_defval(defval), m_subkeys(subkeys)
 			{
 				if (!m_node.get_child_optional(m_key)) {

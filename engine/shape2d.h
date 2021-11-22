@@ -10,6 +10,7 @@
 #include <iterator>
 #include <boost/multi_array.hpp>
 #include <optional>
+#include <boost/property_tree/ptree.hpp>
 #include <string>
 
 namespace tte {
@@ -49,7 +50,7 @@ namespace tte {
 			PTree::PropertyV<vec, int32_t, 2> blitSize;
 			PTree::PropertyV<vec, int32_t, 2> mapSize;
 			PTree::Property<bool> transpose;
-			vector<PTree::Property<int32_t>> tiles;
+			PTree::PropertyAA<vector<int32_t>> tiles;
 
 			Tilemap(property_tree::ptree &node)
 				: size(node, "size", 8),
@@ -57,8 +58,8 @@ namespace tte {
 				cellSize(node, "cellSize", 8),
 				blitSize(node, "blitSize", 8),
 				mapSize(node, "mapSize", 8),
-				transpose(node, "transpose", false)
-				//,tiles(node, "tiles", 0)
+				transpose(node, "transpose", false),
+				tiles(node, "tiles")
 			{
 			}
 
@@ -91,7 +92,7 @@ namespace tte {
 						if (transpose()) {
 							for (int32_t rp = startPos(X(viewOffset_), X(blitSize_)); rp < X(size_); rp += X(blitSize_), transform.translation() = translation + X00<int32_t>(rp)) {
 								int32_t ri = startIdx(X(viewOffset_) + rp, X(blitSize_), X(mapSize_));
-								const vector<int32_t> vertical = Geometry::get<vector, int32_t>(a.props("tilemap.tiles." + to_string(ri)));
+								auto vertical = tiles[ri]();
 								for (int32_t cp = startPos(Y(viewOffset_), Y(blitSize_)); cp < Y(size_); cp += Y(blitSize_), Y(transform.translation()) += Y(blitSize_)) {
 									int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(mapSize_));
 									auto code = vertical[ci];
@@ -104,7 +105,7 @@ namespace tte {
 						} else {
 							for (int32_t rp = startPos(Y(viewOffset_), Y(blitSize_)); rp < Y(size_); rp += Y(blitSize_), transform.translation() = translation + _0X0<int32_t>(rp)) {
 								int32_t ri = startIdx(Y(viewOffset_) + rp, Y(blitSize_), Y(mapSize_));
-								const vector<int32_t> holizontal = Geometry::get<vector, int32_t>(a.props("tilemap.tiles." + to_string(ri)));
+								auto holizontal = tiles[ri]();
 								for (int32_t cp = startPos(X(viewOffset_), X(blitSize_)); cp < X(size_); cp += X(blitSize_), X(transform.translation()) += X(blitSize_)) {
 									int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(mapSize_));
 									auto code = holizontal[ci];
