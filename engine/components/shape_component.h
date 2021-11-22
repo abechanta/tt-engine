@@ -57,8 +57,8 @@ namespace tte {
 
 	public:
 		explicit ShapeSprite(
-			const property_tree::ptree &props
-		) : Shape(), m_data(Shape2d::Sprite::load(props.get_child("sprite"))) {
+			property_tree::ptree &props
+		) : Shape(), m_data(props.get_child("sprite")) {
 		}
 
 		virtual ~ShapeSprite() override {
@@ -75,8 +75,8 @@ namespace tte {
 
 	public:
 		explicit ShapeTilemap(
-			const property_tree::ptree &props
-		) : Shape(), m_data(Shape2d::Tilemap::load(props.get_child("tilemap"))) {
+			property_tree::ptree &props
+		) : Shape(), m_data(props.get_child("tilemap")) {
 		}
 
 		virtual ~ShapeTilemap() override {

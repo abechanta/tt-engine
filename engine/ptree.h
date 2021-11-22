@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cstdint>
 #include <functional>
+#include <initializer_list>
 #include <iterator>
 #include <boost/property_tree/ptree.hpp>
 #include <string>
@@ -12,6 +13,67 @@ namespace tte {
 
 	class PTree {
 	public:
+		static inline const initializer_list<string> subkeysXYZW = { "x", "y", "z", "w", };
+		static inline const initializer_list<string> subkeysWH = { "w", "h", };
+		static inline const initializer_list<string> subkeysXYWH = { "x", "y", "w", "h", };
+		static inline const initializer_list<string> subkeysRGBA = { "r", "g", "b", "a", };
+
+		template<typename V>
+		class Property {
+		private:
+			property_tree::ptree &m_node;
+			const string m_key;
+			const V m_defval;
+
+		public:
+			Property(property_tree::ptree &node, const string &key, const V &defval = 0)
+				: m_node(node), m_key(key), m_defval(defval)
+			{
+			}
+
+			V operator() () {
+				return m_node.get<V>(m_key, m_defval);
+			}
+
+			void operator = (const V &val) {
+				m_node.put<V>(m_key, val);
+			}
+		};
+
+		template<template<typename, int> class C, typename V, int N>
+		class PropertyV {
+		private:
+			property_tree::ptree &m_node;
+			const string m_key;
+			const V m_defval;
+			const initializer_list<string> m_subkeys;
+
+		public:
+			PropertyV(property_tree::ptree &node, const string &key, const V &defval = 0, const initializer_list<string> subkeys = subkeysXYZW)
+				: m_node(node), m_key(key), m_defval(defval), m_subkeys(subkeys)
+			{
+				if (!m_node.get_child_optional(m_key)) {
+					m_node.add_child(m_key, property_tree::ptree());
+				}
+			}
+
+			C<V, N> operator() () {
+				C<V, N> val = {};
+				auto it = m_subkeys.begin();
+				for (auto &e : val.a) {
+					e = m_node.get_child(m_key).get<V>(*it++, m_defval);
+				}
+				return val;
+			}
+
+			void operator = (const C<V, N> &val) {
+				auto it = m_subkeys.begin();
+				for (auto &elm : val.a) {
+					m_node.get_child(m_key).put<V>(*it++, elm);
+				}
+			}
+		};
+
 		template<typename V, typename Vp>
 		static function<void(V &, const property_tree::ptree &)> counter(const string &key, const function<Vp &(V &)> &setter) {
 			return [key, setter](V &v, const property_tree::ptree &pt) {
@@ -21,16 +83,16 @@ namespace tte {
 		}
 
 		template<typename V, typename Vp>
-		static function<void(V &, const property_tree::ptree &)> setter(const string &key, const Vp &defvalue, const function<Vp &(V &)> &setter) {
-			return [key, defvalue, setter](V &v, const property_tree::ptree &pt) {
-				setter(v) = pt.get<Vp>(key, defvalue);
+		static function<void(V &, const property_tree::ptree &)> setter(const string &key, const Vp &defval, const function<Vp &(V &)> &setter) {
+			return [key, defval, setter](V &v, const property_tree::ptree &pt) {
+				setter(v) = pt.get<Vp>(key, defval);
 			};
 		}
 
 		template<typename V, typename Vp, typename Vp2>
-		static function<void(V &, const property_tree::ptree &)> setter(const string &key, const initializer_list<string> &subkey, const Vp &defvalue, const function<Vp &(V &)> &setter) {
-			return [key, subkey, defvalue, setter](V &v, const property_tree::ptree &pt) {
-				Vp r = defvalue;
+		static function<void(V &, const property_tree::ptree &)> setter(const string &key, const initializer_list<string> &subkey, const Vp &defval, const function<Vp &(V &)> &setter) {
+			return [key, subkey, defval, setter](V &v, const property_tree::ptree &pt) {
+				Vp r = defval;
 				auto it = subkey.begin();
 				for (auto &e : r.a) {
 					if (it) {
