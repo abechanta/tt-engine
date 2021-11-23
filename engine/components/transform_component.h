@@ -34,9 +34,17 @@ namespace tte {
 	public:
 		Transform(property_tree::ptree &node)
 			: CList(tag),
-			translation(node.get_child("transform"), "translation", 0.f),
-			rotation(node.get_child("transform"), "rotation", 0.f),
-			scaling(node.get_child("transform"), "scaling", 1.f)
+			translation(node, "translation", 0.f),
+			rotation(node, "rotation", 0.f),
+			scaling(node, "scaling", 1.f)
+		{
+		}
+
+		Transform(property_tree::ptree &node, const vector3 &translation_, const vector3 &rotation_, const vector3 &scaling_)
+			: CList(tag),
+			translation(node, "translation", translation_),
+			rotation(node, "rotation", rotation_),
+			scaling(node, "scaling", scaling_)
 		{
 		}
 
@@ -52,7 +60,7 @@ namespace tte {
 			return [](Actor &a) {
 				// const string rUnit = a.get<string>(key + ".rotation.unit", "degree");
 				// r *= unitConv.at(rUnit);
-				a.appendComponent(new Transform(a.props()));
+				a.appendComponent(new Transform(a.props("transform")));
 			};
 		}
 

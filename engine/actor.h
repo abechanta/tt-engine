@@ -98,8 +98,11 @@ namespace tte {
 			return m_props;
 		}
 
-		std::optional<property_tree::ptree> props(const string &key) const {
-			return get_child_optional(m_props, key);
+		property_tree::ptree & props(const string &key) {
+			if (!m_props.get_child_optional(key)) {
+				m_props.add_child(key, property_tree::ptree());
+			}
+			return m_props.get_child(key);
 		}
 
 		template<typename Vp>

@@ -39,7 +39,7 @@ namespace tte {
 		template<typename V>
 		static Actor::Action append(const string &rendererKey) {
 			return [rendererKey](Actor &a) {
-				a.appendComponent(reinterpret_cast<CList *>(new V(a.props())));
+				a.appendComponent(reinterpret_cast<CList *>(new V(a.props(V::key))));
 				a.appendAction([rendererKey](Actor &a) {
 					Finder<Actor>::find<Renderer2d>(rendererKey, [&a](auto &renderer) {
 						a.getComponent<V>([&renderer, &a](auto &shape) {
@@ -56,13 +56,15 @@ namespace tte {
 	};
 
 	class ShapeSprite : public Shape {
+	public:
+		static inline const string key = "sprite";
 	private:
 		Shape2d::Sprite m_data;
 
 	public:
 		explicit ShapeSprite(
 			property_tree::ptree &props
-		) : Shape(), m_data(props.get_child("sprite")) {
+		) : Shape(), m_data(props) {
 		}
 
 		virtual ~ShapeSprite() override {
@@ -82,13 +84,15 @@ namespace tte {
 	};
 
 	class ShapeTilemap : public Shape {
+	public:
+		static inline const string key = "tilemap";
 	private:
 		Shape2d::Tilemap m_data;
 
 	public:
 		explicit ShapeTilemap(
 			property_tree::ptree &props
-		) : Shape(), m_data(props.get_child("tilemap")) {
+		) : Shape(), m_data(props) {
 		}
 
 		virtual ~ShapeTilemap() override {

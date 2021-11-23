@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <functional>
 #include <initializer_list>
+#include <iostream>
 #include <iterator>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -12,8 +13,7 @@ namespace tte {
 	using namespace boost;
 	using namespace std;
 
-	class PTree {
-	public:
+	namespace PTree {
 		static inline const initializer_list<string> subkeysXYZW = { "x", "y", "z", "w", };
 		static inline const initializer_list<string> subkeysWH = { "w", "h", };
 		static inline const initializer_list<string> subkeysXYWH = { "x", "y", "w", "h", };
@@ -32,12 +32,18 @@ namespace tte {
 			{
 			}
 
-			V operator() () {
+			V operator()() const {
 				return m_node.get<V>(m_key, m_defval);
 			}
 
-			void operator = (const V &val) {
+			void operator()(const V &val) {
 				m_node.put<V>(m_key, val);
+			}
+
+			ostream &to_string(ostream &os) const {
+				auto val = operator()();
+				os << m_key << ": " << val << "]";
+				return os;
 			}
 		};
 
@@ -56,7 +62,7 @@ namespace tte {
 				}
 			}
 
-			C operator() () {
+			C operator()() const {
 				C val = {};
 				for (auto &ch : m_node.get_child(m_key)) {
 					val.push_back(ch.second.get<C::value_type>(""));
@@ -64,7 +70,7 @@ namespace tte {
 				return val;
 			}
 
-			void operator = (const C &val) {
+			void operator()(const C &val) {
 				m_node.get_child(m_key).clear();
 				property_tree::ptree &node = m_node.get_child(m_key);
 				for (auto elm : val) {
@@ -72,6 +78,17 @@ namespace tte {
 					ch.put("", elm);
 					node.push_back(make_pair("", ch));
 				}
+			}
+
+			ostream &to_string(ostream &os) const {
+				auto it = m_subkeys.begin();
+				auto val = operator()();
+				os << m_key << ": [ ";
+				for (auto &e : val.a) {
+					os << e << ", ";
+				}
+				os << "]";
+				return os;
 			}
 		};
 
@@ -93,6 +110,16 @@ namespace tte {
 					push_back(val);
 				}
 			}
+
+			ostream &to_string(ostream &os) const {
+				auto it = m_subkeys.begin();
+				os << m_key << ": [ ";
+				for (auto &e : *this) {
+					os << *it++ << ": " << e << ", ";
+				}
+				os << "]";
+				return os;
+			}
 		};
 
 		template<template<typename, int> class C, typename V, int N>
@@ -112,20 +139,44 @@ namespace tte {
 				}
 			}
 
-			C<V, N> operator() () {
-				C<V, N> val = {};
-				auto it = m_subkeys.begin();
-				for (auto &e : val.a) {
-					e = m_node.get_child(m_key).get<V>(*it++, m_defval);
+			PropertyV(property_tree::ptree &node, const string &key, const C<V, N> &val, const initializer_list<string> subkeys = subkeysXYZW)
+				: m_node(node), m_key(key), m_defval(0), m_subkeys(subkeys)
+			{
+				if (!m_node.get_child_optional(m_key)) {
+					m_node.add_child(m_key, property_tree::ptree());
 				}
-				return val;
+				operator()(val);
 			}
 
-			void operator = (const C<V, N> &val) {
+			C<V, N> operator()() const {
+				return get(m_node, m_key, m_defval, m_subkeys);
+			}
+
+			void operator()(const C<V, N> &val) {
 				auto it = m_subkeys.begin();
 				for (auto &elm : val.a) {
 					m_node.get_child(m_key).put<V>(*it++, elm);
 				}
+			}
+
+			static C<V, N> get(const property_tree::ptree &node, const string &key, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW) {
+				C<V, N> val = {};
+				auto it = subkeys.begin();
+				for (auto &e : val.a) {
+					e = node.get_child(key).get<V>(*it++, defval);
+				}
+				return val;
+			}
+
+			ostream &to_string(ostream &os) const {
+				auto it = m_subkeys.begin();
+				auto val = operator()();
+				os << m_key << ": [ ";
+				for (auto &e : val.a) {
+					os << *it++ << ": " << e << ", ";
+				}
+				os << "]";
+				return os;
 			}
 		};
 
@@ -170,5 +221,22 @@ namespace tte {
 				}
 			};
 		}
-	};
+	}
+
+	template<typename V>
+	ostream & operator<<(ostream &os, const PTree::Property<V> &rhs) {
+		return rhs.to_string(os);
+	}
+	template<class C>
+	ostream &operator<<(ostream &os, const PTree::PropertyA<C> &rhs) {
+		return rhs.to_string(os);
+	}
+	template<class C>
+	ostream &operator<<(ostream &os, const PTree::PropertyAA<C> &rhs) {
+		return rhs.to_string(os);
+	}
+	template<template<typename, int> class C, typename V, int N>
+	ostream &operator<<(ostream &os, const PTree::PropertyV<C, V, N> &rhs) {
+		return rhs.to_string(os);
+	}
 }
