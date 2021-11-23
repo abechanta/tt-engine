@@ -1,17 +1,11 @@
 #pragma once
+#include <boost/property_tree/ptree.hpp>
+#include <cassert>
+#include <cstdint>
 #include <geometry.h>
 #include <ptree.h>
-#include <renderer2d.h>
-#include <cassert>
-#include <climits>
-#include <cstdint>
-#include <deque>
-#include <iostream>
-#include <iterator>
-#include <boost/multi_array.hpp>
-#include <optional>
-#include <boost/property_tree/ptree.hpp>
 #include <string>
+#include <vector>
 
 namespace tte {
 	namespace Shape2d {
@@ -37,10 +31,6 @@ namespace tte {
 				flip(node, "flip", false)
 			{
 			}
-
-			void draw(const Renderer2dInterface &renderer, Actor &a) {
-				renderer.drawRect(a, size(), anchor(), flip());
-			}
 		};
 
 		struct Tilemap {
@@ -61,66 +51,6 @@ namespace tte {
 				transpose(node, "transpose", false),
 				tiles(node, "tiles")
 			{
-			}
-
-			int32_t startPos(int32_t pos, int32_t size) {
-				int32_t val = pos % size;
-				val += (pos < 0) ? size : 0;
-				return -val;
-			}
-
-			int32_t startIdx(int32_t pos, int32_t size, int32_t wrap) {
-				int32_t val = pos / size;
-				val %= wrap;
-				val += (val < 0) ? wrap : 0;
-				return val;
-			}
-
-			void draw(const Renderer2dInterface &renderer, Actor &a) {
-				a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
-					auto size_ = size();
-					auto viewOffset_ = viewOffset();
-					auto cellSize_ = cellSize();
-					auto blitSize_ = blitSize();
-					auto mapSize_ = transpose() ? vector2i{ Y(mapSize()), X(mapSize()), } : mapSize();
-					const int32_t cellBounds = X(material.size()) / X(cellSize());
-
-					const vector3 translation = transform.translation();
-					const vector2 uv0 = material.uv0();
-					const vector2 uv1 = material.uv1();
-					{
-						if (transpose()) {
-							for (int32_t rp = startPos(X(viewOffset_), X(blitSize_)); rp < X(size_); rp += X(blitSize_), transform.translation() = translation + X00<int32_t>(rp)) {
-								int32_t ri = startIdx(X(viewOffset_) + rp, X(blitSize_), X(mapSize_));
-								auto vertical = tiles[ri]();
-								for (int32_t cp = startPos(Y(viewOffset_), Y(blitSize_)); cp < Y(size_); cp += Y(blitSize_), Y(transform.translation()) += Y(blitSize_)) {
-									int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(mapSize_));
-									auto code = vertical[ci];
-									material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize_), ((code / cellBounds) + 0) * Y(cellSize_), });
-									material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize_), ((code / cellBounds) + 1) * Y(cellSize_), });
-
-									renderer.drawRect(a, blitSize_, vector2{ 0.f, 0.f, }, vec<bool, 2>{ false, false, });
-								}
-							}
-						} else {
-							for (int32_t rp = startPos(Y(viewOffset_), Y(blitSize_)); rp < Y(size_); rp += Y(blitSize_), transform.translation() = translation + _0X0<int32_t>(rp)) {
-								int32_t ri = startIdx(Y(viewOffset_) + rp, Y(blitSize_), Y(mapSize_));
-								auto holizontal = tiles[ri]();
-								for (int32_t cp = startPos(X(viewOffset_), X(blitSize_)); cp < X(size_); cp += X(blitSize_), X(transform.translation()) += X(blitSize_)) {
-									int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(mapSize_));
-									auto code = holizontal[ci];
-									material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize_), ((code / cellBounds) + 0) * Y(cellSize_), });
-									material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize_), ((code / cellBounds) + 1) * Y(cellSize_), });
-
-									renderer.drawRect(a, blitSize_, vector2{ 0.f, 0.f, }, vec<bool, 2>{ false, false, });
-								}
-							}
-						}
-					}
-					transform.translation() = translation;
-					material.uv0() = uv0;
-					material.uv1() = uv1;
-				});
 			}
 		};
 

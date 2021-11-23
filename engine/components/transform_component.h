@@ -1,11 +1,12 @@
 #pragma once
 #include <actor.h>
-#include <clist.h>
-#include <geometry.h>
 #include <cassert>
+#include <clist.h>
 #include <cstdint>
 #include <functional>
+#include <geometry.h>
 #include <initializer_list>
+#include <ptree.h>
 #include <string>
 #include <unordered_map>
 
@@ -22,89 +23,45 @@ namespace tte {
 		//
 		// member variables
 		//
-	private:
-		vector3 m_translation;
-		vector3 m_rotation;
-		vector3 m_scaling;
+	public:
+		PTree::PropertyV<vec, float, 3> translation;
+		PTree::PropertyV<vec, float, 3> rotation;
+		PTree::PropertyV<vec, float, 3> scaling;
 
 		//
 		// public methods
 		//
 	public:
-		Transform(
-			const vector3 &translation, const vector3 &rotation, const vector3 &scaling
-		) : CList(tag), m_translation(translation), m_rotation(rotation), m_scaling(scaling) {
+		Transform(property_tree::ptree &node)
+			: CList(tag),
+			translation(node.get_child("transform"), "translation", 0.f),
+			rotation(node.get_child("transform"), "rotation", 0.f),
+			scaling(node.get_child("transform"), "scaling", 1.f)
+		{
 		}
 
 		virtual ~Transform() override {
 		}
 
-		static Actor::Action append(const string &key = "transform") {
-			static const unordered_map<string, float> unitConv = {
-				{ "radian", 1.f, },
-				{ "degree", Geometry::deg2rad, },
-				{ "fixed32", Geometry::fixed2rad, },
-			};
-			return [key](Actor &a) {
-				auto t = Geometry::get<vec, float, 3>(a.props(key + ".translation"), 0.f);
-				auto r = Geometry::get<vec, float, 3>(a.props(key + ".rotation"), 0.f);
-				const string rUnit = a.get<string>(key + ".rotation.unit", "degree");
-				r *= unitConv.at(rUnit);
-				auto s = Geometry::get<vec, float, 3>(a.props(key + ".scaling"), 1.f);
-				a.appendComponent(new Transform(t, r, s));
+		static Actor::Action append() {
+			// static const unordered_map<string, float> unitConv = {
+			// 	{ "radian", 1.f, },
+			// 	{ "degree", Geometry::deg2rad, },
+			// 	{ "fixed32", Geometry::fixed2rad, },
+			// };
+			return [](Actor &a) {
+				// const string rUnit = a.get<string>(key + ".rotation.unit", "degree");
+				// r *= unitConv.at(rUnit);
+				a.appendComponent(new Transform(a.props()));
 			};
 		}
 
-		static Actor::Action apply(const string &key = "transform") {
-			static const unordered_map<string, float> unitConv = {
-				{ "radian", 1.f, },
-				{ "degree", Geometry::deg2rad, },
-				{ "fixed32", Geometry::fixed2rad, },
-			};
-			return [key](Actor &a) {
-				a.getComponent<Transform>([key, &a](auto &transform) {
-					auto t = Geometry::get<vec, float, 3>(a.props(key + ".translation"), 0.f);
-					auto r = Geometry::get<vec, float, 3>(a.props(key + ".rotation"), 0.f);
-					const string rUnit = a.get<string>(key + ".rotation.unit", "degree");
-					//r *= unitConv.at(rUnit);	// TODO
-					auto s = Geometry::get<vec, float, 3>(a.props(key + ".scaling"), 1.f);
-					transform.translation() = t;
-					transform.rotation() = r;
-					transform.scaling() = s;
-				});
-			};
-		}
-
-		matrix3x4 & trs2d(matrix3x4 &m) const {
-			return Geometry::trs2d(m, m_translation, m_rotation, m_scaling);
+		matrix3x4 & trs2d(matrix3x4 &m) {
+			return Geometry::trs2d(m, translation(), rotation(), scaling());
 		}
 
 		//
 		// property methods
 		//
-	public:
-		vector3 & translation() {
-			return m_translation;
-		}
-
-		const vector3 & translation() const {
-			return m_translation;
-		}
-
-		vector3 & rotation() {
-			return m_rotation;
-		}
-
-		const vector3 & rotation() const {
-			return m_rotation;
-		}
-
-		vector3 & scaling() {
-			return m_scaling;
-		}
-
-		const vector3 & scaling() const {
-			return m_scaling;
-		}
 	};
 }

@@ -12,16 +12,17 @@ using namespace tte;
 namespace Tutorial6 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		auto transform1 = make_unique<Transform>(vector3{ 1, 2, 3, }, vector3{ 4, 5, 6, }, vector3{ 7, 8, 9, });
-		cout << "--- translation" << endl;
-		vector3 t = transform1->translation();
-		cout << X(t) << " " << Y(t) << " " << Z(t) << endl;
-		cout << "--- rotation" << endl;
-		vector3 r = transform1->rotation();
-		cout << X(r) << " " << Y(r) << " " << Z(r) << endl;
-		cout << "--- scaling" << endl;
-		vector3 s = transform1->scaling();
-		cout << X(s) << " " << Y(s) << " " << Z(s) << endl;
+		//auto transform1 = make_unique<Transform>(vector3{ 1, 2, 3, }, vector3{ 4, 5, 6, }, vector3{ 7, 8, 9, });
+		//cout << "--- translation" << endl;
+		//vector3 t = transform1->translation();
+		//cout << X(t) << " " << Y(t) << " " << Z(t) << endl;
+		//cout << "--- rotation" << endl;
+		//vector3 r = transform1->rotation();
+		//cout << X(r) << " " << Y(r) << " " << Z(r) << endl;
+		//cout << "--- scaling" << endl;
+		//vector3 s = transform1->scaling();
+		//cout << X(s) << " " << Y(s) << " " << Z(s) << endl;
+		assert(("TODO: revise test code.", false));
 	}
 
 	void test2() {

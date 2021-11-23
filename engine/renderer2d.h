@@ -1,7 +1,9 @@
 #pragma once
-#include <geometry.h>
+#include <actor.h>
 #include <cassert>
 #include <cstdint>
+#include <geometry.h>
+#include <memory>
 #include <vector>
 
 namespace tte {
@@ -39,6 +41,6 @@ namespace tte {
 		virtual void drawLine(Actor &a, const vector2 &lineS, const vector2 &lineE) const = 0;
 		virtual void drawLines(Actor &a, const vector<vector2> &lineS, const vector<vector2> &lineE) const = 0;
 		virtual void drawLines(Actor &a, const vector<vector2> &points, const vector<int32_t> &lines) const = 0;
-		virtual void drawRect(Actor &a, const vector2 &size, const vector2 &anchor, const vec<bool, 2> &flip) const = 0;
+		virtual void drawRect(Actor &a, const vector2 &pos, const vector2 &size, const vector2 &anchor, const vec<bool, 2> &flip) const = 0;
 	};
 }
