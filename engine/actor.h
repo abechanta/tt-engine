@@ -1,6 +1,7 @@
 #pragma once
 #include <clist.h>
 #include <mtree.h>
+#include <ptree.h>
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -99,42 +100,13 @@ namespace tte {
 		}
 
 		property_tree::ptree & props(const string &key) {
-			if (!m_props.get_child_optional(key)) {
-				m_props.add_child(key, property_tree::ptree());
-			}
-			return m_props.get_child(key);
+			return PTree::get_child(m_props, key);
 		}
 
 		template<typename Vp>
 		Vp get(const string &key, const Vp &defvalue) const {
-			auto pNode = get_child_optional(m_props, key);
+			auto pNode = PTree::get_child_optional(m_props, key);
 			return pNode ? pNode->get_value<Vp>(defvalue) : defvalue;
-		}
-
-	private:
-		static std::optional<const property_tree::ptree> get_child_optional(const property_tree::ptree &node, property_tree::ptree::path_type key) {
-			if (key.empty()) {
-				return node;
-			}
-
-			auto head = key.reduce();
-			auto name = !head.empty() && isdigit(head.front()) ? "" : head;
-			auto index = !head.empty() && name.empty() ? std::stoul(head) : 0;
-
-			auto matches = node.equal_range(name);
-			if (matches.first == matches.second) {
-				return std::nullopt;
-			}
-
-			while ((index > 0) && (matches.first != matches.second)) {
-				--index;
-				++matches.first;
-			}
-			if ((index > 0) || (matches.first == matches.second)) {
-				return std::nullopt;
-			}
-
-			return get_child_optional(matches.first->second, key);
 		}
 
 		//

@@ -1,11 +1,13 @@
 #pragma once
 #include <actor.h>
 #include <asset.h>
-#include <clist.h>
-#include <geometry.h>
 #include <cassert>
+#include <climits>
+#include <clist.h>
 #include <cstdint>
 #include <functional>
+#include <geometry.h>
+#include <ptree.h>
 
 namespace tte {
 	class Material : public CList {
@@ -20,37 +22,39 @@ namespace tte {
 		//
 	private:
 		const Asset &m_asset;
-		vector4 m_diffuse;
-		vector2 m_uv0;
-		vector2 m_uv1;
 		vector2i m_size;
+	public:
+		PTree::PropertyV<vec, float, 4> diffuse;
+		PTree::PropertyV<vec, float, 2> uv0;
+		PTree::PropertyV<vec, float, 2> uv1;
 
 		//
 		// public methods
 		//
 	public:
-		Material(
-			const Asset &asset, const vector4 &diffuse, const vector2 &uv0, const vector2 &uv1
-		) : CList(tag), m_asset(asset), m_diffuse(diffuse), m_uv0(uv0), m_uv1(uv1), m_size() {
-			X(m_size) = asset.props().get<int32_t>("size.w", 8);
-			Y(m_size) = asset.props().get<int32_t>("size.h", 8);
+		Material(const Asset &asset, property_tree::ptree &node)
+			: CList(tag),
+			m_asset(asset),
+			m_size(PTree::PropertyV<vec, int32_t, 2>::get(asset.props(), "size", 8, PTree::subkeysWH)),
+			diffuse(node, "diffuse", 1.f, PTree::subkeysRGBA),
+			uv0(node, "uv.0", 0.f),
+			uv1(node, "uv.1", 1.f)
+		{
+			auto unit = node.get<string>("uvUnit", "ratio");
+			if (unit == "px") {
+				uv0(to_vector2(uv0()));
+				uv1(to_vector2(uv1()));
+			}
 		}
 
-		Material(
-			const Asset& asset, const Actor &a
-		) : CList(tag), m_asset(asset), m_diffuse(), m_uv0(), m_uv1(), m_size() {
-			const string &key = "material";
-			X(m_size) = asset.props().get<int32_t>("size.w", 8);
-			Y(m_size) = asset.props().get<int32_t>("size.h", 8);
-			m_diffuse = Geometry::get<vec, float, 4>(a.props(key + ".diffuse"), 1.f);
-			auto unit = a.get<string>(key + ".uvUnit", "ratio");
-			if (unit == "px") {
-				m_uv0 = to_vector2(Geometry::get<vec, int32_t, 2>(a.props(key + ".uv.0"), 0));
-				m_uv1 = to_vector2(Geometry::get<vec, int32_t, 2>(a.props(key + ".uv.1"), 8));
-			} else {
-				m_uv0 = Geometry::get<vec, float, 2>(a.props(key + ".uv.0"), 0.f);
-				m_uv1 = Geometry::get<vec, float, 2>(a.props(key + ".uv.1"), 1.f);
-			}
+		Material(const Asset &asset, property_tree::ptree &node, const vector4 &diffuse_, const vector2 &uv0_, const vector2 &uv1_)
+			: CList(tag),
+			m_asset(asset),
+			m_size(PTree::PropertyV<vec, int32_t, 2>::get(asset.props(), "size", 8, PTree::subkeysWH)),
+			diffuse(node, "diffuse", diffuse_, PTree::subkeysRGBA),
+			uv0(node, "uv.0", uv0_),
+			uv1(node, "uv.1", uv1_)
+		{
 		}
 
 		virtual ~Material() override {
@@ -58,8 +62,7 @@ namespace tte {
 
 		static Actor::Action append(const Asset &asset) {
 			return [&asset](Actor &a) {
-				auto pMaterial = new Material(asset, a);
-				a.appendComponent(pMaterial);
+				a.appendComponent(new Material(asset, a.props("material")));
 			};
 		}
 
@@ -67,32 +70,8 @@ namespace tte {
 		// property methods
 		//
 	public:
-		operator const Asset & () const {
+		operator const Asset &() const {
 			return m_asset;
-		}
-
-		vector4 & diffuse() {
-			return m_diffuse;
-		}
-
-		const vector4 & diffuse() const {
-			return m_diffuse;
-		}
-
-		vector2 & uv0() {
-			return m_uv0;
-		}
-
-		const vector2 & uv0() const {
-			return m_uv0;
-		}
-
-		vector2 & uv1() {
-			return m_uv1;
-		}
-
-		const vector2 & uv1() const {
-			return m_uv1;
 		}
 
 		const vector2i & size() const {

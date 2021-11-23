@@ -62,9 +62,9 @@ namespace tte {
 		Shape2d::Sprite m_data;
 
 	public:
-		explicit ShapeSprite(
-			property_tree::ptree &props
-		) : Shape(), m_data(props) {
+		explicit ShapeSprite(property_tree::ptree &props)
+			: Shape(), m_data(props)
+		{
 		}
 
 		virtual ~ShapeSprite() override {
@@ -90,9 +90,9 @@ namespace tte {
 		Shape2d::Tilemap m_data;
 
 	public:
-		explicit ShapeTilemap(
-			property_tree::ptree &props
-		) : Shape(), m_data(props) {
+		explicit ShapeTilemap(property_tree::ptree &props)
+			: Shape(), m_data(props)
+		{
 		}
 
 		virtual ~ShapeTilemap() override {
@@ -122,8 +122,8 @@ namespace tte {
 							for (int32_t cp = startPos(Y(viewOffset_), Y(blitSize_)); cp < Y(size_); cp += Y(blitSize_)) {
 								int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(mapSize_));
 								auto code = vertical[ci];
-								material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize_), ((code / cellBounds) + 0) * Y(cellSize_), });
-								material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize_), ((code / cellBounds) + 1) * Y(cellSize_), });
+								material.uv0(material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize_), ((code / cellBounds) + 0) * Y(cellSize_), }));
+								material.uv1(material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize_), ((code / cellBounds) + 1) * Y(cellSize_), }));
 
 								const Renderer2dInterface &renderer2d = renderer;
 								renderer2d.drawRect(a, vector2i{ rp, cp, }, blitSize_, vector2{ 0.f, 0.f, }, vec<bool, 2>{ false, false, });
@@ -136,8 +136,8 @@ namespace tte {
 							for (int32_t cp = startPos(X(viewOffset_), X(blitSize_)); cp < X(size_); cp += X(blitSize_)) {
 								int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(mapSize_));
 								auto code = holizontal[ci];
-								material.uv0() = material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize_), ((code / cellBounds) + 0) * Y(cellSize_), });
-								material.uv1() = material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize_), ((code / cellBounds) + 1) * Y(cellSize_), });
+								material.uv0(material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize_), ((code / cellBounds) + 0) * Y(cellSize_), }));
+								material.uv1(material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize_), ((code / cellBounds) + 1) * Y(cellSize_), }));
 
 								const Renderer2dInterface &renderer2d = renderer;
 								renderer2d.drawRect(a, vector2i{ cp, rp, }, blitSize_, vector2{ 0.f, 0.f, }, vec<bool, 2>{ false, false, });
@@ -146,8 +146,8 @@ namespace tte {
 					}
 				}
 				renderer.popMatrix();
-				material.uv0() = uv0;
-				material.uv1() = uv1;
+				material.uv0(uv0);
+				material.uv1(uv1);
 			});
 		}
 
