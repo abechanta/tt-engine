@@ -71,9 +71,10 @@ namespace tte {
 		}
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
-			a.getComponent<Transform>([this, &a, &renderer](auto &transform) {
+			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
 				renderer.pushMatrix();
 				transform.trs2d(renderer.mat());
+				material.resetUv();
 				{
 					const Renderer2dInterface &renderer2d = renderer;
 					renderer2d.drawRect(a, vector2{ 0.f, 0.f, }, m_data.size(), m_data.anchor(), m_data.flip());
@@ -110,11 +111,13 @@ namespace tte {
 				auto translation = transform.translation();
 				auto rotation = transform.rotation();
 				auto scaling = transform.scaling();
-				const vector2 uv0 = material.uv0();
-				const vector2 uv1 = material.uv1();
 				renderer.pushMatrix();
 				Geometry::trs2d(renderer.mat(), translation, rotation, scaling);
+				material.resetUv();
 				{
+					const auto &anchor = vector2{ 0.f, 0.f, };
+					const auto &flip = vec<bool, 2>{ false, false, };
+
 					if (m_data.transpose()) {
 						for (int32_t rp = startPos(X(viewOffset_), X(blitSize_)); rp < X(size_); rp += X(blitSize_)) {
 							int32_t ri = startIdx(X(viewOffset_) + rp, X(blitSize_), X(mapSize_));
@@ -122,32 +125,33 @@ namespace tte {
 							for (int32_t cp = startPos(Y(viewOffset_), Y(blitSize_)); cp < Y(size_); cp += Y(blitSize_)) {
 								int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(mapSize_));
 								auto code = vertical[ci];
-								material.uv0(material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize_), ((code / cellBounds) + 0) * Y(cellSize_), }));
-								material.uv1(material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize_), ((code / cellBounds) + 1) * Y(cellSize_), }));
+								auto uv = vector2i{ (code % cellBounds) * X(cellSize_), (code / cellBounds) * Y(cellSize_), };
+								material._uv0(material.to_vector2(uv));
+								material._uv1(material.to_vector2(uv + cellSize_));
 
 								const Renderer2dInterface &renderer2d = renderer;
-								renderer2d.drawRect(a, vector2i{ rp, cp, }, blitSize_, vector2{ 0.f, 0.f, }, vec<bool, 2>{ false, false, });
+								renderer2d.drawRect(a, vector2i{ rp, cp, }, blitSize_, anchor, flip);
 							}
 						}
 					} else {
 						for (int32_t rp = startPos(Y(viewOffset_), Y(blitSize_)); rp < Y(size_); rp += Y(blitSize_)) {
 							int32_t ri = startIdx(Y(viewOffset_) + rp, Y(blitSize_), Y(mapSize_));
-							auto holizontal = m_data.tiles[ri]();
+							auto horizontal = m_data.tiles[ri]();
 							for (int32_t cp = startPos(X(viewOffset_), X(blitSize_)); cp < X(size_); cp += X(blitSize_)) {
 								int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(mapSize_));
-								auto code = holizontal[ci];
-								material.uv0(material.to_vector2({ ((code % cellBounds) + 0) * X(cellSize_), ((code / cellBounds) + 0) * Y(cellSize_), }));
-								material.uv1(material.to_vector2({ ((code % cellBounds) + 1) * X(cellSize_), ((code / cellBounds) + 1) * Y(cellSize_), }));
+								auto code = horizontal[ci];
+								auto uv = vector2i{ (code % cellBounds) * X(cellSize_), (code / cellBounds) * Y(cellSize_), };
+								material._uv0(material.to_vector2(uv));
+								material._uv1(material.to_vector2(uv + cellSize_));
 
 								const Renderer2dInterface &renderer2d = renderer;
-								renderer2d.drawRect(a, vector2i{ cp, rp, }, blitSize_, vector2{ 0.f, 0.f, }, vec<bool, 2>{ false, false, });
+								renderer2d.drawRect(a, vector2i{ cp, rp, }, blitSize_, anchor, flip);
 							}
 						}
 					}
 				}
+				material.resetUv();
 				renderer.popMatrix();
-				material.uv0(uv0);
-				material.uv1(uv1);
 			});
 		}
 

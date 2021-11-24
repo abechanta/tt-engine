@@ -88,8 +88,8 @@ namespace tte {
 				virtual void drawRect(Actor &a, const vector2 &pos, const vector2 &size, const vector2 &anchor, const vec<bool, 2> &flip) const override {
 					a.getComponent<tte::Material>([this, &pos, &size, &anchor, &flip, &a](auto &material) {
 						const vector2i s = size;
-						auto &uv0 = material.to_vector2i(material.uv0());
-						auto &uv1 = material.to_vector2i(material.uv1());
+						auto &uv0 = material.to_vector2i(material._uv0());
+						auto &uv1 = material.to_vector2i(material._uv1());
 						auto srcRect = SDL_Rect{ X(uv0), Y(uv0), X(uv1) - X(uv0), Y(uv1) - Y(uv0), };
 						const vector3i &t = Geometry::pos(m_renderer.mat(), XY0(pos));
 						auto dstRect = SDL_Rect{ X(t), Y(t), X(s), Y(s), };
