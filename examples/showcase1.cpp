@@ -12,7 +12,6 @@
 #include <components/indexer_component.h>
 #include <components/input_component.h>
 #include <components/material_component.h>
-#include <components/primitive_component.h>
 #include <components/renderer2d_component.h>
 #include <components/resource_component.h>
 #include <components/shape_component.h>
