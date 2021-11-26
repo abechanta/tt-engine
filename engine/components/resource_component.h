@@ -1,8 +1,8 @@
 #pragma once
 #include <actor.h>
 #include <asset.h>
-#include <clist.h>
 #include <cassert>
+#include <clist.h>
 #include <cstdint>
 
 namespace tte {
@@ -23,9 +23,9 @@ namespace tte {
 		// public methods
 		//
 	public:
-		explicit Resource(
-			Asset &asset
-		) : CList(tag), m_asset(asset) {
+		explicit Resource(Asset &asset)
+			: CList(tag), m_asset(asset)
+		{
 			m_asset.load();
 		}
 
@@ -39,11 +39,11 @@ namespace tte {
 			};
 		}
 
-		Asset & find(const Asset::Path &path) {
+		Asset &find(const Asset::Path &path) {
 			return m_asset.find(path);
 		}
 
-		static Asset & find(Actor &a, const Asset::Path &path) {
+		static Asset &find(Actor &a, const Asset::Path &path) {
 			return a.getComponent<Asset &, Resource>(Asset::noAsset(), [&path](auto &resource) -> Asset & {
 				return resource.find(path);
 			});

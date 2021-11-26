@@ -1,8 +1,8 @@
 #pragma once
 #include <actor.h>
 #include <button.h>
-#include <clist.h>
 #include <cassert>
+#include <clist.h>
 #include <cstdint>
 #include <functional>
 #include <string>
@@ -26,7 +26,9 @@ namespace tte {
 		// public methods
 		//
 	public:
-		Input() : CList(tag), m_buttons() {
+		explicit Input()
+			: CList(tag), m_buttons()
+		{
 		}
 
 		virtual ~Input() override {
@@ -48,7 +50,7 @@ namespace tte {
 		// property methods
 		//
 	public:
-		Button<> & buttons(const string &alias) {
+		Button<> &buttons(const string &alias) {
 			return m_buttons[alias];
 		}
 	};
