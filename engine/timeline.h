@@ -1,12 +1,12 @@
 #pragma once
-#include <easing.h>
-#include <ptree.h>
 #include <cassert>
 #include <climits>
 #include <cstdint>
 #include <deque>
+#include <easing.h>
 #include <iostream>
 #include <iterator>
+#include <ptree.h>
 #include <string>
 #include <unordered_map>
 
@@ -43,6 +43,7 @@ namespace tte {
 					{ "sine", Easing::Function::sine<Vt>, },
 					{ "back", Easing::Function::back<Vt>, },
 					{ "elastic", Easing::Function::elastic<Vt>, },
+					{ "stepping", Easing::Function::stepping<Vt>, },
 				};
 				auto name = easing.substr(0, easing.find_first_of(':'));
 				return func.at(name);
@@ -116,20 +117,20 @@ namespace tte {
 		// public methods
 		//
 	public:
-		explicit Timeline(
-			const property_tree::ptree &props = property_tree::ptree()
-		) : m_bPlaying(false), m_animation(Animation::load(props)) {
+		explicit Timeline(const property_tree::ptree &props = property_tree::ptree())
+			: m_bPlaying(false), m_animation(Animation::load(props))
+		{
 		}
 
 		virtual ~Timeline() {
 		}
 
-		Timeline & play() {
+		Timeline &play() {
 			m_bPlaying = true;
 			return *this;
 		}
 
-		Timeline & pause() {
+		Timeline &pause() {
 			m_bPlaying = false;
 			return *this;
 		}
@@ -168,7 +169,7 @@ namespace tte {
 		// others
 		//
 	private:
-		void tick(Channel &channel , int32_t frame, property_tree::ptree &out) {
+		void tick(Channel &channel, int32_t frame, property_tree::ptree &out) {
 			auto value = getValue(channel, frame);
 			auto func = (channel.access.compare("delta") == 0) ? delta : overwrite;
 			func(out, channel, value);

@@ -55,9 +55,10 @@ namespace tte {
 			//static Vt bounce(Vt value1, Vt value2, float ratio) {
 			//};
 
-			//template<typename Vt>
-			//static Vt stepping(Vt value1, Vt value2, float ratio) {
-			//};
+			template<typename Vt>
+			static Vt stepping(Vt value1, Vt value2, float ratio) {
+				return (ratio < 1.f) ? value1 : value2;
+			};
 		};
 
 		//

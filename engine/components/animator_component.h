@@ -1,11 +1,11 @@
 #pragma once
 #include <actor.h>
 #include <asset.h>
-#include <clist.h>
-#include <timeline.h>
 #include <cassert>
+#include <clist.h>
 #include <cstdint>
 #include <iostream>
+#include <timeline.h>
 
 namespace tte {
 	class Animator : public CList {
@@ -26,18 +26,17 @@ namespace tte {
 		// public methods
 		//
 	public:
-		explicit Animator(
-			const property_tree::ptree &props
-		) : CList(tag), m_params(props), m_timeline() {
+		explicit Animator(const property_tree::ptree &props)
+			: CList(tag), m_params(props), m_timeline()
+		{
 		}
 
 		virtual ~Animator() override {
 		}
 
-		static Actor::Action append(Asset &asset, const string &key = "animation") {
-			return [&asset, &key](Actor &a) {
-				auto &props = asset.props().get_child(key);
-				a.appendComponent(new Animator(props));
+		static Actor::Action append(Asset &asset) {
+			return [&asset](Actor &a) {
+				a.appendComponent(new Animator(asset.props("animation")));
 				a.appendAction([](Actor &a) {
 					a.getComponent<Animator>([&a](auto &animator) {
 						animator.tick(a);
@@ -54,9 +53,6 @@ namespace tte {
 		void tick(Actor &a) {
 			auto count0 = a.get<int32_t>("count0", 0);
 			m_timeline.tick(count0, a.props());
-			//if (m_timeline.isPlaying()) {
-			//	cout << "playing" << endl;
-			//}
 		}
 	};
 }
