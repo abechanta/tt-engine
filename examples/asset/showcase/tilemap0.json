@@ -5,8 +5,8 @@
       "x": 256,
       "y": 0
     },
+		"rotationUnit": "degree",
     "rotation": {
-      "unit": "degree",
       "z": 0
     },
     "scaling": {

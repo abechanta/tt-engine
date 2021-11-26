@@ -15,8 +15,8 @@
 			"x": 64,
 			"y": 160
 		},
+		"rotationUnit": "degree",
 		"rotation": {
-			"unit": "degree",
 			"z": 0
 		},
 		"scaling": {
