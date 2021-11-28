@@ -1,14 +1,14 @@
 #pragma once
 #include <actor.h>
 #include <asset.h>
-#include <clist.h>
-#include <geometry.h>
-#include <renderer2d.h>
 #include <cassert>
+#include <clist.h>
 #include <cmath>
 #include <cstdint>
 #include <functional>
+#include <geometry.h>
 #include <memory>
+#include <renderer2d.h>
 #include <vector>
 
 namespace tte {
@@ -32,10 +32,9 @@ namespace tte {
 		// public methods
 		//
 	public:
-		Renderer2d(
-			Actor &a,
-			const function<void(Actor &, Renderer2d &)> &initializer
-		) : CList(tag), m_matrixStack() {
+		explicit Renderer2d(Actor &a, const function<void(Actor &, Renderer2d &)> &initializer)
+			: CList(tag), m_matrixStack()
+		{
 			matrix3x4 id = Geometry::identity(matrix3x4());
 			m_matrixStack.push_back(id);
 			initializer(a, self());
@@ -50,17 +49,17 @@ namespace tte {
 			};
 		}
 
-		Renderer2d & pushMatrix() {
+		Renderer2d &pushMatrix() {
 			m_matrixStack.push_back(m_matrixStack.back());
 			return self();
 		}
 
-		Renderer2d & popMatrix() {
+		Renderer2d &popMatrix() {
 			m_matrixStack.pop_back();
 			return self();
 		}
 
-		matrix3x4 & mat() {
+		matrix3x4 &mat() {
 			return m_matrixStack.back();
 		}
 
@@ -72,7 +71,7 @@ namespace tte {
 			m_handle.reset(renderer);
 		}
 
-		operator const Renderer2dInterface & () const {
+		operator const Renderer2dInterface &() const {
 			return *m_handle.get();
 		}
 
@@ -80,7 +79,7 @@ namespace tte {
 		// utility operators
 		//
 	private:
-		Renderer2d & self() {
+		Renderer2d &self() {
 			return *this;
 		}
 	};

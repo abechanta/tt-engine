@@ -1,9 +1,9 @@
 #pragma once
 #include <actor.h>
-#include <clist.h>
-#include <finder.h>
 #include <cassert>
+#include <clist.h>
 #include <cstdint>
+#include <finder.h>
 #include <string>
 #include <utility>
 
@@ -25,10 +25,9 @@ namespace tte {
 		// public methods
 		//
 	public:
-		Indexer(
-			const string &name,
-			Actor &a
-		) : CList(tag), m_indexer(std::move(Finder<Actor>::create(name, a))) {
+		explicit Indexer(const string &name, Actor &a)
+			: CList(tag), m_indexer(std::move(Finder<Actor>::create(name, a)))
+		{
 		}
 
 		virtual ~Indexer() override {

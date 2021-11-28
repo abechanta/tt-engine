@@ -12,7 +12,6 @@
 #include <components/indexer_component.h>
 #include <components/input_component.h>
 #include <components/material_component.h>
-#include <components/primitive_component.h>
 #include <components/renderer2d_component.h>
 #include <components/resource_component.h>
 #include <components/shape_component.h>
@@ -59,7 +58,9 @@ public:
 		auto resource = new Actor(Actor::noAction, Indexer::append("sys:resource"));
 		auto window = m_adapter->createWindowActor(config, Indexer::append("window:"));
 		auto input = m_adapter->createInputActor(config, Indexer::append("input:"));
-		auto inputKbd = m_adapter->createKeyboardActor(config, Actor::noAction);
+		auto inputKbd = m_adapter->createKeyboardActor(config, [](Actor &a) {
+			a.appendAction(onButtonPressed("escape") * findAndAct("input:", put<bool>("quit", true)));
+		});
 		auto scene = new Actor(Actor::noAction, Indexer::append("sys:scene"));
 		auto renderer = m_adapter->createRendererActor(config, Indexer::append("renderer:"));
 		config.unload();
@@ -100,33 +101,27 @@ public:
 				auto x = a.props().get<int32_t>("tilemap.viewOffset.x");
 				a.props().put<int32_t>("tilemap.viewOffset.x", ++x);
 			},
-			loadProps(showcase.find(L"tilemap1.json")) + Transform::append() + Material::append(showcase.find(L"SMB_BANK0@16.png")) +
-			Shape::append<ShapeTilemap>("renderer:")
+			loadProps(showcase.find(L"tilemap1.json")) + Transform::append() + Material::append(showcase.find(L"SMB_BANK0@16.png")) + Shape::append<ShapeTilemap>("renderer:")
 		));
 		scene->appendChild(new Actor(
 			Actor::noAction,
-			loadProps(showcase.find(L"tilemap0.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) +
-			Shape::append<ShapeTilemap>("renderer:")
+			loadProps(showcase.find(L"tilemap0.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeTilemap>("renderer:")
 		));
 		scene->appendChild(new Actor(
-			Transform::apply(),
-			loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara0.anim.json")) +
-			Shape::append<ShapeSprite>("renderer:")
+			Actor::noAction,
+			loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara0.anim.json")) + Shape::append<ShapeSprite>("renderer:")
 		));
 		scene->appendChild(new Actor(
-			Transform::apply(),
-			loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara1.anim.json")) +
-			Shape::append<ShapeSprite>("renderer:")
+			Actor::noAction,
+			loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara1.anim.json")) + Shape::append<ShapeSprite>("renderer:")
 		));
 		scene->appendChild(new Actor(
-			Transform::apply(),
-			loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara2.anim.json")) +
-			Shape::append<ShapeSprite>("renderer:")
+			Actor::noAction,
+			loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara2.anim.json")) + Shape::append<ShapeSprite>("renderer:")
 		));
 		scene->appendChild(new Actor(
-			Transform::apply(),
-			loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara3.anim.json")) +
-			Shape::append<ShapeSprite>("renderer:")
+			Actor::noAction,
+			loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara3.anim.json")) + Shape::append<ShapeSprite>("renderer:")
 		));
 	}
 
@@ -141,7 +136,7 @@ public:
 		});
 		return !bQuit;
 	}
-	
+
 	virtual void tick() override {
 		m_actors->act();
 	}

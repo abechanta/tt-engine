@@ -6,8 +6,8 @@
 			"y": 20,
 			"z": 0
 		},
+		"rotationUnit": "degree",
 		"rotation": {
-			"unit": "degree",
 			"z": 90
 		}
 	}

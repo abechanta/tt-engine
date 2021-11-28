@@ -12,16 +12,12 @@ using namespace tte;
 namespace Tutorial6 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		auto transform1 = make_unique<Transform>(vector3{ 1, 2, 3, }, vector3{ 4, 5, 6, }, vector3{ 7, 8, 9, });
-		cout << "--- translation" << endl;
-		vector3 t = transform1->translation();
-		cout << X(t) << " " << Y(t) << " " << Z(t) << endl;
-		cout << "--- rotation" << endl;
-		vector3 r = transform1->rotation();
-		cout << X(r) << " " << Y(r) << " " << Z(r) << endl;
-		cout << "--- scaling" << endl;
-		vector3 s = transform1->scaling();
-		cout << X(s) << " " << Y(s) << " " << Z(s) << endl;
+		property_tree::ptree props;
+		auto transform1 = make_unique<Transform>(props, vector3{ 1, 2, 3, }, vector3{ 4, 5, 6, }, vector3{ 7, 8, 9, });
+		cout << "--- transformation" << endl;
+		cout << transform1->translation << endl;
+		cout << transform1->rotation << endl;
+		cout << transform1->scaling << endl;
 	}
 
 	void test2() {
@@ -41,7 +37,7 @@ namespace Tutorial6 {
 		asset1->unload();
 		cout << "--- transformation" << endl;
 		actor1->getComponent<Transform>([](Transform &transform) {
-			vector3 &t = transform.translation();
+			vector3 t = transform.translation();
 			vector3 p = { 1.f, 2.f, 3.f, };
 			vector3 q = Geometry::pos(transform.trs2d(Geometry::identity(matrix3x4())), p);
 			cout << "t=" << X(t) << " " << Y(t) << " " << Z(t) << endl;

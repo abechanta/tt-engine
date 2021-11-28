@@ -4,14 +4,6 @@
 		"size": {
 			"x": 32,
 			"y": 32
-		},
-		"anchor": {
-			"x": 0.5,
-			"y": 0.5
-		},
-		"flip": {
-			"x": false,
-			"y": false
 		}
 	},
 	"transform": {
@@ -19,8 +11,8 @@
 			"x": 64,
 			"y": 96
 		},
+		"rotationUnit": "degree",
 		"rotation": {
-			"unit": "degree",
 			"z": 0
 		},
 		"scaling": {

@@ -1,12 +1,13 @@
 #pragma once
-#include <mtree.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
 #include <iostream>
 #include <memory>
-#include <boost/property_tree/ptree.hpp>
+#include <mtree.h>
+#include <ptree.h>
 #include <string>
 
 namespace tte {
@@ -40,10 +41,9 @@ namespace tte {
 		// public methods
 		//
 	public:
-		Asset(
-			const Path &path,
-			const function<void(Asset &)> &initializer
-		) : MTree(), m_path(path), m_props(), m_handle(), m_loader(noLoader), m_loaded(0) {
+		explicit Asset(const Path &path, const function<void(Asset &)> &initializer)
+			: MTree(), m_path(path), m_props(), m_handle(), m_loader(noLoader), m_loaded(0)
+		{
 			initializer(*this);
 		}
 
@@ -83,25 +83,29 @@ namespace tte {
 		// property methods
 		//
 	public:
-		const Path & path() const {
+		const Path &path() const {
 			return m_path;
 		}
 
-		property_tree::ptree & props() {
+		property_tree::ptree &props() {
 			return m_props;
 		}
 
-		const property_tree::ptree & props() const {
+		const property_tree::ptree &props() const {
 			return m_props;
+		}
+
+		property_tree::ptree &props(const string &key) {
+			return PTree::get_child(m_props, key);
 		}
 
 		template<typename V>
-		std::unique_ptr<V> & handle() {
+		std::unique_ptr<V> &handle() {
 			return *reinterpret_cast<std::unique_ptr<V> *>(&m_handle);
 		}
 
 		template<typename V>
-		const std::unique_ptr<V> & handle() const {
+		const std::unique_ptr<V> &handle() const {
 			return *reinterpret_cast<const std::unique_ptr<V> *>(&m_handle);
 		}
 
@@ -113,11 +117,11 @@ namespace tte {
 		// utility methods
 		//
 	public:
-		Asset & find(const Path &path) {
+		Asset &find(const Path &path) {
 			return path.empty() ? *this : find(path.parent_path()).findChild(path.filename());
 		}
 
-		Asset & findChild(const Path &path) {
+		Asset &findChild(const Path &path) {
 			auto it = find_if(begin_children(), end_children(), [&pathCurrent = m_path, &path](Asset &a) {
 				return (a.path().compare(pathCurrent / path) == 0);
 			});
@@ -132,13 +136,13 @@ namespace tte {
 			return false;
 		}
 
-		static Asset & noAsset() {
+		static Asset &noAsset() {
 			static Asset s_assetDummy(L"<undef>", [](Asset &) {});
 			return s_assetDummy;
 		}
 
 	private:
-		Asset & self() {
+		Asset &self() {
 			return *this;
 		}
 	};

@@ -3,14 +3,13 @@
 #include <actor_modifiers.h>
 #include <asset.h>
 #include <finder.h>
+#include <functional>
 #include <geometry.h>
 #include <components/material_component.h>
-#include <components/primitive_component.h>
 #include <components/renderer2d_component.h>
 #include <components/transform_component.h>
-#include <SDL.h>
-#include <functional>
 #include <memory>
+#include <SDL.h>
 
 namespace std {
 	template<>
@@ -52,7 +51,7 @@ namespace tte {
 			typedef tte::Material Component;
 			typedef SDL_Texture Handle;
 
-			static Handle * get(const Component &material) {
+			static Handle *get(const Component &material) {
 				const Asset &a = material;
 				return a.handle<Handle>().get();
 			}
@@ -62,7 +61,7 @@ namespace tte {
 			typedef tte::Renderer2d Component;
 			typedef SDL_Renderer Handle;
 
-			static Handle * get(const Component &renderer) {
+			static Handle *get(const Component &renderer) {
 				const tte::Renderer2dInterface &renderer2d = renderer;
 				return renderer2d.handle<Handle>().get();
 			}

@@ -7,6 +7,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/qvm/all.hpp>
 #include <string>
+#include <unordered_map>
 
 namespace tte {
 	using namespace std;
@@ -31,6 +32,12 @@ namespace tte {
 		typedef float Degree;
 		typedef int32_t Fixed32;
 		//using vector3r = boost::qvm::vec<Radian, 3>;	// TODO
+
+		static inline const unordered_map<string, float> rotationConv = {
+			{ "radian", 1.f, },
+			{ "degree", Geometry::deg2rad, },
+			{ "fixed32", Geometry::fixed2rad, },
+		};
 
 		template<typename V>
 		static V get(const initializer_list<float> &vec = {}, const float &defvalue = 0.f) {
