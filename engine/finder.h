@@ -114,6 +114,6 @@ namespace tte {
 	};
 
 #if defined(tte_declare_static_variables)
-	unordered_map<string, Actor *> Finder<Actor>::s_registory;
+	unordered_map<string, Actor *> Finder<Actor>::s_registory = {};
 #endif	// defined(tte_declare_static_variables)
 }
