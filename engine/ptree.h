@@ -262,20 +262,20 @@ namespace tte {
 		}
 
 		template<typename V, typename Vp>
-		static function<void(V &, const property_tree::ptree &)> setter(const string &key, const Vp &defval, const function<Vp &(V &)> &setter) {
+		static function<void(V &, const property_tree::ptree &)> parse(const string &key, const Vp &defval, const function<Vp &(V &)> &setter) {
 			return [key, defval, setter](V &v, const property_tree::ptree &pt) {
 				setter(v) = pt.get<Vp>(key, defval);
 			};
 		}
 
 		template<typename V, typename Vp, typename Vp2>
-		static function<void(V &, const property_tree::ptree &)> setter(const string &key, const initializer_list<string> &subkey, const Vp &defval, const function<Vp &(V &)> &setter) {
+		static function<void(V &, const property_tree::ptree &)> parse(const string &key, const initializer_list<string> &subkey, const Vp &defval, const function<Vp &(V &)> &setter) {
 			return [key, subkey, defval, setter](V &v, const property_tree::ptree &pt) {
 				Vp r = defval;
 				auto it = subkey.begin();
 				for (auto &e : r.a) {
 					if (it) {
-						if (auto d = pt.get_optional<Vp2>(key + *it++)) {
+						if (auto d = pt.get_optional<Vp2>(key + "." + *it++)) {
 							e = *d;
 						}
 					}
@@ -297,7 +297,7 @@ namespace tte {
 	}
 
 	template<typename V>
-	ostream & operator<<(ostream &os, const PTree::Property<V> &rhs) {
+	ostream &operator<<(ostream &os, const PTree::Property<V> &rhs) {
 		return rhs.to_string(os);
 	}
 	template<class C>

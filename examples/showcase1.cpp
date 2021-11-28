@@ -58,7 +58,9 @@ public:
 		auto resource = new Actor(Actor::noAction, Indexer::append("sys:resource"));
 		auto window = m_adapter->createWindowActor(config, Indexer::append("window:"));
 		auto input = m_adapter->createInputActor(config, Indexer::append("input:"));
-		auto inputKbd = m_adapter->createKeyboardActor(config, Actor::noAction);
+		auto inputKbd = m_adapter->createKeyboardActor(config, [](Actor &a) {
+			a.appendAction(onButtonPressed("escape") * findAndAct("input:", put<bool>("quit", true)));
+		});
 		auto scene = new Actor(Actor::noAction, Indexer::append("sys:scene"));
 		auto renderer = m_adapter->createRendererActor(config, Indexer::append("renderer:"));
 		config.unload();

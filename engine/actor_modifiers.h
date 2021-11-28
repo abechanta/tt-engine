@@ -1,10 +1,11 @@
 #pragma once
 #include <actor.h>
 #include <asset.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <cstdint>
+#include <finder.h>
 #include <functional>
-#include <boost/property_tree/ptree.hpp>
 #include <string>
 #include <utility>
 
@@ -35,6 +36,12 @@ namespace tte {
 #else
 		;
 #endif	// defined(tte_declare_static_variables)
+
+	inline Actor::Action findAndAct(const string &key, const Actor::Action &action) {
+		return [key, action](Actor &a) {
+			Finder<Actor>::find(key, action);
+		};
+	}
 
 	template<typename Vc1>
 	Actor::Action componentModifier(const function<void(Actor &, Vc1 &)> &action) {

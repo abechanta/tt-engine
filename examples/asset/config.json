@@ -11,7 +11,8 @@
 		"size": {
 			"w": 512,
 			"h": 224
-		}
+		},
+		"refreshRate": 60
 	},
 	"renderer/sdl2": {
 		"index": -1,

@@ -25,16 +25,16 @@ namespace tte {
 			string easing;
 			float value;
 
-			static this_type load(const property_tree::ptree &pt) {
+			static this_type parse(const property_tree::ptree &pt) {
 				this_type v;
-				PTree::setter<this_type, int32_t>("frame", 0, [](this_type &v) -> auto & { return v.frame; })(v, pt);
-				PTree::setter<this_type, string>("easing", "linear:in", [](this_type &v) -> auto & { return v.easing; })(v, pt);
-				PTree::setter<this_type, float>("value", 0, [](this_type &v) -> auto & { return v.value; })(v, pt);
+				PTree::parse<this_type, int32_t>("frame", 0, [](this_type &v) -> auto & { return v.frame; })(v, pt);
+				PTree::parse<this_type, string>("easing", "linear:in", [](this_type &v) -> auto & { return v.easing; })(v, pt);
+				PTree::parse<this_type, float>("value", 0, [](this_type &v) -> auto & { return v.value; })(v, pt);
 				return v;
 			}
 
 			template<typename Vt>
-			const function<Vt(Vt, Vt, float)> & easingFunc() const {
+			const function<Vt(Vt, Vt, float)> &easingFunc() const {
 				static const unordered_map<string, function<Vt(Vt, Vt, Vt)> > func = {
 					{ "linear", Easing::Function::linear<Vt>, },
 					{ "quadratic", Easing::Function::quadratic<Vt>, },
@@ -50,7 +50,7 @@ namespace tte {
 			}
 
 			template<typename Vt>
-			const function<Vt(Vt, Vt, float, const function<Vt(Vt, Vt, float)> &)> & easingKind() const {
+			const function<Vt(Vt, Vt, float, const function<Vt(Vt, Vt, float)> &)> &easingKind() const {
 				static const unordered_map<string, function<Vt(Vt, Vt, float, const function<Vt(Vt, Vt, float)> &)> > func = {
 					{ ":in", Easing::in<Vt>, },
 					{ ":out", Easing::out<Vt>, },
@@ -74,12 +74,12 @@ namespace tte {
 			deque<Key> keys;
 			float lastValue;
 
-			static this_type load(const property_tree::ptree &pt) {
+			static this_type parse(const property_tree::ptree &pt) {
 				this_type v;
-				PTree::setter<this_type, string>("access", "overwrite", [](this_type &v) -> auto & { return v.access; })(v, pt);
-				PTree::setter<this_type, string>("target", "empty", [](this_type &v) -> auto & { return v.target; })(v, pt);
-				PTree::setter<this_type, string>("type", "float", [](this_type &v) -> auto & { return v.type; })(v, pt);
-				PTree::inserter<this_type, deque<Key>, Key>("keys", [](this_type &v) -> back_insert_iterator<deque<Key> > { return back_inserter<deque<Key> >(v.keys); }, Key::load)(v, pt);
+				PTree::parse<this_type, string>("access", "overwrite", [](this_type &v) -> auto & { return v.access; })(v, pt);
+				PTree::parse<this_type, string>("target", "empty", [](this_type &v) -> auto & { return v.target; })(v, pt);
+				PTree::parse<this_type, string>("type", "float", [](this_type &v) -> auto & { return v.type; })(v, pt);
+				PTree::inserter<this_type, deque<Key>, Key>("keys", [](this_type &v) -> back_insert_iterator<deque<Key> > { return back_inserter<deque<Key> >(v.keys); }, Key::parse)(v, pt);
 				v.lastValue = 0.f;
 				return v;
 			}
@@ -94,13 +94,13 @@ namespace tte {
 			deque<Channel> channels;
 			int32_t frameBegin;
 
-			static this_type load(const property_tree::ptree &pt) {
+			static this_type parse(const property_tree::ptree &pt) {
 				this_type v;
-				PTree::setter<this_type, int32_t>("frameLength", 0, [](this_type &v) -> auto & { return v.frameLength; })(v, pt);
-				PTree::setter<this_type, int32_t>("frameDelay", 0, [](this_type &v) -> auto & { return v.frameDelay; })(v, pt);
-				PTree::setter<this_type, size_t>("repeatCount", 0, [](this_type &v) -> auto & { return v.repeatCount; })(v, pt);
+				PTree::parse<this_type, int32_t>("frameLength", 0, [](this_type &v) -> auto & { return v.frameLength; })(v, pt);
+				PTree::parse<this_type, int32_t>("frameDelay", 0, [](this_type &v) -> auto & { return v.frameDelay; })(v, pt);
+				PTree::parse<this_type, size_t>("repeatCount", 0, [](this_type &v) -> auto & { return v.repeatCount; })(v, pt);
 				PTree::counter<this_type, size_t>("channels", [](this_type &v) -> auto & { return v.channelCount; })(v, pt);
-				PTree::inserter<this_type, deque<Channel>, Channel>("channels", [](this_type &v) -> back_insert_iterator<deque<Channel> > { return back_inserter<deque<Channel> >(v.channels); }, Channel::load)(v, pt);
+				PTree::inserter<this_type, deque<Channel>, Channel>("channels", [](this_type &v) -> back_insert_iterator<deque<Channel> > { return back_inserter<deque<Channel> >(v.channels); }, Channel::parse)(v, pt);
 				v.frameBegin = INT_MAX;
 				return v;
 			}
@@ -118,7 +118,7 @@ namespace tte {
 		//
 	public:
 		explicit Timeline(const property_tree::ptree &props = property_tree::ptree())
-			: m_bPlaying(false), m_animation(Animation::load(props))
+			: m_bPlaying(false), m_animation(Animation::parse(props))
 		{
 		}
 
