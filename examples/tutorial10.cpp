@@ -22,15 +22,16 @@ namespace Tutorial10 {
 		AssetHandler::clear();
 		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
 		AssetHandler::append({ L".json", AssetHandler::typeJson, });
+		AssetHandler::append({ L".anim", AssetHandler::typeAnim, });
 		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		auto assetRoot = make_unique<Asset>(L"asset/tutorial10", AssetHandler::factory(L""));
 		cout << "--- ctor" << endl;
 		auto actor1 = make_unique<Actor>(
-			[](Actor &a) {
-				a.getComponent<Input>([&a](auto &input) {
+			[&assetRoot](Actor &a) {
+				a.getComponent<Input>([&assetRoot, &a](auto &input) {
 					if (input.buttons("down").pressed()) {
-						a.getComponent<Animator>([](auto &animator) {
-							animator.play("0");
+						a.getComponent<Animator>([&assetRoot](auto &animator) {
+							animator.replay(assetRoot->find(L"tutorial10.anim"), "0");
 						});
 					}
 				});
@@ -38,7 +39,7 @@ namespace Tutorial10 {
 			[&assetRoot](Actor &a) {
 				Resource::append(*assetRoot)(a);
 				a.importProps(assetRoot->find(L"tutorial10.json").props());
-				Animator::append(assetRoot->find(L"tutorial10.anim.json"))(a);
+				Animator::append()(a);
 			}
 		);
 		cout << "--- dtor" << endl;
@@ -49,16 +50,17 @@ namespace Tutorial10 {
 		AssetHandler::clear();
 		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
 		AssetHandler::append({ L".json", AssetHandler::typeJson, });
+		AssetHandler::append({ L".anim", AssetHandler::typeAnim, });
 		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		auto assetRoot = make_unique<Asset>(L"asset/tutorial10", AssetHandler::factory(L""));
 		cout << "--- ctor" << endl;
 		auto actor1 = make_unique<Actor>(
-			onButtonPressed("down") * componentModifier<Animator>([](Actor &, auto &animator) {
-				animator.play("0");
+			onButtonPressed("down") * componentModifier<Animator>([&assetRoot](Actor &, auto &animator) {
+				animator.replay(assetRoot->find(L"tutorial10.anim"), "0");
 			}),
 			Resource::append(*assetRoot) +
 			loadProps(assetRoot->find(L"tutorial10.json")) +
-			Animator::append(assetRoot->find(L"tutorial10.anim.json"))
+			Animator::append()
 		);
 		cout << "--- dtor" << endl;
 	}

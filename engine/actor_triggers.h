@@ -11,43 +11,26 @@
 namespace tte {
 	using namespace std;
 
-	Actor::Trigger operator+(const Actor::Trigger &lhs, const Actor::Trigger &rhs)
-#if defined(tte_declare_static_variables)
-	{
+	inline Actor::Trigger operator+(const Actor::Trigger &lhs, const Actor::Trigger &rhs) {
 		return [lhs, rhs](Actor &a) -> bool {
 			return lhs(a) || rhs(a);
 		};
 	}
-#else
-		;
-#endif	// defined(tte_declare_static_variables)
 
-	Actor::Trigger operator*(const Actor::Trigger &lhs, const Actor::Trigger &rhs)
-#if defined(tte_declare_static_variables)
-	{
+	inline Actor::Trigger operator*(const Actor::Trigger &lhs, const Actor::Trigger &rhs) {
 		return [lhs, rhs](Actor &a) -> bool {
 			return lhs(a) && rhs(a);
 		};
 	}
-#else
-		;
-#endif	// defined(tte_declare_static_variables)
 
-	Actor::Trigger inState(const string &stateName)
-#if defined(tte_declare_static_variables)
-	{
+	inline Actor::Trigger inState(const string &stateName) {
 		return [stateName](Actor &a) -> bool {
 			auto pSrc = a.props().get_child_optional("state");
 			return pSrc && (pSrc->get_value<string>().compare(stateName) == 0);
 		};
 	}
-#else
-		;
-#endif	// defined(tte_declare_static_variables)
 
-	Actor::Trigger onEvent(const string &eventName)
-#if defined(tte_declare_static_variables)
-	{
+	inline Actor::Trigger onEvent(const string &eventName) {
 		return [eventName](Actor &a) -> bool {
 			auto pPool = a.props().get_child_optional("eventPool");
 			if (!pPool) {
@@ -63,13 +46,8 @@ namespace tte {
 			return true;
 		};
 	}
-#else
-		;
-#endif	// defined(tte_declare_static_variables)
 
-	Actor::Trigger onButtonOn(const string &alias, uint32_t range = 1)
-#if defined(tte_declare_static_variables)
-	{
+	inline Actor::Trigger onButtonOn(const string &alias, uint32_t range = 1) {
 		return [alias, range](Actor &) -> bool {
 			return Finder<Actor>::find<bool>("input:", false, [alias, range](Actor &a) -> bool {
 				return a.getComponent<bool, Input>(false, [alias, range](auto &input) -> bool {
@@ -78,13 +56,8 @@ namespace tte {
 			});
 		};
 	}
-#else
-		;
-#endif	// defined(tte_declare_static_variables)
 
-	Actor::Trigger onButtonOff(const string &alias, uint32_t range = 1)
-#if defined(tte_declare_static_variables)
-	{
+	inline Actor::Trigger onButtonOff(const string &alias, uint32_t range = 1) {
 		return [alias, range](Actor &) -> bool {
 			return Finder<Actor>::find<bool>("input:", false, [alias, range](Actor &a) -> bool {
 				return a.getComponent<bool, Input>(false, [alias, range](auto &input) -> bool {
@@ -93,13 +66,8 @@ namespace tte {
 			});
 		};
 	}
-#else
-		;
-#endif	// defined(tte_declare_static_variables)
 
-	Actor::Trigger onButtonPressed(const string &alias, uint32_t range = 1, uint32_t needs = 1)
-#if defined(tte_declare_static_variables)
-	{
+	inline Actor::Trigger onButtonPressed(const string &alias, uint32_t range = 1, uint32_t needs = 1) {
 		return [alias, range, needs](Actor &) -> bool {
 			return Finder<Actor>::find<bool>("input:", false, [alias, range, needs](Actor &a) -> bool {
 				return a.getComponent<bool, Input>(false, [alias, range, needs](auto &input) -> bool {
@@ -108,13 +76,8 @@ namespace tte {
 			});
 		};
 	}
-#else
-		;
-#endif	// defined(tte_declare_static_variables)
 
-	Actor::Trigger onButtonReleased(const string &alias, uint32_t range = 1, uint32_t needs = 1)
-#if defined(tte_declare_static_variables)
-	{
+	inline Actor::Trigger onButtonReleased(const string &alias, uint32_t range = 1, uint32_t needs = 1) {
 		return [alias, range, needs](Actor &) -> bool {
 			return Finder<Actor>::find<bool>("input:", false, [alias, range, needs](Actor &a) -> bool {
 				return a.getComponent<bool, Input>(false, [alias, range, needs](auto &input) -> bool {
@@ -123,7 +86,4 @@ namespace tte {
 			});
 		};
 	}
-#else
-		;
-#endif	// defined(tte_declare_static_variables)
 }

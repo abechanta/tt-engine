@@ -37,6 +37,7 @@ public:
 		AssetHandler::clear();
 		AssetHandler::append({ AssetHandler::extensionUnknown, AssetHandler::typeUnknown, });
 		AssetHandler::append({ L".json", AssetHandler::typeJson, });
+		AssetHandler::append({ L".anim", AssetHandler::typeAnim, });
 		AssetHandler::append({ L".png", sdl2::Adapter::typePng(*m_adapter), });
 		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		m_assets = std::make_unique<Asset>(L"asset", AssetHandler::factory(L"asset:"));
@@ -81,17 +82,17 @@ public:
 		scene->appendChild(new Actor(
 			inState("1") * onButtonPressed("left") * (
 				changeState("2") +
-				componentModifier<Animator>("chara0", play("left")) +
-				componentModifier<Animator>("chara1", play("left")) +
-				componentModifier<Animator>("chara2", play("left")) +
-				componentModifier<Animator>("chara3", play("left"))
+				componentModifier<Animator>("chara0", replay(showcase.find(L"chara0.anim"), "left", "moving")) +
+				componentModifier<Animator>("chara1", replay(showcase.find(L"chara1.anim"), "left", "moving")) +
+				componentModifier<Animator>("chara2", replay(showcase.find(L"chara2.anim"), "left", "moving")) +
+				componentModifier<Animator>("chara3", replay(showcase.find(L"chara3.anim"), "left", "moving"))
 			) +
 			inState("0") * onButtonPressed("right") * (
 				changeState("1") +
-				componentModifier<Animator>("chara0", play("right")) +
-				componentModifier<Animator>("chara1", play("right")) +
-				componentModifier<Animator>("chara2", play("right")) +
-				componentModifier<Animator>("chara3", play("right"))
+				componentModifier<Animator>("chara0", replay(showcase.find(L"chara0.anim"), "right", "moving")) +
+				componentModifier<Animator>("chara1", replay(showcase.find(L"chara1.anim"), "right", "moving")) +
+				componentModifier<Animator>("chara2", replay(showcase.find(L"chara2.anim"), "right", "moving")) +
+				componentModifier<Animator>("chara3", replay(showcase.find(L"chara3.anim"), "right", "moving"))
 			) +
 			inState("2") * changeState("0"),
 			put<string>("state", "0")
@@ -109,19 +110,19 @@ public:
 		));
 		scene->appendChild(new Actor(
 			Actor::noAction,
-			loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara0.anim.json")) + Shape::append<ShapeSprite>("renderer:")
+			loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
 		));
 		scene->appendChild(new Actor(
 			Actor::noAction,
-			loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara1.anim.json")) + Shape::append<ShapeSprite>("renderer:")
+			loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
 		));
 		scene->appendChild(new Actor(
 			Actor::noAction,
-			loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara2.anim.json")) + Shape::append<ShapeSprite>("renderer:")
+			loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
 		));
 		scene->appendChild(new Actor(
 			Actor::noAction,
-			loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append(showcase.find(L"chara3.anim.json")) + Shape::append<ShapeSprite>("renderer:")
+			loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
 		));
 	}
 
@@ -142,9 +143,9 @@ public:
 	}
 
 private:
-	function<void(Actor &, Animator &)> play(const string &arg1) {
-		return [arg1](Actor &, Animator &animator) {
-			animator.play(arg1);
+	function<void(Actor &, Animator &)> replay(Asset &asset, const string &animname, const string &slotname) {
+		return [&asset, animname, slotname](Actor &, Animator &animator) {
+			animator.replay(asset, animname, slotname);
 		};
 	}
 };

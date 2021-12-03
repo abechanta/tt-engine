@@ -1,10 +1,11 @@
 #pragma once
 #include <asset.h>
 #include <algorithm>
+#include <boost/property_tree/json_parser.hpp>
 #include <cassert>
 #include <cstdint>
 #include <functional>
-#include <boost/property_tree/json_parser.hpp>
+#include <timeline.h>
 #include <unordered_map>
 #include <utility>
 
@@ -34,7 +35,7 @@ namespace tte {
 		}
 
 		static void append(const pair<Asset::Path, function<void(Asset &)> > &entry) {
-			s_handlers[entry.first] = entry.second;	
+			s_handlers[entry.first] = entry.second;
 		}
 
 		static const function<void(Asset &)> & factory(const Asset::Path &filename) {
@@ -77,6 +78,21 @@ namespace tte {
 #endif
 				} else {
 					a.props().clear();
+				}
+				return true;
+			});
+		}
+
+		static void typeAnim(Asset &a) {
+			cout << __FUNCTION__ << ": " << a.path() << endl;
+			assert(filesystem::is_regular_file(a.path()));
+			a.setLoader([](Asset &a, bool bLoad) -> bool {
+				if (bLoad) {
+					property_tree::ptree pt;
+					read_json(ifstream(a.path()), pt);
+					a.handle<AnimationSet>().reset(new AnimationSet(pt));
+				} else {
+					a.handle<AnimationSet>().reset();
 				}
 				return true;
 			});
