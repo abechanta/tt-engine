@@ -1,7 +1,8 @@
 {
 	"contentType": "text/json",
-	"animation": {
-		"0": {
+	"animation": [
+		{
+			"name": "0",
 			"frameLength": 10,
 			"frameDelay": 0,
 			"repeatCount": 0,
@@ -40,5 +41,5 @@
 				}
 			]
 		}
-	}
+	]
 }

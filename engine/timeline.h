@@ -9,16 +9,18 @@
 #include <ptree.h>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace tte {
 	using namespace boost;
 	using namespace std;
 
-	class Timeline {
+	struct Animation {
 		//
 		// definitions
 		//
-	private:
+		typedef Animation this_type;
+
 		struct Key {
 			typedef Key this_type;
 			int32_t frame;
@@ -72,7 +74,6 @@ namespace tte {
 			string target;
 			string type;
 			deque<Key> keys;
-			float lastValue;
 
 			static this_type parse(const property_tree::ptree &pt) {
 				this_type v;
@@ -80,28 +81,6 @@ namespace tte {
 				PTree::parse<this_type, string>("target", "empty", [](this_type &v) -> auto & { return v.target; })(v, pt);
 				PTree::parse<this_type, string>("type", "float", [](this_type &v) -> auto & { return v.type; })(v, pt);
 				PTree::inserter<this_type, deque<Key>, Key>("keys", [](this_type &v) -> back_insert_iterator<deque<Key> > { return back_inserter<deque<Key> >(v.keys); }, Key::parse)(v, pt);
-				v.lastValue = 0.f;
-				return v;
-			}
-		};
-
-		struct Animation {
-			typedef Animation this_type;
-			int32_t frameLength;
-			int32_t frameDelay;
-			size_t repeatCount;
-			size_t channelCount;
-			deque<Channel> channels;
-			int32_t frameBegin;
-
-			static this_type parse(const property_tree::ptree &pt) {
-				this_type v;
-				PTree::parse<this_type, int32_t>("frameLength", 0, [](this_type &v) -> auto & { return v.frameLength; })(v, pt);
-				PTree::parse<this_type, int32_t>("frameDelay", 0, [](this_type &v) -> auto & { return v.frameDelay; })(v, pt);
-				PTree::parse<this_type, size_t>("repeatCount", 0, [](this_type &v) -> auto & { return v.repeatCount; })(v, pt);
-				PTree::counter<this_type, size_t>("channels", [](this_type &v) -> auto & { return v.channelCount; })(v, pt);
-				PTree::inserter<this_type, deque<Channel>, Channel>("channels", [](this_type &v) -> back_insert_iterator<deque<Channel> > { return back_inserter<deque<Channel> >(v.channels); }, Channel::parse)(v, pt);
-				v.frameBegin = INT_MAX;
 				return v;
 			}
 		};
@@ -109,23 +88,94 @@ namespace tte {
 		//
 		// member variables
 		//
+		string name;
+		int32_t frameLength;
+		int32_t frameDelay;
+		size_t repeatCount;
+		size_t channelCount;
+		deque<Channel> channels;
+
+		//
+		// public methods
+		//
+		static this_type parse(const property_tree::ptree &pt) {
+			this_type v;
+			PTree::parse<this_type, string>("name", "", [](this_type &v) -> auto & { return v.name; })(v, pt);
+			PTree::parse<this_type, int32_t>("frameLength", 0, [](this_type &v) -> auto & { return v.frameLength; })(v, pt);
+			PTree::parse<this_type, int32_t>("frameDelay", 0, [](this_type &v) -> auto & { return v.frameDelay; })(v, pt);
+			PTree::parse<this_type, size_t>("repeatCount", 0, [](this_type &v) -> auto & { return v.repeatCount; })(v, pt);
+			PTree::counter<this_type, size_t>("channels", [](this_type &v) -> auto & { return v.channelCount; })(v, pt);
+			PTree::inserter<this_type, deque<Channel>, Channel>("channels", [](this_type &v) -> back_insert_iterator<deque<Channel> > { return back_inserter<deque<Channel> >(v.channels); }, Channel::parse)(v, pt);
+			return v;
+		}
+	};
+
+	class AnimationSet {
+		//
+		// definitions
+		//
 	private:
-		bool m_bPlaying;
-		Animation m_animation;
+		typedef AnimationSet this_type;
+
+		//
+		// member variables
+		//
+	private:
+		deque<Animation> m_animations;
+		static const Animation s_noAnimation;
 
 		//
 		// public methods
 		//
 	public:
-		explicit Timeline(const property_tree::ptree &props = property_tree::ptree())
-			: m_bPlaying(false), m_animation(Animation::parse(props))
+		AnimationSet(const property_tree::ptree &pt)
+			: m_animations()
 		{
+			PTree::inserter<this_type, deque<Animation>, Animation>("animation", [](this_type &v) -> back_insert_iterator<deque<Animation> > { return back_inserter<deque<Animation> >(v.m_animations); }, Animation::parse)(*this, pt);
+		}
+
+		const Animation &get(const string &animname) const {
+			auto pAnimation = find_if(m_animations.begin(), m_animations.end(), [&animname](auto &anim) -> bool {
+				return anim.name == animname;
+			});
+			return (pAnimation == m_animations.end()) ? s_noAnimation : *pAnimation;
+		}
+	};
+
+	class Timeline {
+		//
+		// definitions
+		//
+
+		//
+		// member variables
+		//
+	private:
+		property_tree::ptree &m_out;
+		const Animation &m_animation;
+		bool m_bPlaying;
+		bool m_bDone;
+		int32_t m_frameBegin;
+		int32_t m_repeatLeft;
+		vector<float> m_lastValues;
+
+		//
+		// public methods
+		//
+	public:
+		explicit Timeline(property_tree::ptree &out, const Animation &animation, bool bImmediate = true)
+			: m_out(out), m_animation(animation), m_bPlaying(false), m_bDone(false), m_frameBegin(INT_MAX), m_repeatLeft(0)
+		{
+			m_lastValues.resize(m_animation.channelCount, 0.f);
+			if (bImmediate) {
+				replay();
+			}
 		}
 
 		virtual ~Timeline() {
 		}
 
-		Timeline &play() {
+		Timeline &replay() {
 			m_bPlaying = true;
 			return *this;
 		}
@@ -135,26 +185,32 @@ namespace tte {
 			return *this;
 		}
 
-		void tick(int32_t frameSrc, property_tree::ptree &out) {
+		bool tick(int32_t frameSrc) {
 			if (m_bPlaying) {
-				(m_animation.frameBegin == INT_MAX) && (m_animation.frameBegin = frameSrc);
-				while (frameSrc - m_animation.frameBegin - m_animation.frameDelay >= m_animation.frameLength) {
-					if (m_bPlaying && (m_animation.repeatCount == 0)) {
+				if (m_frameBegin == INT_MAX) {
+					m_frameBegin = frameSrc;
+					m_repeatLeft = m_animation.repeatCount;
+				}
+				while (frameSrc - m_frameBegin - m_animation.frameDelay >= m_animation.frameLength) {
+					if (m_bPlaying && (m_repeatLeft == 0)) {
 						m_bPlaying = false;
-						out.add<string>("eventPool", "playend");
+						m_bDone = true;
 						break;
 					}
-					m_animation.repeatCount--;
-					m_animation.frameBegin += m_animation.frameLength;
+					m_repeatLeft--;
+					m_frameBegin += m_animation.frameLength;
 				}
 			} else {
-				m_animation.frameBegin++;
+				m_frameBegin++;
 			}
 
-			auto framePoint = frameSrc - m_animation.frameBegin - m_animation.frameDelay;
+			auto framePoint = frameSrc - m_frameBegin - m_animation.frameDelay;
+			auto pLastValue = m_lastValues.begin();
 			for (auto &channel : m_animation.channels) {
-				tick(channel, framePoint, out);
+				tick(channel, framePoint, *pLastValue++);
 			}
+
+			return m_bDone;
 		}
 
 		//
@@ -165,18 +221,22 @@ namespace tte {
 			return m_bPlaying;
 		}
 
+		bool isDone() const {
+			return m_bDone;
+		}
+
 		//
 		// others
 		//
 	private:
-		void tick(Channel &channel, int32_t frame, property_tree::ptree &out) {
+		void tick(const Animation::Channel &channel, int32_t frame, float &lastValue) {
 			auto value = getValue(channel, frame);
 			auto func = (channel.access.compare("delta") == 0) ? delta : overwrite;
-			func(out, channel, value);
-			channel.lastValue = value;
+			func(m_out, channel, value, lastValue);
+			lastValue = value;
 		}
 
-		float getValue(Channel &channel, int32_t frame) {
+		float getValue(const Animation::Channel &channel, int32_t frame) {
 			int32_t keyframeBegin = 0;
 			float valueBegin = 0.f;
 			(frame < 0) && (frame = 0);
@@ -191,13 +251,17 @@ namespace tte {
 			return valueBegin;
 		}
 
-		static void delta(property_tree::ptree &out, Channel &channel, float value) {
-			value = out.get<float>(channel.target, value) - channel.lastValue + value;
+		static void delta(property_tree::ptree &out, const Animation::Channel &channel, float value, float lastValue) {
+			value = out.get<float>(channel.target, value) - lastValue + value;
 			out.put<float>(channel.target, value);
 		}
 
-		static void overwrite(property_tree::ptree &out, Channel &channel, float value) {
+		static void overwrite(property_tree::ptree &out, const Animation::Channel &channel, float value, float) {
 			out.put<float>(channel.target, value);
 		}
 	};
+
+#if defined(tte_declare_static_variables)
+	const Animation AnimationSet::s_noAnimation = Animation();
+#endif	// defined(tte_declare_static_variables)
 }

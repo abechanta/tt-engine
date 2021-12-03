@@ -1,7 +1,8 @@
 {
   "contentType": "text/json",
-  "animation": {
-    "right": {
+  "animation": [
+    {
+      "name": "right",
       "frameLength": 60,
       "frameDelay": 0,
       "repeatCount": 0,
@@ -17,30 +18,15 @@
             },
             {
               "frame": 60,
-              "easing": "sine:out",
+              "easing": "linear:out",
               "value": 384
-            }
-          ]
-        },
-        {
-          "access": "delta",
-          "target": "transform.translation.y",
-          "type": "float",
-          "keys": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 60,
-              "easing": "back:out",
-              "value": -128
             }
           ]
         }
       ]
     },
-    "left": {
+    {
+      "name": "left",
       "frameLength": 60,
       "frameDelay": 0,
       "repeatCount": 0,
@@ -56,28 +42,12 @@
             },
             {
               "frame": 60,
-              "easing": "sine:in",
+              "easing": "linear:in",
               "value": -384
-            }
-          ]
-        },
-        {
-          "access": "delta",
-          "target": "transform.translation.y",
-          "type": "float",
-          "keys": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 60,
-              "easing": "back:in",
-              "value": 128
             }
           ]
         }
       ]
     }
-  }
+  ]
 }

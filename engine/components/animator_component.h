@@ -1,11 +1,14 @@
 #pragma once
 #include <actor.h>
 #include <asset.h>
+#include <asset_handler.h>
 #include <cassert>
 #include <clist.h>
 #include <cstdint>
 #include <iostream>
+#include <list>
 #include <timeline.h>
+#include <utility>
 
 namespace tte {
 	class Animator : public CList {
@@ -19,24 +22,24 @@ namespace tte {
 		// member variables
 		//
 	private:
-		property_tree::ptree m_params;
-		Timeline m_timeline;
+		property_tree::ptree &m_out;
+		list<pair<string, unique_ptr<Timeline> > > m_timelines;
 
 		//
 		// public methods
 		//
 	public:
-		explicit Animator(const property_tree::ptree &props)
-			: CList(tag), m_params(props), m_timeline()
+		explicit Animator(property_tree::ptree &props)
+			: CList(tag), m_out(props), m_timelines()
 		{
 		}
 
 		virtual ~Animator() override {
 		}
 
-		static Actor::Action append(Asset &asset) {
-			return [&asset](Actor &a) {
-				a.appendComponent(new Animator(asset.props("animation")));
+		static Actor::Action append() {
+			return [](Actor &a) {
+				a.appendComponent(new Animator(a.props()));
 				a.appendAction([](Actor &a) {
 					a.getComponent<Animator>([&a](auto &animator) {
 						animator.tick(a);
@@ -45,14 +48,20 @@ namespace tte {
 			};
 		}
 
-		void play(const string &animname) {
-			m_timeline = Timeline(m_params.get_child(animname)).play();
-			cout << "play" << endl;
+		void replay(Asset &asset, const string &animname, const string &slotname = "") {
+			auto name = slotname.empty() ? animname : slotname;
+			m_timelines.remove_if([name](auto &t) -> bool {
+				return t.first == name;
+			});
+			m_timelines.push_back(pair<string, unique_ptr<Timeline> >{ name, new Timeline(m_out, asset.handle<AnimationSet>()->get(animname)), });
+			cout << "replay" << endl;
 		}
 
 		void tick(Actor &a) {
 			auto count0 = a.get<int32_t>("count0", 0);
-			m_timeline.tick(count0, a.props());
+			m_timelines.remove_if([count0](auto &t) -> bool {
+				return t.second->tick(count0);
+			});
 		}
 	};
 }
