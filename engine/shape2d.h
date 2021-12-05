@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <cstdint>
@@ -55,6 +56,32 @@ namespace tte {
 				transpose(node, "transpose", false),
 				tiles(node, "tiles")
 			{
+			}
+		};
+
+		struct Text {
+			PTree::PropertyV<vec, int32_t, 2> size;
+			PTree::PropertyV<vec, int32_t, 2> cellSize;
+			PTree::PropertyV<vec, int32_t, 2> blitSize;
+			PTree::PropertyV<array, string, 2> alignment;
+			PTree::PropertyA<vector<string> > lines;
+
+			Text(property_tree::ptree &node)
+				: size(node, "size", 8),
+				cellSize(node, "cellSize", 8),
+				blitSize(node, "blitSize", 8),
+				alignment(node, "alignment", "center"),
+				lines(node, "lines")
+			{
+				auto alignment_ = alignment();
+				if (Geometry::alignmentConv.find(alignment_[0]) == Geometry::alignmentConv.end()) {
+					alignment_[0] = "center";
+					alignment(alignment_);
+				}
+				if (Geometry::alignmentConv.find(alignment_[1]) == Geometry::alignmentConv.end()) {
+					alignment_[1] = "center";
+					alignment(alignment_);
+				}
 			}
 		};
 

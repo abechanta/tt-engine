@@ -106,7 +106,19 @@ public:
 		));
 		scene->appendChild(new Actor(
 			Actor::noAction,
-			loadProps(showcase.find(L"tilemap0.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeTilemap>("renderer:")
+			loadProps(showcase.find(L"hud/score.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
+		));
+		scene->appendChild(new Actor(
+			Actor::noAction,
+			loadProps(showcase.find(L"hud/coins.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
+		));
+		scene->appendChild(new Actor(
+			Actor::noAction,
+			loadProps(showcase.find(L"hud/world.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
+		));
+		scene->appendChild(new Actor(
+			Actor::noAction,
+			loadProps(showcase.find(L"hud/time.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
 		));
 		scene->appendChild(new Actor(
 			Actor::noAction,

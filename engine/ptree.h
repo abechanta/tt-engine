@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <cassert>
@@ -246,6 +247,65 @@ namespace tte {
 				auto val = operator()();
 				os << m_key << ": [ ";
 				for (auto &e : val.a) {
+					os << *it++ << ": " << e << ", ";
+				}
+				os << "]";
+				return os;
+			}
+		};
+
+		template<typename V, int N>
+		class PropertyV<array, V, N> {
+		private:
+			property_tree::ptree &m_node;
+			const string m_key;
+			const V m_defval;
+			const initializer_list<string> m_subkeys;
+
+		public:
+			PropertyV(property_tree::ptree &node, const string &key, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW)
+				: m_node(get_child(node, key)), m_key(key), m_defval(defval), m_subkeys(subkeys)
+			{
+			}
+
+			PropertyV(property_tree::ptree &node, const string &key, const array<V, N> &val, const initializer_list<string> subkeys = subkeysXYZW)
+				: m_node(get_child(node, key)), m_key(key), m_defval(0), m_subkeys(subkeys)
+			{
+				operator()(val);
+			}
+
+			array<V, N> operator()() const {
+				return get(m_node, m_defval, m_subkeys);
+			}
+
+			void operator()(const array<V, N> &val) {
+				auto it = m_subkeys.begin();
+				for (auto &elm : val) {
+					m_node.put<V>(*it++, elm);
+				}
+			}
+
+			static array<V, N> get(const property_tree::ptree &node, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW) {
+				array<V, N> val = {};
+				auto it = subkeys.begin();
+				for (auto &e : val) {
+					e = node.get<V>(*it++, defval);
+				}
+				return val;
+			}
+
+			static array<V, N> get(const property_tree::ptree &node, const string &key, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW) {
+				array<V, N> val = {};
+				auto pNode = get_child_optional(node, key);
+				assert(pNode);
+				return get(*pNode, defval, subkeys);
+			}
+
+			ostream &to_string(ostream &os) const {
+				auto it = m_subkeys.begin();
+				auto val = operator()();
+				os << m_key << ": [ ";
+				for (auto &e : val) {
 					os << *it++ << ": " << e << ", ";
 				}
 				os << "]";

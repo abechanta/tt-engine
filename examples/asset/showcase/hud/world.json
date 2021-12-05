@@ -1,0 +1,47 @@
+{
+  "contentType": "text/json",
+  "transform": {
+    "translation": {
+      "x": 164,
+      "y": 8
+    },
+		"rotationUnit": "degree",
+    "rotation": {
+      "z": 0
+    },
+    "scaling": {
+      "x": 1,
+      "y": 1
+    }
+  },
+  "material": {
+    "diffuse": {
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    }
+  },
+  "text": {
+    "size": {
+      "x": 256,
+      "y": 192
+    },
+    "cellSize": {
+      "x": 8,
+      "y": 8
+    },
+    "blitSize": {
+      "x": 8,
+      "y": 8
+    },
+    "alignment": {
+      "x": "center",
+      "y": "begin"
+    },
+    "lines": [
+      "WORLD",
+      "0-0"
+    ]
+  }
+}

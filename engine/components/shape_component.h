@@ -181,4 +181,62 @@ namespace tte {
 			return val;
 		}
 	};
+
+	class ShapeText : public Shape {
+	public:
+		static inline const string key = "text";
+	private:
+		Shape2d::Text m_data;
+
+	public:
+		explicit ShapeText(property_tree::ptree &props)
+			: Shape(), m_data(props)
+		{
+		}
+
+		virtual ~ShapeText() override {
+		}
+
+		virtual void draw(Renderer2d &renderer, Actor &a) override {
+			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
+				auto size_ = m_data.size();
+				auto cellSize_ = m_data.cellSize();
+				auto blitSize_ = m_data.blitSize();
+				auto alignment_ = m_data.alignment();
+				auto lines_ = m_data.lines();
+				const int32_t cellBounds = X(material.size()) / X(cellSize_);
+
+				auto translation = transform.translation();
+				auto rotation = transform.rotation();
+				auto scaling = transform.scaling();
+				renderer.pushMatrix();
+				Geometry::trs2d(renderer.mat(), translation, rotation, scaling);
+				material.resetUv();
+				{
+					const auto &anchor = vector2{ 0.f, 0.f, };
+					const auto &flip = vec<bool, 2>{ false, false, };
+
+					for (int32_t r = 0; r < lines_.size(); r++) {
+						int32_t rp = r * Y(blitSize_);
+						auto offset = vector2i{
+							static_cast<int32_t>(-Geometry::alignmentConv.at(alignment_[0]) * X(blitSize_) * lines_[r].length()),
+							static_cast<int32_t>(-Geometry::alignmentConv.at(alignment_[1]) * Y(blitSize_) * lines_.size()),
+						};
+						for (int32_t c = 0; c < lines_[r].length(); c++) {
+							int32_t cp = c * X(blitSize_);
+							auto code = lines_[r][c];
+							auto uv = vector2i{ (code % cellBounds) * X(cellSize_), (code / cellBounds) * Y(cellSize_), };
+							material._uv0(material.to_vector2(uv));
+							material._uv1(material.to_vector2(uv + cellSize_));
+
+							const Renderer2dInterface &renderer2d = renderer;
+							renderer2d.drawRect(a, vector2i{ cp + X(offset), rp + Y(offset), }, blitSize_, anchor, flip);
+						}
+					}
+				}
+				material.resetUv();
+				renderer.popMatrix();
+			});
+		}
+	};
 }

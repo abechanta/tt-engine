@@ -39,6 +39,12 @@ namespace tte {
 			{ "fixed32", Geometry::fixed2rad, },
 		};
 
+		static inline const unordered_map<string, float> alignmentConv = {
+			{ "begin", 0.f, },
+			{ "center", 0.5f, },
+			{ "end", 1.f, },
+		};
+
 		template<typename V>
 		static V get(const initializer_list<float> &vec = {}, const float &defvalue = 0.f) {
 			V ret = {};
