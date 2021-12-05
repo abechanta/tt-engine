@@ -22,13 +22,17 @@ namespace tte {
 
 		struct Sprite {
 			PTree::PropertyV<vec, float, 2> size;
+			PTree::PropertyV<vec, int32_t, 2> cellSize;
 			PTree::PropertyV<vec, float, 2> anchor;
 			PTree::PropertyV<vec, bool, 2> flip;
+			PTree::Property<int32_t> code;
 
 			Sprite(property_tree::ptree &node)
 				: size(node, "size", 8.f),
+				cellSize(node, "cellSize", 8),
 				anchor(node, "anchor", .5f),
-				flip(node, "flip", false)
+				flip(node, "flip", false),
+				code(node, "code", 0)
 			{
 			}
 		};

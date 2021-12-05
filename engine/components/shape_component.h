@@ -72,13 +72,25 @@ namespace tte {
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
 			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
+				auto size_ = m_data.size();
+				auto cellSize_ = m_data.cellSize();
+				auto anchor_ = m_data.anchor();
+				auto flip_ = m_data.flip();
+				auto code_ = m_data.code();
+				const int32_t cellBounds = X(size_) / X(cellSize_);
+
 				renderer.pushMatrix();
 				transform.trs2d(renderer.mat());
 				material.resetUv();
 				{
+					auto uv = vector2i{ (code_ % cellBounds) * X(cellSize_), (code_ / cellBounds) * Y(cellSize_), };
+					material._uv0(material.to_vector2(uv));
+					material._uv1(material.to_vector2(uv + cellSize_));
+
 					const Renderer2dInterface &renderer2d = renderer;
-					renderer2d.drawRect(a, vector2{ 0.f, 0.f, }, m_data.size(), m_data.anchor(), m_data.flip());
+					renderer2d.drawRect(a, material.to_vector2i(-anchor_), size_, anchor_, flip_);
 				}
+				material.resetUv();
 				renderer.popMatrix();
 			});
 		}
