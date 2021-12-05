@@ -52,7 +52,28 @@ public:
 
 	virtual void initialize() override {
 		cout << __FUNCTION__ << endl;
+		initializeActors();
+		initializeScene();
+	}
 
+	virtual void finalize() override {
+		cout << __FUNCTION__ << endl;
+		m_actors.reset();
+	}
+
+	virtual bool isRunning() override {
+		bool bQuit = Finder<Actor>::find<bool>("input:", true, [](Actor &a) -> bool {
+			return a.get<bool>("quit", true);
+		});
+		return !bQuit;
+	}
+
+	virtual void tick() override {
+		m_actors->act();
+	}
+
+private:
+	void initializeActors() {
 		auto &config = m_assets->find(L"config.json");
 		config.load();
 		auto root = new Actor(actChildren(), Indexer::append("sys:root"));
@@ -72,89 +93,79 @@ public:
 		root->appendChild(scene);
 		root->appendChild(renderer);
 		m_actors.reset(root);
+	}
 
+	void initializeScene() {
 		auto &showcase = m_assets->find(L"showcase");
-		resource->appendChild(new Actor(
-			Actor::noAction,
-			Indexer::append("asset:showcase") + Resource::append(showcase)
-		));
 
-		scene->appendChild(new Actor(
-			inState("1") * onButtonPressed("left") * (
-				changeState("2") +
-				componentModifier<Animator>("chara0", replay(showcase.find(L"chara0.anim"), "left", "moving")) +
-				componentModifier<Animator>("chara1", replay(showcase.find(L"chara1.anim"), "left", "moving")) +
-				componentModifier<Animator>("chara2", replay(showcase.find(L"chara2.anim"), "left", "moving")) +
-				componentModifier<Animator>("chara3", replay(showcase.find(L"chara3.anim"), "left", "moving"))
-			) +
-			inState("0") * onButtonPressed("right") * (
-				changeState("1") +
-				componentModifier<Animator>("chara0", replay(showcase.find(L"chara0.anim"), "right", "moving")) +
-				componentModifier<Animator>("chara1", replay(showcase.find(L"chara1.anim"), "right", "moving")) +
-				componentModifier<Animator>("chara2", replay(showcase.find(L"chara2.anim"), "right", "moving")) +
-				componentModifier<Animator>("chara3", replay(showcase.find(L"chara3.anim"), "right", "moving"))
-			) +
-			inState("2") * changeState("0"),
-			put<string>("state", "0")
-		));
-		scene->appendChild(new Actor(
-			[](Actor &a) {
-				auto x = a.props().get<int32_t>("tilemap.viewOffset.x");
-				a.props().put<int32_t>("tilemap.viewOffset.x", ++x);
-			},
-			loadProps(showcase.find(L"tilemap1.json")) + Transform::append() + Material::append(showcase.find(L"SMB_BANK0@16.png")) + Shape::append<ShapeTilemap>("renderer:")
-		));
-		scene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"hud/score.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
-		));
-		scene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"hud/coins.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
-		));
-		scene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"hud/world.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
-		));
-		scene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"hud/time.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
-		));
-		scene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
-		));
-		scene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
-		));
-		scene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
-		));
-		scene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
-		));
-	}
-
-	virtual void finalize() override {
-		cout << __FUNCTION__ << endl;
-		m_actors.reset();
-	}
-
-	virtual bool isRunning() override {
-		bool bQuit = Finder<Actor>::find<bool>("input:", true, [&](Actor &a) -> bool {
-			return a.get<bool>("quit", true);
+		Finder<Actor>::find("sys:resource", [&](Actor &resource) {
+			resource.appendChild(new Actor(
+				Actor::noAction,
+				Indexer::append("asset:showcase") + Resource::append(showcase)
+			));
 		});
-		return !bQuit;
+
+		Finder<Actor>::find("sys:scene", [&](Actor &scene) {
+			scene.appendChild(new Actor(
+				inState("1") * onButtonPressed("left") * (
+					changeState("2") +
+					componentModifier<Animator>("chara0", replay(showcase.find(L"chara0.anim"), "left", "moving")) +
+					componentModifier<Animator>("chara1", replay(showcase.find(L"chara1.anim"), "left", "moving")) +
+					componentModifier<Animator>("chara2", replay(showcase.find(L"chara2.anim"), "left", "moving")) +
+					componentModifier<Animator>("chara3", replay(showcase.find(L"chara3.anim"), "left", "moving"))
+				) +
+				inState("0") * onButtonPressed("right") * (
+					changeState("1") +
+					componentModifier<Animator>("chara0", replay(showcase.find(L"chara0.anim"), "right", "moving")) +
+					componentModifier<Animator>("chara1", replay(showcase.find(L"chara1.anim"), "right", "moving")) +
+					componentModifier<Animator>("chara2", replay(showcase.find(L"chara2.anim"), "right", "moving")) +
+					componentModifier<Animator>("chara3", replay(showcase.find(L"chara3.anim"), "right", "moving"))
+				) +
+				inState("2") * changeState("0"),
+				put<string>("state", "0")
+			));
+			scene.appendChild(new Actor(
+				[](Actor &a) {
+					auto x = a.props().get<int32_t>("tilemap.viewOffset.x");
+					a.props().put<int32_t>("tilemap.viewOffset.x", ++x);
+				},
+				loadProps(showcase.find(L"tilemap1.json")) + Transform::append() + Material::append(showcase.find(L"SMB_BANK0@16.png")) + Shape::append<ShapeTilemap>("renderer:")
+			));
+			scene.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"hud/score.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
+			));
+			scene.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"hud/coins.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
+			));
+			scene.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"hud/world.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
+			));
+			scene.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"hud/time.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("renderer:")
+			));
+			scene.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
+			));
+			scene.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
+			));
+			scene.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
+			));
+			scene.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("renderer:")
+			));
+		});
 	}
 
-	virtual void tick() override {
-		m_actors->act();
-	}
-
-private:
 	function<void(Actor &, Animator &)> replay(Asset &asset, const string &animname, const string &slotname) {
 		return [&asset, animname, slotname](Actor &, Animator &animator) {
 			animator.replay(asset, animname, slotname);

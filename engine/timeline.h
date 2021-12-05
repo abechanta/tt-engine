@@ -192,13 +192,15 @@ namespace tte {
 					m_repeatLeft = m_animation.repeatCount;
 				}
 				while (frameSrc - m_frameBegin - m_animation.frameDelay >= m_animation.frameLength) {
-					if (m_bPlaying && (m_repeatLeft == 0)) {
+					if (m_repeatLeft == 0) {
+						m_frameBegin = frameSrc - m_animation.frameDelay - m_animation.frameLength;
 						m_bPlaying = false;
 						m_bDone = true;
 						break;
+					} else if (m_repeatLeft > 0) {
+						m_frameBegin += m_animation.frameLength;
+						m_repeatLeft--;
 					}
-					m_repeatLeft--;
-					m_frameBegin += m_animation.frameLength;
 				}
 			} else {
 				m_frameBegin++;
