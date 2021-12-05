@@ -80,7 +80,7 @@ namespace tte {
 				const int32_t cellBounds = X(size_) / X(cellSize_);
 
 				renderer.pushMatrix();
-				transform.trs2d(renderer.mat());
+				transform.trs2d(renderer.matrix());
 				material.resetUv();
 				{
 					auto uv = vector2i{ (code_ % cellBounds) * X(cellSize_), (code_ / cellBounds) * Y(cellSize_), };
@@ -124,7 +124,7 @@ namespace tte {
 				auto rotation = transform.rotation();
 				auto scaling = transform.scaling();
 				renderer.pushMatrix();
-				Geometry::trs2d(renderer.mat(), translation, rotation, scaling);
+				Geometry::trs2d(renderer.matrix(), translation, rotation, scaling);
 				material.resetUv();
 				{
 					const auto &anchor = vector2{ 0.f, 0.f, };
@@ -210,7 +210,7 @@ namespace tte {
 				auto rotation = transform.rotation();
 				auto scaling = transform.scaling();
 				renderer.pushMatrix();
-				Geometry::trs2d(renderer.mat(), translation, rotation, scaling);
+				Geometry::trs2d(renderer.matrix(), translation, rotation, scaling);
 				material.resetUv();
 				{
 					const auto &anchor = vector2{ 0.f, 0.f, };
