@@ -59,7 +59,7 @@ namespace tte {
 			return self();
 		}
 
-		matrix3x4 &mat() {
+		matrix3x4 &matrix() {
 			return m_matrixStack.back();
 		}
 

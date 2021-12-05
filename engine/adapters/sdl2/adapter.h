@@ -92,9 +92,9 @@ namespace tte {
 						auto &uv0 = material.to_vector2i(material._uv0());
 						auto &uv1 = material.to_vector2i(material._uv1());
 						auto srcRect = SDL_Rect{ X(uv0), Y(uv0), X(uv1) - X(uv0), Y(uv1) - Y(uv0), };
-						const vector3i &t = Geometry::pos(m_renderer.mat(), XY0(pos));
-						auto dstRect = SDL_Rect{ X(t), Y(t), X(s), Y(s), };
-						float rotZ = Geometry::angZ(m_renderer.mat()) * Geometry::rad2deg;
+						const vector3i &t = Geometry::pos(m_renderer.matrix(), vector3{ 0.f, 0.f, 0.f, });
+						auto dstRect = SDL_Rect{ static_cast<int32_t>(X(t) + X(pos)), static_cast<int32_t>(Y(t) + Y(pos)), X(s), Y(s), };
+						float rotZ = Geometry::angZ(m_renderer.matrix()) * Geometry::rad2deg;
 						auto center = SDL_Point{ static_cast<int32_t>(X(anchor) * X(s)), static_cast<int32_t>(Y(anchor) * Y(s)), };
 						auto flipFlag = (X(flip) ? SDL_FLIP_HORIZONTAL : 0) | (Y(flip) ? SDL_FLIP_VERTICAL : 0);
 						SDL_RenderCopyEx(Renderer2d::get(m_renderer), Material::get(material), &srcRect, &dstRect, rotZ, &center, static_cast<SDL_RendererFlip>(flipFlag));
