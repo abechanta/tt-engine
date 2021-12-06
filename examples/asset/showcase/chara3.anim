@@ -18,7 +18,7 @@
             },
             {
               "frame": 60,
-              "easing": "elastic:out",
+              "easing": "bounce:out",
               "value": 384
             }
           ]
@@ -42,7 +42,7 @@
             },
             {
               "frame": 60,
-              "easing": "elastic:in",
+              "easing": "bounce:in",
               "value": -384
             }
           ]

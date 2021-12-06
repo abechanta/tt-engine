@@ -45,6 +45,7 @@ namespace tte {
 					{ "sine", Easing::Function::sine<Vt>, },
 					{ "back", Easing::Function::back<Vt>, },
 					{ "elastic", Easing::Function::elastic<Vt>, },
+					{ "bounce", Easing::Function::bounce<Vt>, },
 					{ "stepping", Easing::Function::stepping<Vt>, },
 				};
 				auto name = easing.substr(0, easing.find_first_of(':'));

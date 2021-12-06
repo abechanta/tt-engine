@@ -51,9 +51,11 @@ namespace tte {
 				return (value2 - value1) * ratio * ratio * ratio * cos((5 * ratio - 1) * pi);
 			};
 
-			//template<typename Vt>
-			//static Vt bounce(Vt value1, Vt value2, float ratio) {
-			//};
+			template<typename Vt>
+			static Vt bounce(Vt value1, Vt value2, float ratio) {
+				Vt ratio0 = ratio * ratio * ratio * cos((3 * ratio - 1) * pi);
+				return (value2 - value1) * (ratio0 < 0.f ? -ratio0 : ratio0);
+			};
 
 			template<typename Vt>
 			static Vt stepping(Vt value1, Vt value2, float ratio) {
