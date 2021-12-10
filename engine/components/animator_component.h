@@ -58,9 +58,9 @@ namespace tte {
 		}
 
 		void tick(Actor &a) {
-			auto count0 = a.get<int32_t>("count0", 0);
-			m_timelines.remove_if([count0](auto &t) -> bool {
-				return t.second->tick(count0);
+			auto ticks = a.get<int32_t>("_.ticks", 0);
+			m_timelines.remove_if([ticks](auto &t) -> bool {
+				return t.second->tick(ticks);
 			});
 		}
 	};

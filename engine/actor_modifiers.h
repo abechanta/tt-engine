@@ -27,14 +27,14 @@ namespace tte {
 		};
 	}
 
-	inline Actor::Action findAndAct(const string &key, const Actor::Action &action) {
-		return [key, action](Actor &a) {
+	inline Actor::Action findThen(const string &key, const Actor::Action &action) {
+		return [key, action](Actor &) {
 			Finder<Actor>::find(key, action);
 		};
 	}
 
 	template<typename Vc1>
-	Actor::Action componentModifier(const function<void(Actor &, Vc1 &)> &action) {
+	Actor::Action withComponent(const function<void(Actor &, Vc1 &)> &action) {
 		return [action](Actor &a) {
 			a.getComponent<Vc1>([action, &a](Vc1 &component1) {
 				action(a, component1);
@@ -42,17 +42,8 @@ namespace tte {
 		};
 	}
 
-	template<typename Vc1>
-	Actor::Action componentModifier(const string &key, const function<void(Actor &, Vc1 &)> &action) {
-		return [key, action](Actor &a) {
-			Finder<Actor>::find<Vc1>(key, [action, &a](auto &component1) {
-				action(a, component1);
-			});
-		};
-	}
-
 	template<typename Vc1, typename Vc2>
-	Actor::Action componentModifier(const function<void(Actor &, Vc1 &, Vc2 &)> &action) {
+	Actor::Action withComponent(const function<void(Actor &, Vc1 &, Vc2 &)> &action) {
 		return [action](Actor &a) {
 			a.getComponent<Vc1>([action, &a](Vc1 &component1) {
 				a.getComponent<Vc1>([action, &a, &component1](Vc2 &component2) {
@@ -62,32 +53,28 @@ namespace tte {
 		};
 	}
 
-	inline Actor::Action actChildren() {
+	inline Actor::Action exit() {
 		return [](Actor &a) {
-			for_each(a.begin(true), a.end(), [](Actor &a) {
-				a.act();
-			});
+			delete &a;
 		};
 	}
 
 	template<typename Vp>
 	Actor::Action put(const string &key, const Vp &value) {
 		return [key, value](Actor &a) {
-			a.props().put<Vp>(key, value);
+			a.props(key).put_value<Vp>(value);
 		};
+	}
+
+	inline Actor::Action changeState(const string &stateValue, const string &stateKey = "state") {
+		return put<string>(stateKey, stateValue);
 	}
 
 	inline Actor::Action loadProps(const Asset &asset) {
 		return [&asset](Actor &a) {
-			if (asset.props().get<string>("contentType").compare("text/json") == 0) {
+			if (asset.props().get<string>("contentType", "").compare("text/json") == 0) {
 				a.importProps(asset.props());
 			}
-		};
-	}
-
-	inline Actor::Action changeState(const string &stateName) {
-		return [stateName](Actor &a) {
-			a.props().put<string>("state", stateName);
 		};
 	}
 

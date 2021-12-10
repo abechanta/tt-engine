@@ -2,12 +2,12 @@
 #include <actor.h>
 #include <actor_modifiers.h>
 #include <asset.h>
-#include <finder.h>
-#include <functional>
-#include <geometry.h>
 #include <components/material_component.h>
 #include <components/renderer2d_component.h>
 #include <components/transform_component.h>
+#include <finder.h>
+#include <functional>
+#include <geometry.h>
 #include <memory>
 #include <SDL.h>
 
@@ -43,9 +43,9 @@ namespace std {
 
 namespace tte {
 	namespace sdl2 {
-		static constexpr char windowActor[] = "window:";
-		static constexpr char rendererActor[] = "renderer:";
-		static constexpr char inputActor[] = "input:";
+		static constexpr char windowActor[] = "sys:window";
+		static constexpr char rendererActor[] = "sys:renderer2d";
+		static constexpr char inputActor[] = "sys:input";
 
 		struct Material : public tte::Material {
 			typedef tte::Material Component;

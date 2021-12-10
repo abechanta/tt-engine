@@ -87,15 +87,11 @@ namespace tte {
 			return m_path;
 		}
 
-		property_tree::ptree &props() {
-			return m_props;
-		}
-
 		const property_tree::ptree &props() const {
 			return m_props;
 		}
 
-		property_tree::ptree &props(const string &key) {
+		property_tree::ptree &props(const string &key = "") {
 			return PTree::get_child(m_props, key);
 		}
 
