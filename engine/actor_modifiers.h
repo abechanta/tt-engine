@@ -7,6 +7,7 @@
 #include <components/indexer_component.h>
 #include <components/input_component.h>
 #include <components/material_component.h>
+// #include <components/prefab_component.h>
 // #include <components/renderer2d_component.h>
 #include <components/resource_component.h>
 #include <components/shape_component.h>
@@ -76,6 +77,12 @@ namespace tte {
 
 	inline Actor::Action changeState(const string &stateValue, const string &stateKey = "state") {
 		return put<string>(stateKey, stateValue);
+	}
+
+	inline Actor::Action loadProps(const property_tree::ptree &props) {
+		return [&props](Actor &a) {
+			a.importProps(props);
+		};
 	}
 
 	inline Actor::Action loadProps(const Asset &asset) {

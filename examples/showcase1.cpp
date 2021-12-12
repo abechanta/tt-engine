@@ -12,6 +12,7 @@
 #include <components/indexer_component.h>
 #include <components/input_component.h>
 #include <components/material_component.h>
+#include <components/prefab_component.h>
 #include <components/renderer2d_component.h>
 #include <components/resource_component.h>
 #include <components/shape_component.h>
@@ -104,33 +105,12 @@ private:
 
 	void loadPrefab(Asset &asset) {
 		asset.load();
-		auto prefabName = asset.props().get<string>("name", "prefab");
+		auto prefabName = asset.props().get<string>("indexer.name", "prefab");
 		auto parentName = asset.props().get<string>("parent", "sys:root");
-		Finder<Actor>::find(parentName, [&, prefabName](Actor &parent) {
+		Finder<Actor>::find(parentName, [&, &assetBase = *m_assets, prefabName](Actor &parent) {
 			parent.appendChild(new Actor(
-				inState("exit") * findThen("sys:root", [&, prefabName](Actor &a) {
-					for (auto &resource : a.props("resources")) {
-						a.appendAction(findThen(resource.second.get<string>("name"), exit()));
-					}
-					a.appendAction(findThen(prefabName, exit()));
-				}),
-				loadProps(asset) +
-				Indexer::append() +
-				[&](Actor &a) {
-					for (auto &resource : a.props("resources")) {
-						auto parentName = resource.second.get<string>("parent");
-						Finder<Actor>::find(parentName, [&](Actor &parent) {
-							write_json(cout, resource.second);
-							parent.appendChild(new Actor(
-								Actor::noAction,
-								[&](Actor &a) {
-									a.importProps(resource.second);
-								} +
-								appendComponents(*m_assets)
-							));
-						});
-					}
-				}
+				Actor::noAction,
+				loadProps(asset) + Indexer::append() + Prefab::append(assetBase)
 			));
 		});
 		asset.unload();
@@ -141,7 +121,9 @@ private:
 			auto &showcase = m_assets->find(L"showcase");
 
 			prefab.appendAction(
-				onButtonPressed("up") * changeState("exit") +
+				onButtonPressed("up") * withComponent<Prefab>([](Actor &, auto &prefab) {
+					prefab.unload();
+				}) +
 				inState("1") * onButtonPressed("left") * (
 					changeState("2") +
 					findThen("chara0", withComponent<Animator>(replay(showcase.find(L"chara0.anim"), "left", "moving"))) +
