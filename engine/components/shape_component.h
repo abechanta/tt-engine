@@ -78,7 +78,7 @@ namespace tte {
 				auto anchor_ = m_data.anchor();
 				auto flip_ = m_data.flip();
 				auto code_ = m_data.code();
-				const int32_t cellBounds = X(size_) / X(cellSize_);
+				const int32_t cellBounds = X(material.size()) / X(cellSize_);
 
 				renderer.pushMatrix();
 				transform.trs2d(renderer.matrix());
@@ -87,9 +87,10 @@ namespace tte {
 					auto uv = vector2i{ (code_ % cellBounds) * X(cellSize_), (code_ / cellBounds) * Y(cellSize_), };
 					material._uv0(material.to_vector2(uv));
 					material._uv1(material.to_vector2(uv + cellSize_));
+					auto anchorOffset = vector2{ X(anchor_) * X(cellSize_), Y(anchor_) * Y(cellSize_), };
 
 					const Renderer2dInterface &renderer2d = renderer;
-					renderer2d.drawRect(a, material.to_vector2i(-anchor_), size_, anchor_, flip_);
+					renderer2d.drawRect(a, -anchorOffset, size_, anchor_, flip_);
 				}
 				material.resetUv();
 				renderer.popMatrix();
