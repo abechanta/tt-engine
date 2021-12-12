@@ -33,9 +33,10 @@ namespace tte {
 		virtual ~Indexer() override {
 		}
 
-		static Actor::Action append(const string &name) {
-			return [&name](Actor &a) {
-				a.appendComponent(new Indexer(name, a));
+		static Actor::Action append(const string &name = "") {
+			return [name](Actor &a) {
+				auto name_ = name.empty() ? a.props("indexer").get<string>("name", "<noname>") : name;
+				a.appendComponent(new Indexer(name_, a));
 			};
 		}
 	};

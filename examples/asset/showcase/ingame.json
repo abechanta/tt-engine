@@ -1,0 +1,27 @@
+{
+	"contentType": "text/json",
+	"name": "prefab:showcase",
+	"parent": "sys:resource",
+	"components": [
+		"indexer"
+	],
+	"indexer": {
+		"name": "prefab:showcase"
+	},
+	"resources": [
+		{
+			"name": "asset:showcase",
+			"parent": "sys:resource",
+			"components": [
+				"indexer",
+				"resource"
+			],
+			"indexer": {
+				"name": "asset:showcase"
+			},
+			"resource": {
+				"asset": "showcase"
+			}
+		}
+	]
+}

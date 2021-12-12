@@ -54,7 +54,7 @@ public:
 	virtual void initialize() override {
 		cout << __FUNCTION__ << endl;
 		initializeActors();
-		initializeScene("ingame");
+		loadPrefab(m_assets->find(L"showcase/ingame.json"));
 	}
 
 	virtual void finalize() override {
@@ -89,7 +89,6 @@ private:
 			a.appendAction(onButtonPressed("escape") * findThen("sys:input", put<bool>("quit", true)));
 		});
 		auto resource = new Actor(Actor::noAction, Indexer::append("sys:resource"));
-		auto scene = new Actor(Actor::noAction, Indexer::append("sys:scene"));
 		auto renderer = m_adapter->createRendererActor(config, Indexer::append("sys:renderer2d"));
 		config.unload();
 
@@ -99,90 +98,105 @@ private:
 		root->appendChild(window);
 		root->appendChild(input->appendChild(inputKbd));
 		root->appendChild(resource);
-		root->appendChild(scene);
 		root->appendChild(renderer);
 		m_actors.reset(root);
 	}
 
-	void initializeScene(const string &sceneName) {
-		cout << sceneName << endl;
+	void loadPrefab(Asset &asset) {
+		asset.load();
+		auto prefabName = asset.props().get<string>("name", "prefab");
+		auto parentName = asset.props().get<string>("parent", "sys:root");
+		Finder<Actor>::find(parentName, [&, prefabName](Actor &parent) {
+			parent.appendChild(new Actor(
+				inState("exit") * findThen("sys:root", [&, prefabName](Actor &a) {
+					for (auto &resource : a.props("resources")) {
+						a.appendAction(findThen(resource.second.get<string>("name"), exit()));
+					}
+					a.appendAction(findThen(prefabName, exit()));
+				}),
+				loadProps(asset) +
+				Indexer::append() +
+				[&](Actor &a) {
+					for (auto &resource : a.props("resources")) {
+						auto parentName = resource.second.get<string>("parent");
+						Finder<Actor>::find(parentName, [&](Actor &parent) {
+							write_json(cout, resource.second);
+							parent.appendChild(new Actor(
+								Actor::noAction,
+								[&](Actor &a) {
+									a.importProps(resource.second);
+								} +
+								appendComponents(*m_assets)
+							));
+						});
+					}
+				}
+			));
+		});
+		asset.unload();
 
-		auto &showcase = m_assets->find(L"showcase");
+		Finder<Actor>::find(prefabName, [&](Actor &prefab) {
+			put<string>("state", "0")(prefab);
 
-		Actor *newScene = new Actor(
-			onButtonPressed("up") * findThen("sys:root", [&](Actor &a) {
-				a.appendAction(findThen("asset:showcase", exit()) + findThen("scene:showcase", exit()));
-			}),
-			findThen("global", changeState(sceneName)) +
-			findThen("sys:resource", [&](Actor &resource) {
-				resource.appendChild(new Actor(
-					Actor::noAction,
-					Indexer::append("asset:showcase") + Resource::append(showcase)
-				));
-			}) +
-			Indexer::append("scene:showcase")
-		);
+			auto &showcase = m_assets->find(L"showcase");
 
-		newScene->appendChild(new Actor(
-			inState("1") * onButtonPressed("left") * (
-				changeState("2") +
-				findThen("chara0", withComponent<Animator>(replay(showcase.find(L"chara0.anim"), "left", "moving"))) +
-				findThen("chara1", withComponent<Animator>(replay(showcase.find(L"chara1.anim"), "left", "moving"))) +
-				findThen("chara2", withComponent<Animator>(replay(showcase.find(L"chara2.anim"), "left", "moving"))) +
-				findThen("chara3", withComponent<Animator>(replay(showcase.find(L"chara3.anim"), "left", "moving")))
-			) +
-			inState("0") * onButtonPressed("right") * (
-				changeState("1") +
-				findThen("chara0", withComponent<Animator>(replay(showcase.find(L"chara0.anim"), "right", "moving"))) +
-				findThen("chara1", withComponent<Animator>(replay(showcase.find(L"chara1.anim"), "right", "moving"))) +
-				findThen("chara2", withComponent<Animator>(replay(showcase.find(L"chara2.anim"), "right", "moving"))) +
-				findThen("chara3", withComponent<Animator>(replay(showcase.find(L"chara3.anim"), "right", "moving")))
-			) +
-			inState("2") * changeState("0"),
-			put<string>("state", "0")
-		));
-		newScene->appendChild(new Actor(
-			[](Actor &a) {
-				auto x = a.props().get<int32_t>("tilemap.viewOffset.x");
-				a.props().put<int32_t>("tilemap.viewOffset.x", ++x);
-			},
-			loadProps(showcase.find(L"tilemap1.json")) + Transform::append() + Material::append(showcase.find(L"SMB_BANK0@16.png")) + Shape::append<ShapeTilemap>("sys:renderer2d")
-		));
-		newScene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"hud/score.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("sys:renderer2d")
-		));
-		newScene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"hud/coins.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("sys:renderer2d")
-		));
-		newScene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"hud/world.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("sys:renderer2d")
-		));
-		newScene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"hud/time.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>("sys:renderer2d")
-		));
-		newScene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("sys:renderer2d")
-		));
-		newScene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("sys:renderer2d")
-		));
-		newScene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("sys:renderer2d")
-		));
-		newScene->appendChild(new Actor(
-			Actor::noAction,
-			loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>("sys:renderer2d")
-		));
-
-		Finder<Actor>::find("sys:scene", [&](Actor &scene) {
-			scene.appendChild(newScene);
+			prefab.appendAction(
+				onButtonPressed("up") * changeState("exit") +
+				inState("1") * onButtonPressed("left") * (
+					changeState("2") +
+					findThen("chara0", withComponent<Animator>(replay(showcase.find(L"chara0.anim"), "left", "moving"))) +
+					findThen("chara1", withComponent<Animator>(replay(showcase.find(L"chara1.anim"), "left", "moving"))) +
+					findThen("chara2", withComponent<Animator>(replay(showcase.find(L"chara2.anim"), "left", "moving"))) +
+					findThen("chara3", withComponent<Animator>(replay(showcase.find(L"chara3.anim"), "left", "moving")))
+				) +
+				inState("0") * onButtonPressed("right") * (
+					changeState("1") +
+					findThen("chara0", withComponent<Animator>(replay(showcase.find(L"chara0.anim"), "right", "moving"))) +
+					findThen("chara1", withComponent<Animator>(replay(showcase.find(L"chara1.anim"), "right", "moving"))) +
+					findThen("chara2", withComponent<Animator>(replay(showcase.find(L"chara2.anim"), "right", "moving"))) +
+					findThen("chara3", withComponent<Animator>(replay(showcase.find(L"chara3.anim"), "right", "moving")))
+				) +
+				inState("2") * changeState("0")
+			);
+			prefab.appendChild(new Actor(
+				[](Actor &a) {
+					auto x = a.props().get<int32_t>("tilemap.viewOffset.x");
+					a.props().put<int32_t>("tilemap.viewOffset.x", ++x);
+				},
+				loadProps(showcase.find(L"tilemap1.json")) + Transform::append() + Material::append(showcase.find(L"SMB_BANK0@16.png")) + Shape::append<ShapeTilemap>()
+			));
+			prefab.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"hud/score.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>()
+			));
+			prefab.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"hud/coins.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>()
+			));
+			prefab.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"hud/world.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>()
+			));
+			prefab.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"hud/time.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>()
+			));
+			prefab.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>()
+			));
+			prefab.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>()
+			));
+			prefab.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>()
+			));
+			prefab.appendChild(new Actor(
+				Actor::noAction,
+				loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>()
+			));
 		});
 	}
 

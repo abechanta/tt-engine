@@ -71,9 +71,10 @@ namespace tte {
 		virtual ~Material() override {
 		}
 
-		static Actor::Action append(const Asset &asset) {
-			return [&asset](Actor &a) {
-				a.appendComponent(new Material(asset, a.props("material")));
+		static Actor::Action append(Asset &asset, bool bParse = false) {
+			return [&asset, bParse](Actor &a) {
+				auto assetName = bParse ? a.props("material").get<string>("texture", "") : "";
+				a.appendComponent(new Material(asset.find(assetName), a.props("material")));
 			};
 		}
 

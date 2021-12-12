@@ -3,10 +3,10 @@
 #include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <clist.h>
-#include <cstdint>
 #include <components/material_component.h>
 #include <components/renderer2d_component.h>
 #include <components/transform_component.h>
+#include <cstdint>
 #include <finder.h>
 #include <geometry.h>
 #include <renderer2d.h>
@@ -37,10 +37,11 @@ namespace tte {
 		virtual void draw(Renderer2d &renderer, Actor &a) = 0;
 
 		template<typename V>
-		static Actor::Action append(const string &rendererKey) {
-			return [rendererKey](Actor &a) {
+		static Actor::Action append() {
+			return [](Actor &a) {
 				a.appendComponent(reinterpret_cast<CList *>(new V(a.props(V::key))));
-				a.appendAction([rendererKey](Actor &a) {
+				a.appendAction([](Actor &a) {
+					auto rendererKey = a.props(V::key).get<string>("renderer", "renderer");
 					Finder<Actor>::find<Renderer2d>(rendererKey, [&a](auto &renderer) {
 						a.getComponent<V>([&renderer, &a](auto &shape) {
 							shape.draw(renderer, a);
