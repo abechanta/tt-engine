@@ -1,0 +1,66 @@
+{
+	"contentType": "text/json",
+	"components": [
+		"indexer",
+		"transform",
+		"material",
+		"sprite",
+		"animator"
+	],
+	"indexer": {
+		"name": "player"
+	},
+	"sprite": {
+		"renderer": "sys:renderer2d",
+		"size": {
+			"x": 16,
+			"y": 16
+		},
+		"cellSize": {
+			"x": 16,
+			"y": 16
+		},
+		"anchor": {
+			"x": 0.5,
+			"y": 1.0
+		},
+		"flip": {
+			"x": false,
+			"y": false
+		}
+	},
+	"transform": {
+		"translation": {
+			"x": 64,
+			"y": 200
+		},
+		"rotationUnit": "degree",
+		"rotation": {
+			"z": 0
+		},
+		"scaling": {
+			"x": 1,
+			"y": 1
+		}
+	},
+	"material": {
+		"texture": "showcase/SMB_BANK1@16.png",
+		"diffuse": {
+			"r": 255,
+			"g": 255,
+			"b": 255,
+			"a": 255
+		},
+		"uvUnit": "px",
+		"uv": [
+			{
+				"x": 0,
+				"y": 0
+			},
+			{
+				"x": 16,
+				"y": 16
+			}
+		]
+	}
+}

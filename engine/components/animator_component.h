@@ -54,7 +54,6 @@ namespace tte {
 				return t.first == name;
 			});
 			m_timelines.push_back(pair<string, unique_ptr<Timeline> >{ name, new Timeline(m_out, asset.handle<AnimationSet>()->get(animname)), });
-			cout << "replay" << endl;
 		}
 
 		void tick(Actor &a) {

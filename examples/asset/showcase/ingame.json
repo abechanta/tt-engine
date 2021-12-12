@@ -46,6 +46,10 @@
 				"property": "showcase/hud/time.json"
 			},
 			{
+				"name": "player",
+				"property": "showcase/player.json"
+			},
+			{
 				"name": "chara0",
 				"property": "showcase/chara0.json"
 			},

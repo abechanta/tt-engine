@@ -11,6 +11,12 @@
 namespace tte {
 	using namespace std;
 
+	inline Actor::Trigger operator!(const Actor::Trigger &lhs) {
+		return [lhs](Actor &a) -> bool {
+			return !lhs(a);
+		};
+	}
+
 	inline Actor::Trigger operator+(const Actor::Trigger &lhs, const Actor::Trigger &rhs) {
 		return [lhs, rhs](Actor &a) -> bool {
 			return lhs(a) || rhs(a);

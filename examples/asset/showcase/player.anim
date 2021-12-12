@@ -1,0 +1,104 @@
+{
+	"contentType": "text/json",
+	"animation": [
+		{
+			"name": "standing",
+			"frameLength": 1,
+			"frameDelay": 0,
+			"repeatCount": 0,
+			"channels": [
+				{
+					"access": "overwrite",
+					"target": "sprite.code",
+					"type": "integer",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 0
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "jumpup",
+			"frameLength": 8,
+			"frameDelay": 0,
+			"repeatCount": 0,
+			"channels": [
+				{
+					"access": "delta",
+					"target": "transform.translation.y",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 0
+						},
+						{
+							"frame": 8,
+							"easing": "linear:out",
+							"value": -64
+						}
+					]
+				},
+				{
+					"access": "overwrite",
+					"target": "sprite.code",
+					"type": "integer",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 5
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "falldown",
+			"frameLength": 60,
+			"frameDelay": 0,
+			"repeatCount": 1,
+			"channels": [
+				{
+					"access": "delta",
+					"target": "transform.translation.y",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 0
+						},
+						{
+							"frame": 4,
+							"easing": "cubic:out",
+							"value": -8
+						},
+						{
+							"frame": 20,
+							"easing": "cubic:in",
+							"value": 32
+						},
+						{
+							"frame": 60,
+							"easing": "linear:in",
+							"value": 320
+						}
+					]
+				},
+				{
+					"access": "overwrite",
+					"target": "sprite.code",
+					"type": "integer",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 5
+						}
+					]
+				}
+			]
+		}
+	]
+}

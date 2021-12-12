@@ -116,10 +116,10 @@ private:
 		asset.unload();
 
 		auto &showcase = m_assets->find(L"showcase");
-		Finder<Actor>::find(prefabName, [&](Actor &prefab) {
-			put<string>("state", "0")(prefab);
+		Finder<Actor>::find(prefabName, [&](Actor &a) {
+			changeState("0")(a);
 
-			prefab.appendAction(
+			a.appendAction(
 				onButtonPressed("up") * withComponent<Prefab>([](Actor &, auto &prefab) {
 					prefab.unload();
 				}) +
@@ -144,6 +144,47 @@ private:
 				})
 			);
 		});
+
+		Finder<Actor>::find("player", [&](Actor &a) {
+			changeState("standing")(a);
+			changeState("", "nextState")(a);
+
+			a.appendAction(
+				inState("falling") * onLanding() * (
+					changeState("standing", "nextState") +
+					withComponent<Animator>(replay(showcase.find(L"player.anim"), "standing", "moving"))
+				) +
+				inState("jumping") * (onButtonOff("z") + !onButtonPressed("z", 9)) * (
+					changeState("falling", "nextState") +
+					withComponent<Animator>(replay(showcase.find(L"player.anim"), "falldown", "moving"))
+				) +
+				inState("standing") * onButtonPressed("z") * (
+					changeState("jumping", "nextState") +
+					withComponent<Animator>(replay(showcase.find(L"player.anim"), "jumpup", "moving"))
+				) +
+				[](Actor &a) {
+					auto nextState = a.props("nextState").get_value<string>("");
+					if (!nextState.empty()) {
+						a.props().put<string>("state", nextState);
+					}
+				} +
+				changeState("", "nextState")
+			);
+		});
+	}
+
+	Actor::Trigger onLanding() {
+		return [](Actor &a) -> bool {
+			return a.getComponent<bool, Transform>(false, [](auto &transform) -> bool {
+				auto pos = transform.translation();
+				if (Y(pos) >= 200) {
+					Y(pos) = 200;
+					transform.translation(pos);
+					return true;
+				}
+				return false;
+			});
+		};
 	}
 
 	function<void(Actor &, Animator &)> replay(Asset &asset, const string &animname, const string &slotname) {
