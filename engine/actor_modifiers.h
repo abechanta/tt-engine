@@ -128,10 +128,6 @@ namespace tte {
 		};
 	}
 
-	inline Actor::Action loadProps(const Asset &asset, Asset &assetRoot) {
-		return loadProps(asset) + appendComponents(assetRoot);
-	}
-
 	inline Actor::Action notifyEvent(const string &eventName, const function<property_tree::ptree(Actor &a)> &eventSetup = [](Actor &) -> property_tree::ptree { return property_tree::ptree(); }) {
 		return [eventName, eventSetup](Actor &a) {
 			a.props().add_child("eventPool." + eventName, eventSetup(a));

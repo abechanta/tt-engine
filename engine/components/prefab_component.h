@@ -31,6 +31,7 @@ namespace tte {
 			: CList(tag), m_assetBase(assetBase), m_actor(a), m_node(node)
 		{
 			loadResources();
+			createActors();
 		}
 
 		virtual ~Prefab() override {
@@ -51,6 +52,26 @@ namespace tte {
 						loadProps(resource.second) + appendComponents(m_assetBase)
 					));
 				});
+			}
+		}
+
+		void createActors() {
+			for (auto &actor : m_node.get_child("actors")) {
+				auto name = actor.second.get<string>("name", "");
+				auto props = actor.second.get<string>("property", "");
+				auto parentName = actor.second.get<string>("parent", "");
+				auto createAndAppendChild = [this, &name, &props](Actor &parent) {
+					parent.appendChild(new Actor(
+						Actor::noAction,
+						loadProps(m_assetBase.find(props)) + appendComponents(m_assetBase) + put<string>("_.name", name)
+					));
+				};
+
+				if (parentName.empty()) {
+					createAndAppendChild(m_actor);
+				} else {
+					Finder<Actor>::find(parentName, createAndAppendChild);
+				}
 			}
 		}
 

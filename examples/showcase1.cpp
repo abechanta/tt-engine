@@ -107,7 +107,7 @@ private:
 		asset.load();
 		auto prefabName = asset.props().get<string>("indexer.name", "prefab");
 		auto parentName = asset.props().get<string>("parent", "sys:root");
-		Finder<Actor>::find(parentName, [&, &assetBase = *m_assets, prefabName](Actor &parent) {
+		Finder<Actor>::find(parentName, [&, &assetBase = *m_assets](Actor &parent) {
 			parent.appendChild(new Actor(
 				Actor::noAction,
 				loadProps(asset) + Indexer::append() + Prefab::append(assetBase)
@@ -115,10 +115,9 @@ private:
 		});
 		asset.unload();
 
+		auto &showcase = m_assets->find(L"showcase");
 		Finder<Actor>::find(prefabName, [&](Actor &prefab) {
 			put<string>("state", "0")(prefab);
-
-			auto &showcase = m_assets->find(L"showcase");
 
 			prefab.appendAction(
 				onButtonPressed("up") * withComponent<Prefab>([](Actor &, auto &prefab) {
@@ -138,47 +137,12 @@ private:
 					findThen("chara2", withComponent<Animator>(replay(showcase.find(L"chara2.anim"), "right", "moving"))) +
 					findThen("chara3", withComponent<Animator>(replay(showcase.find(L"chara3.anim"), "right", "moving")))
 				) +
-				inState("2") * changeState("0")
-			);
-			prefab.appendChild(new Actor(
-				[](Actor &a) {
+				inState("2") * changeState("0") +
+				findThen("bg", [](Actor &a) {
 					auto x = a.props().get<int32_t>("tilemap.viewOffset.x");
 					a.props().put<int32_t>("tilemap.viewOffset.x", ++x);
-				},
-				loadProps(showcase.find(L"tilemap1.json")) + Transform::append() + Material::append(showcase.find(L"SMB_BANK0@16.png")) + Shape::append<ShapeTilemap>()
-			));
-			prefab.appendChild(new Actor(
-				Actor::noAction,
-				loadProps(showcase.find(L"hud/score.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>()
-			));
-			prefab.appendChild(new Actor(
-				Actor::noAction,
-				loadProps(showcase.find(L"hud/coins.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>()
-			));
-			prefab.appendChild(new Actor(
-				Actor::noAction,
-				loadProps(showcase.find(L"hud/world.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>()
-			));
-			prefab.appendChild(new Actor(
-				Actor::noAction,
-				loadProps(showcase.find(L"hud/time.json")) + Transform::append() + Material::append(showcase.find(L"font8x8.png")) + Shape::append<ShapeText>()
-			));
-			prefab.appendChild(new Actor(
-				Actor::noAction,
-				loadProps(showcase.find(L"chara0.json")) + Indexer::append("chara0") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>()
-			));
-			prefab.appendChild(new Actor(
-				Actor::noAction,
-				loadProps(showcase.find(L"chara1.json")) + Indexer::append("chara1") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>()
-			));
-			prefab.appendChild(new Actor(
-				Actor::noAction,
-				loadProps(showcase.find(L"chara2.json")) + Indexer::append("chara2") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>()
-			));
-			prefab.appendChild(new Actor(
-				Actor::noAction,
-				loadProps(showcase.find(L"chara3.json")) + Indexer::append("chara3") + Transform::append() + Material::append(showcase.find(L"hedgehog.png")) + Animator::append() + Shape::append<ShapeSprite>()
-			));
+				})
+			);
 		});
 	}
 
