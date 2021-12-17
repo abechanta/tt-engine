@@ -52,8 +52,8 @@ namespace tte {
 		{
 			auto unit = node.get<string>("uvUnit", "ratio");
 			if (unit == "px") {
-				uv0(to_vector2(uv0()));
-				uv1(to_vector2(uv1()));
+				uv0(to_ratio(scalar_cast<int32_t>(uv0())));
+				uv1(to_ratio(scalar_cast<int32_t>(uv1())));
 			}
 		}
 
@@ -110,12 +110,12 @@ namespace tte {
 			m_extra.uv1 = uv;
 		}
 
-		vector2i to_vector2i(const vector2 &uv) const {
+		vector2i to_pixel(const vector2 &uv) const {
 			return vector2i{ static_cast<int32_t>(X(uv) * X(m_size)), static_cast<int32_t>(Y(uv) * Y(m_size)), };
 		}
 
-		vector2 to_vector2(const vector2i &uvi) const {
-			vector2 uv = uvi;
+		vector2 to_ratio(const vector2i &uvi) const {
+			vector2 uv = scalar_cast<float>(uvi);
 			X(uv) /= X(m_size);
 			Y(uv) /= Y(m_size);
 			return uv;

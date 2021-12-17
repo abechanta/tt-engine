@@ -92,7 +92,7 @@ namespace tte {
 		string name;
 		int32_t frameLength;
 		int32_t frameDelay;
-		size_t repeatCount;
+		int32_t repeatCount;
 		size_t channelCount;
 		deque<Channel> channels;
 
@@ -104,7 +104,7 @@ namespace tte {
 			PTree::parse<this_type, string>("name", "", [](this_type &v) -> auto & { return v.name; })(v, pt);
 			PTree::parse<this_type, int32_t>("frameLength", 0, [](this_type &v) -> auto & { return v.frameLength; })(v, pt);
 			PTree::parse<this_type, int32_t>("frameDelay", 0, [](this_type &v) -> auto & { return v.frameDelay; })(v, pt);
-			PTree::parse<this_type, size_t>("repeatCount", 0, [](this_type &v) -> auto & { return v.repeatCount; })(v, pt);
+			PTree::parse<this_type, int32_t>("repeatCount", 0, [](this_type &v) -> auto & { return v.repeatCount; })(v, pt);
 			PTree::counter<this_type, size_t>("channels", [](this_type &v) -> auto & { return v.channelCount; })(v, pt);
 			PTree::inserter<this_type, deque<Channel>, Channel>("channels", [](this_type &v) -> back_insert_iterator<deque<Channel> > { return back_inserter<deque<Channel> >(v.channels); }, Channel::parse)(v, pt);
 			return v;

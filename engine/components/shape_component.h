@@ -85,8 +85,8 @@ namespace tte {
 				material.resetUv();
 				{
 					auto uv = vector2i{ (code_ % cellBounds) * X(cellSize_), (code_ / cellBounds) * Y(cellSize_), };
-					material._uv0(material.to_vector2(uv));
-					material._uv1(material.to_vector2(uv + cellSize_));
+					material._uv0(material.to_ratio(uv));
+					material._uv1(material.to_ratio(uv + cellSize_));
 					auto anchorOffset = vector2{ X(anchor_) * X(cellSize_), Y(anchor_) * Y(cellSize_), };
 
 					const Renderer2dInterface &renderer2d = renderer;
@@ -140,11 +140,12 @@ namespace tte {
 								int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(mapSize_));
 								auto code = vertical[ci];
 								auto uv = vector2i{ (code % cellBounds) * X(cellSize_), (code / cellBounds) * Y(cellSize_), };
-								material._uv0(material.to_vector2(uv));
-								material._uv1(material.to_vector2(uv + cellSize_));
+								material._uv0(material.to_ratio(uv));
+								material._uv1(material.to_ratio(uv + cellSize_));
+								auto pos = vector2i{ rp, cp, };
 
 								const Renderer2dInterface &renderer2d = renderer;
-								renderer2d.drawRect(a, vector2i{ rp, cp, }, blitSize_, anchor, flip);
+								renderer2d.drawRect(a, scalar_cast<float>(pos), scalar_cast<float>(blitSize_), anchor, flip);
 							}
 						}
 					} else {
@@ -155,11 +156,12 @@ namespace tte {
 								int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(mapSize_));
 								auto code = horizontal[ci];
 								auto uv = vector2i{ (code % cellBounds) * X(cellSize_), (code / cellBounds) * Y(cellSize_), };
-								material._uv0(material.to_vector2(uv));
-								material._uv1(material.to_vector2(uv + cellSize_));
+								material._uv0(material.to_ratio(uv));
+								material._uv1(material.to_ratio(uv + cellSize_));
+								auto pos = vector2i{ rp, cp, };
 
 								const Renderer2dInterface &renderer2d = renderer;
-								renderer2d.drawRect(a, vector2i{ cp, rp, }, blitSize_, anchor, flip);
+								renderer2d.drawRect(a, scalar_cast<float>(pos), scalar_cast<float>(blitSize_), anchor, flip);
 							}
 						}
 					}
@@ -228,11 +230,12 @@ namespace tte {
 							int32_t cp = c * X(blitSize_);
 							auto code = lines_[r][c];
 							auto uv = vector2i{ (code % cellBounds) * X(cellSize_), (code / cellBounds) * Y(cellSize_), };
-							material._uv0(material.to_vector2(uv));
-							material._uv1(material.to_vector2(uv + cellSize_));
+							material._uv0(material.to_ratio(uv));
+							material._uv1(material.to_ratio(uv + cellSize_));
+							auto pos = vector2i{ cp + X(offset), rp + Y(offset), };
 
 							const Renderer2dInterface &renderer2d = renderer;
-							renderer2d.drawRect(a, vector2i{ cp + X(offset), rp + Y(offset), }, blitSize_, anchor, flip);
+							renderer2d.drawRect(a, scalar_cast<float>(pos), scalar_cast<float>(blitSize_), anchor, flip);
 						}
 					}
 				}
