@@ -21,24 +21,19 @@
 			]
 		},
 		{
-			"name": "jumpup",
-			"frameLength": 8,
+			"name": "turning-r",
+			"frameLength": 1,
 			"frameDelay": 0,
 			"repeatCount": 0,
 			"channels": [
 				{
-					"access": "delta",
-					"target": "transform.translation.y",
-					"type": "float",
+					"access": "overwrite",
+					"target": "sprite.flip.x",
+					"type": "integer",
 					"keys": [
 						{
 							"frame": 0,
 							"value": 0
-						},
-						{
-							"frame": 8,
-							"easing": "linear:out",
-							"value": -64
 						}
 					]
 				},
@@ -49,44 +44,128 @@
 					"keys": [
 						{
 							"frame": 0,
-							"value": 5
+							"value": 4
 						}
 					]
 				}
 			]
 		},
 		{
-			"name": "falldown",
-			"frameLength": 60,
+			"name": "turning-l",
+			"frameLength": 1,
 			"frameDelay": 0,
-			"repeatCount": 1,
+			"repeatCount": 0,
 			"channels": [
 				{
-					"access": "delta",
-					"target": "transform.translation.y",
-					"type": "float",
+					"access": "overwrite",
+					"target": "sprite.flip.x",
+					"type": "integer",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 1
+						}
+					]
+				},
+				{
+					"access": "overwrite",
+					"target": "sprite.code",
+					"type": "integer",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 4
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "running-r",
+			"frameLength": 6,
+			"frameDelay": 0,
+			"repeatCount": 99999,
+			"channels": [
+				{
+					"access": "overwrite",
+					"target": "sprite.flip.x",
+					"type": "integer",
 					"keys": [
 						{
 							"frame": 0,
 							"value": 0
-						},
-						{
-							"frame": 4,
-							"easing": "cubic:out",
-							"value": -8
-						},
-						{
-							"frame": 20,
-							"easing": "cubic:in",
-							"value": 32
-						},
-						{
-							"frame": 60,
-							"easing": "linear:in",
-							"value": 320
 						}
 					]
 				},
+				{
+					"access": "overwrite",
+					"target": "sprite.code",
+					"type": "integer",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 1
+						},
+						{
+							"frame": 2,
+							"easing": "stepping:out",
+							"value": 2
+						},
+						{
+							"frame": 4,
+							"easing": "stepping:out",
+							"value": 3
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "running-l",
+			"frameLength": 6,
+			"frameDelay": 0,
+			"repeatCount": 99999,
+			"channels": [
+				{
+					"access": "overwrite",
+					"target": "sprite.flip.x",
+					"type": "integer",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 1
+						}
+					]
+				},
+				{
+					"access": "overwrite",
+					"target": "sprite.code",
+					"type": "integer",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 1
+						},
+						{
+							"frame": 2,
+							"easing": "stepping:out",
+							"value": 2
+						},
+						{
+							"frame": 4,
+							"easing": "stepping:out",
+							"value": 3
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "jumping",
+			"frameLength": 1,
+			"frameDelay": 0,
+			"repeatCount": 0,
+			"channels": [
 				{
 					"access": "overwrite",
 					"target": "sprite.code",

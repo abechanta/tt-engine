@@ -57,6 +57,27 @@ namespace tte {
 				tiles(node, "tiles")
 			{
 			}
+
+			vector2i getAddress(const vector2i &wp) {
+				vector2i blitSize_ = blitSize();
+				return vector2i{ X(wp) / X(blitSize_), Y(wp) / Y(blitSize_), };
+			}
+
+			vector2i getWp(const vector2i &addr) {
+				vector2i blitSize_ = blitSize();
+				return vector2i{ X(addr) * X(blitSize_), Y(addr) * Y(blitSize_), };
+			}
+
+			int32_t peek(const vector2i &addr) {
+				const vector2i mapSize_ = mapSize();
+				vector2i addr_ = transpose() ? vector2i{ Y(addr), X(addr), } : addr;
+				Y(addr_) = Geometry::modulo(Y(addr_), Y(mapSize_));
+				assert(Y(addr_) < tiles.size());
+				auto horizontal = tiles[Y(addr_)]();
+				X(addr_) = Geometry::modulo(X(addr_), X(mapSize_));
+				assert(X(addr_) < horizontal.size());
+				return horizontal[X(addr_)];
+			}
 		};
 
 		struct Text {

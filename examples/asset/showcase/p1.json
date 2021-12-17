@@ -8,7 +8,7 @@
 		"animator"
 	],
 	"indexer": {
-		"name": "player"
+		"name": "p1"
 	},
 	"sprite": {
 		"renderer": "sys:renderer2d",
@@ -31,8 +31,8 @@
 	},
 	"transform": {
 		"translation": {
-			"x": 64,
-			"y": 200
+			"x": 31,
+			"y": 183
 		},
 		"rotationUnit": "degree",
 		"rotation": {
@@ -62,5 +62,44 @@
 				"y": 16
 			}
 		]
-	}
+	},
+	"wp": {
+		"x": 32,
+		"y": 207
+	},
+	"speed": {
+		"value": {
+			"x": 0.0,
+			"y": 0.0
+		},
+		"min": {
+			"x": -2.5,
+			"y": -5.5
+		},
+		"max": {
+			"x": 2.5,
+			"y": 5.5
+		},
+		"yj0": -5.5
+	},
+	"accel": {
+		"xr": 0.25,
+		"xj": 0.20,
+		"xrRegist": 0.20,
+		"xjRegist": 0.00,
+		"y": 0.0,
+		"yjGravity": 1.0
+	},
+	"jumping": {
+		"value": false,
+		"frame": {
+			"left": 0,
+			"max": 10
+		}
+	},
+	"collider2d": {
+		"x": 10,
+		"y": 16
+	},
+	"replay": ""
 }

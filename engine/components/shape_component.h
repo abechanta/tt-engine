@@ -59,7 +59,7 @@ namespace tte {
 	class ShapeSprite : public Shape {
 	public:
 		static inline const string key = "sprite";
-	private:
+	public:
 		Shape2d::Sprite m_data;
 
 	public:
@@ -101,7 +101,7 @@ namespace tte {
 	class ShapeTilemap : public Shape {
 	public:
 		static inline const string key = "tilemap";
-	private:
+	public:
 		Shape2d::Tilemap m_data;
 
 	public:
@@ -189,7 +189,7 @@ namespace tte {
 	class ShapeText : public Shape {
 	public:
 		static inline const string key = "text";
-	private:
+	public:
 		Shape2d::Text m_data;
 
 	public:

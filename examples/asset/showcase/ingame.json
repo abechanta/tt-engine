@@ -27,7 +27,7 @@
 		"actors": [
 			{
 				"name": "bg",
-				"property": "showcase/tilemap1.json"
+				"property": "showcase/bg.json"
 			},
 			{
 				"name": "hud-score",
@@ -46,24 +46,8 @@
 				"property": "showcase/hud/time.json"
 			},
 			{
-				"name": "player",
-				"property": "showcase/player.json"
-			},
-			{
-				"name": "chara0",
-				"property": "showcase/chara0.json"
-			},
-			{
-				"name": "chara1",
-				"property": "showcase/chara1.json"
-			},
-			{
-				"name": "chara2",
-				"property": "showcase/chara2.json"
-			},
-			{
-				"name": "chara3",
-				"property": "showcase/chara3.json"
+				"name": "p1",
+				"property": "showcase/p1.json"
 			}
 		]
 	}

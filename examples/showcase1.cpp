@@ -20,12 +20,248 @@
 #include <components/transform_component.h>
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 using namespace tte;
+
+template<typename V>
+static V get(Actor &a, const string key, const string val) {
+	auto val_ = a.props().get<V>(key, val);
+	a.props().put<V>(key, val);
+	return val_;
+}
+
+namespace player {
+	inline bool hasCollider(int32_t mapCode) {
+		return mapCode >= 0x20;
+	}
+
+	auto setSpeedX = [](Actor &a) {
+		bool isJumping = a.props().get<bool>("jumping.value", false);
+		PTree::Property<float> speedX(a.props(), "speed.value.x", 0.0f);
+		auto speedX_ = speedX();
+		auto accelX = a.props().get<float>(isJumping ? "accel.xj" : "accel.xr", 0.0f);
+		auto registX = a.props().get<float>(isJumping ? "accel.xjRegist" : "accel.xrRegist", 0.0f);
+		auto dir = (onButtonOn("left")(a) ? -1 : 0) + (onButtonOn("right")(a) ? +1 : 0);
+		auto dirs = (abs(speedX_) < registX) ? 0 : (speedX_ < 0) ? -1 : +1;
+
+		if (dir != 0) {
+			accelX = dir * accelX;
+			if (!isJumping) {
+				string replayName = (dir * dirs < 0) ? "turning" : "running";
+				replayName += (dirs == 0) && (dir < 0) || (dirs < 0) ? "-l" : "-r";
+				a.props().put<string>("replay", replayName);
+			}
+		} else if (dirs == 0) {
+			speedX_ = accelX = 0.0f;
+			if (!isJumping) {
+				a.props().put<string>("replay", "standing");
+			}
+		} else {
+			accelX = -dirs * accelX;
+		}
+
+		speedX_ += accelX;
+		speedX_ = clamp(speedX_, a.props().get<float>("speed.min.x", 0.0f), a.props().get<float>("speed.max.x", 0.0f));
+		speedX(speedX_);
+	};
+
+	auto moveX = [](Actor &a) {
+		auto speedX = a.props().get<float>("speed.value.x", 0.0f);
+		PTree::Property<float> wx(a.props(), "wp.x", 0.0f);
+		auto wx_ = wx();
+
+		wx(wx_ += speedX);
+	};
+
+	auto adjustX = [](Actor &a) {
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
+			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+			PTree::Property<float> speedX(a.props(), "speed.value.x", 0.0f);
+			PTree::PropertyV<vec, float, 2> wp(a.props(), "wp", 0.0f);
+			auto wp_ = wp();
+			PTree::PropertyV<vec, float, 2> c2(a.props(), "collider2d", 0.0f);
+			auto c2_ = c2();
+
+			unordered_map<string, vector2> offsets = {
+				{ "LT", vector2{ X(wp_) - (X(c2_) / 2 + 1), Y(wp_) - Y(c2_), }, },
+				{ "LB", vector2{ X(wp_) - (X(c2_) / 2 + 1), Y(wp_) - 0, }, },
+				{ "RT", vector2{ X(wp_) + (X(c2_) / 2 + 1), Y(wp_) - Y(c2_), }, },
+				{ "RB", vector2{ X(wp_) + (X(c2_) / 2 + 1), Y(wp_) - 0, }, },
+			};
+			unordered_map<string, vector2i> mapAddresses;
+			for (auto &offset : offsets) {
+				mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
+			}
+			bool isHitL = hasCollider(tilemap.peek(mapAddresses.at("LT"))) || hasCollider(tilemap.peek(mapAddresses.at("LB")));
+			bool isHitR = hasCollider(tilemap.peek(mapAddresses.at("RT"))) || hasCollider(tilemap.peek(mapAddresses.at("RB")));
+
+			if (isHitL && !isHitR) {
+				// hit lefthand
+				auto posL = tilemap.getWp(mapAddresses.at("LB") + vector2i{ 1, 0, });
+				X(wp_) = X(posL) + (X(c2_) / 2 + 1);
+				wp(wp_);
+				speedX(0.0f);
+			}
+			if (!isHitL && isHitR) {
+				// hit righthand
+				auto posR = tilemap.getWp(mapAddresses.at("RB"));
+				X(wp_) = X(posR) - (X(c2_) / 2 + 1);
+				wp(wp_);
+				speedX(0.0f);
+			}
+			if (X(wp_) < X(tilemap.viewOffset()) + X(c2_) / 2) {
+				// adjust screen left
+				X(wp_) = X(tilemap.viewOffset()) + X(c2_) / 2;
+				wp(wp_);
+			}
+		});
+	};
+
+	auto adjustBg = [](Actor &a, Transform &transform) {
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a, &transform](auto &shapeTilemap) {
+			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+			auto viewOffset_ = tilemap.viewOffset();
+			PTree::PropertyV<vec, float, 2> wp(a.props(), "wp", 0.0f);
+			auto wp_ = wp();
+
+			// set relative pos from world pos
+			auto pos = transform.translation();
+			X(pos) = X(wp_) - X(viewOffset_);
+			Y(pos) = Y(wp_) - Y(viewOffset_);
+
+			// adjust screen right
+			int32_t overflowX = static_cast<int32_t>(X(pos) - 15 * 8);
+			if (overflowX > 0) {
+				X(viewOffset_) += overflowX;
+				tilemap.viewOffset(viewOffset_);
+				X(pos) -= static_cast<float>(overflowX);
+			}
+			transform.translation(pos);
+		});
+	};
+
+	auto setSpeedY = [](Actor &a) {
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
+			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+			auto accelY = a.props().get<float>("accel.yjGravity", 0.0f);
+			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
+			auto speedY_ = speedY();
+			PTree::Property<int32_t> frameLeft(a.props(), "jumping.frame.left", 0);
+			auto frameLeft_ = frameLeft();
+			PTree::PropertyV<vec, float, 2> wp(a.props(), "wp", 0.0f);
+			auto wp_ = wp();
+			PTree::PropertyV<vec, float, 2> c2(a.props(), "collider2d", 0.0f);
+			auto c2_ = c2();
+
+			unordered_map<string, vector2> offsets = {
+				{ "BL", vector2{ X(wp_) - X(c2_) / 2, Y(wp_) + 1, }, },
+				{ "BR", vector2{ X(wp_) + X(c2_) / 2, Y(wp_) + 1, }, },
+			};
+			unordered_map<string, vector2i> mapAddresses;
+			for (auto &offset : offsets) {
+				mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
+			}
+			bool isHitB = hasCollider(tilemap.peek(mapAddresses.at("BL"))) || hasCollider(tilemap.peek(mapAddresses.at("BR")));
+
+			if (speedY_ < 0.0f) {
+				// jumping up
+				if (onButtonOn("z")(a) && (frameLeft_ > 0)) {
+					accelY = 0.0f;
+					frameLeft(--frameLeft_);
+				} else {
+					frameLeft(frameLeft_ = 0);
+				}
+			} else if (!isHitB) {
+				// on the air / falling
+				frameLeft(frameLeft_ = 0);
+			} else {
+				// standing
+				if (onButtonPressed("z")(a)) {
+					// start jumping
+					accelY = 0.0f;
+					speedY_ = a.props().get<float>("speed.yj0", 0.0f);
+					frameLeft_ = a.props().get<int32_t>("jumping.frame.max", 0);
+					frameLeft(frameLeft_);
+					a.props().put<bool>("jumping.value", true);
+					a.props().put<string>("replay", "jumping");
+				} else {
+					accelY = 0.0f;
+					speedY_ = 0.0f;
+				}
+			}
+
+			speedY_ += accelY;
+			speedY_ = clamp(speedY_, a.props().get<float>("speed.min.y", 0.0f), a.props().get<float>("speed.max.y", 0.0f));
+			speedY(speedY_);
+		});
+	};
+
+	auto moveY = [](Actor &a) {
+		auto speedY = a.props().get<float>("speed.value.y", 0.0f);
+		PTree::Property<float> wy(a.props(), "wp.y", 0.0f);
+		auto wy_ = wy();
+
+		wy(wy_ += speedY);
+	};
+
+	auto adjustY = [](Actor &a) {
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
+			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
+			PTree::PropertyV<vec, float, 2> wp(a.props(), "wp", 0.0f);
+			auto wp_ = wp();
+			PTree::PropertyV<vec, float, 2> c2(a.props(), "collider2d", 0.0f);
+			auto c2_ = c2();
+
+			if (speedY() < 0.0f) {
+				unordered_map<string, vector2> offsets = {
+					{ "TC", vector2{ X(wp_), Y(wp_) - (Y(c2_) + 1), }, },
+				};
+				unordered_map<string, vector2i> mapAddresses;
+				for (auto &offset : offsets) {
+					mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
+				}
+				bool isHitT = hasCollider(tilemap.peek(mapAddresses.at("TC")));
+
+				if (isHitT) {
+					auto posT = tilemap.getWp(mapAddresses.at("TC") + vector2i{ 0, 1, });
+					Y(wp_) = static_cast<float>(Y(posT) + (Y(c2_) + 1));
+					wp(wp_);
+					speedY(0.0f);
+					a.props().put<int32_t>("jumping.frame.left", 0);
+				}
+			} else {
+				PTree::Property<bool> isJumping(a.props(), "jumping.value", false);
+
+				unordered_map<string, vector2> offsets = {
+					{ "BL", vector2{ X(wp_) - X(c2_) / 2, Y(wp_) + 1, }, },
+					{ "BR", vector2{ X(wp_) + X(c2_) / 2, Y(wp_) + 1, }, },
+				};
+				unordered_map<string, vector2i> mapAddresses;
+				for (auto &offset : offsets) {
+					mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
+				}
+				bool isHitB = hasCollider(tilemap.peek(mapAddresses.at("BL"))) || hasCollider(tilemap.peek(mapAddresses.at("BR")));
+
+				if (isHitB) {
+					auto posB = tilemap.getWp(mapAddresses.at("BL"));
+					Y(wp_) = static_cast<float>(Y(posB) - 1);
+					wp(wp_);
+					if (isJumping()) {
+						a.props().put<string>("replay", "standing");
+					}
+				}
+				isJumping(!isHitB);
+			}
+		});
+	};
+}
 
 class Showcase1 : public App {
 private:
@@ -55,7 +291,12 @@ public:
 	virtual void initialize() override {
 		cout << __FUNCTION__ << endl;
 		initializeActors();
-		loadPrefab(m_assets->find(L"showcase/ingame.json"));
+		Finder<Actor>::find("sys:root", 
+			loadPrefab(m_assets->find(L"showcase/ingame.json"), *m_assets) +
+			[this](Actor &) {
+				initializeIngame();
+			}
+		);
 	}
 
 	virtual void finalize() override {
@@ -103,94 +344,22 @@ private:
 		m_actors.reset(root);
 	}
 
-	void loadPrefab(Asset &asset) {
-		asset.load();
-		auto prefabName = asset.props().get<string>("indexer.name", "prefab");
-		auto parentName = asset.props().get<string>("parent", "sys:root");
-		Finder<Actor>::find(parentName, [&, &assetBase = *m_assets](Actor &parent) {
-			parent.appendChild(new Actor(
-				Actor::noAction,
-				loadProps(asset) + Indexer::append() + Prefab::append(assetBase)
-			));
-		});
-		asset.unload();
-
-		auto &showcase = m_assets->find(L"showcase");
-		Finder<Actor>::find(prefabName, [&](Actor &a) {
-			changeState("0")(a);
-
+	void initializeIngame() {
+		Finder<Actor>::find("p1", [&assetBase = *m_assets](Actor &a) {
+			auto &playerAnim = assetBase.find(L"showcase/player.anim");
 			a.appendAction(
-				onButtonPressed("up") * withComponent<Prefab>([](Actor &, auto &prefab) {
-					prefab.unload();
-				}) +
-				inState("1") * onButtonPressed("left") * (
-					changeState("2") +
-					findThen("chara0", withComponent<Animator>(replay(showcase.find(L"chara0.anim"), "left", "moving"))) +
-					findThen("chara1", withComponent<Animator>(replay(showcase.find(L"chara1.anim"), "left", "moving"))) +
-					findThen("chara2", withComponent<Animator>(replay(showcase.find(L"chara2.anim"), "left", "moving"))) +
-					findThen("chara3", withComponent<Animator>(replay(showcase.find(L"chara3.anim"), "left", "moving")))
-				) +
-				inState("0") * onButtonPressed("right") * (
-					changeState("1") +
-					findThen("chara0", withComponent<Animator>(replay(showcase.find(L"chara0.anim"), "right", "moving"))) +
-					findThen("chara1", withComponent<Animator>(replay(showcase.find(L"chara1.anim"), "right", "moving"))) +
-					findThen("chara2", withComponent<Animator>(replay(showcase.find(L"chara2.anim"), "right", "moving"))) +
-					findThen("chara3", withComponent<Animator>(replay(showcase.find(L"chara3.anim"), "right", "moving")))
-				) +
-				inState("2") * changeState("0") +
-				findThen("bg", [](Actor &a) {
-					auto x = a.props().get<int32_t>("tilemap.viewOffset.x");
-					a.props().put<int32_t>("tilemap.viewOffset.x", ++x);
+				player::setSpeedX + player::moveX + player::adjustX +
+				player::setSpeedY + player::moveY + player::adjustY +
+				withComponent<Transform>(player::adjustBg) +
+				withComponent<Animator>([&playerAnim](Actor &a, auto &animator) {
+					auto replayName = get<string>(a, "replay", "");
+					auto replayName_ = get<string>(a, "replay_", replayName);
+					if (replayName != replayName_) {
+						animator.replay(playerAnim, replayName, "moving");
+					}
 				})
 			);
 		});
-
-		Finder<Actor>::find("player", [&](Actor &a) {
-			changeState("standing")(a);
-			changeState("", "nextState")(a);
-
-			a.appendAction(
-				inState("falling") * onLanding() * (
-					changeState("standing", "nextState") +
-					withComponent<Animator>(replay(showcase.find(L"player.anim"), "standing", "moving"))
-				) +
-				inState("jumping") * (onButtonOff("z") + !onButtonPressed("z", 9)) * (
-					changeState("falling", "nextState") +
-					withComponent<Animator>(replay(showcase.find(L"player.anim"), "falldown", "moving"))
-				) +
-				inState("standing") * onButtonPressed("z") * (
-					changeState("jumping", "nextState") +
-					withComponent<Animator>(replay(showcase.find(L"player.anim"), "jumpup", "moving"))
-				) +
-				[](Actor &a) {
-					auto nextState = a.props("nextState").get_value<string>("");
-					if (!nextState.empty()) {
-						a.props().put<string>("state", nextState);
-					}
-				} +
-				changeState("", "nextState")
-			);
-		});
-	}
-
-	Actor::Trigger onLanding() {
-		return [](Actor &a) -> bool {
-			return a.getComponent<bool, Transform>(false, [](auto &transform) -> bool {
-				auto pos = transform.translation();
-				if (Y(pos) >= 200) {
-					Y(pos) = 200;
-					transform.translation(pos);
-					return true;
-				}
-				return false;
-			});
-		};
-	}
-
-	function<void(Actor &, Animator &)> replay(Asset &asset, const string &animname, const string &slotname) {
-		return [&asset, animname, slotname](Actor &, Animator &animator) {
-			animator.replay(asset, animname, slotname);
-		};
 	}
 };
 
