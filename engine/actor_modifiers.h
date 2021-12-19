@@ -3,15 +3,8 @@
 #include <asset.h>
 #include <boost/property_tree/ptree.hpp>
 #include <cassert>
-#include <components/animator_component.h>
 #include <components/indexer_component.h>
-#include <components/input_component.h>
-#include <components/material_component.h>
-// #include <components/prefab_component.h>
-// #include <components/renderer2d_component.h>
-#include <components/resource_component.h>
-#include <components/shape_component.h>
-#include <components/transform_component.h>
+#include <components/prefab_component.h>
 #include <cstdint>
 #include <finder.h>
 #include <functional>
@@ -93,38 +86,17 @@ namespace tte {
 		};
 	}
 
-	inline Actor::Action appendComponents(Asset &assetBase) {
-		return [&assetBase](Actor &a) {
-			for (auto &component : a.props("components")) {
-				auto componentType = component.second.get<string>("", "");
-				if (componentType == "animator") {
-					Animator::append()(a);
-				}
-				if (componentType == "indexer") {
-					Indexer::append()(a);
-				}
-				if (componentType == "input") {
-					Input::append()(a);
-				}
-				if (componentType == "material") {
-					Material::append(assetBase, true)(a);
-				}
-				if (componentType == "resource") {
-					Resource::append(assetBase, true)(a);
-				}
-				if (componentType == "sprite") {
-					Shape::append<ShapeSprite>()(a);
-				}
-				if (componentType == "tilemap") {
-					Shape::append<ShapeTilemap>()(a);
-				}
-				if (componentType == "text") {
-					Shape::append<ShapeText>()(a);
-				}
-				if (componentType == "transform") {
-					Transform::append()(a);
-				}
-			}
+	inline Actor::Action loadPrefab(Asset &asset, Asset &assetBase) {
+		return [&asset, &assetBase](Actor &a) {
+			asset.load();
+			auto parentName = asset.props().get<string>("parent", "sys:root");
+			Finder<Actor>::find(parentName, [&asset, &assetBase](Actor &p) {
+				p.appendChild(new Actor(
+					Actor::noAction,
+					loadProps(asset) + Indexer::append() + Prefab::append(assetBase)
+				));
+			});
+			asset.unload();
 		};
 	}
 

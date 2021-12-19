@@ -1,9 +1,17 @@
 #pragma once
 #include <actor.h>
-#include <actor_modifiers.h>
 #include <asset.h>
 #include <cassert>
 #include <clist.h>
+#include <components/animator_component.h>
+#include <components/indexer_component.h>
+#include <components/input_component.h>
+#include <components/material_component.h>
+#include <components/prefab_component.h>
+// #include <components/renderer2d_component.h>
+#include <components/resource_component.h>
+#include <components/shape_component.h>
+#include <components/transform_component.h>
 #include <cstdint>
 #include <finder.h>
 
@@ -43,13 +51,49 @@ namespace tte {
 			};
 		}
 
+		void appendComponents(Actor &a) {
+			for (auto &component : a.props("components")) {
+				auto componentType = component.second.get<string>("", "");
+				if (componentType == "animator") {
+					Animator::append()(a);
+				}
+				if (componentType == "indexer") {
+					Indexer::append()(a);
+				}
+				if (componentType == "input") {
+					Input::append()(a);
+				}
+				if (componentType == "material") {
+					Material::append(m_assetBase, true)(a);
+				}
+				if (componentType == "resource") {
+					Resource::append(m_assetBase, true)(a);
+				}
+				if (componentType == "sprite") {
+					Shape::append<ShapeSprite>()(a);
+				}
+				if (componentType == "tilemap") {
+					Shape::append<ShapeTilemap>()(a);
+				}
+				if (componentType == "text") {
+					Shape::append<ShapeText>()(a);
+				}
+				if (componentType == "transform") {
+					Transform::append()(a);
+				}
+			}
+		}
+
 		void loadResources() {
 			for (auto &resource : m_node.get_child("resources")) {
 				auto parentName = resource.second.get<string>("parent");
-				Finder<Actor>::find(parentName, [this, &resource](Actor &parent) {
-					parent.appendChild(new Actor(
+				Finder<Actor>::find(parentName, [this, &resourceProps = resource.second](Actor &p) {
+					p.appendChild(new Actor(
 						Actor::noAction,
-						loadProps(resource.second) + appendComponents(m_assetBase)
+						[this, &resourceProps](Actor &a) {
+							a.importProps(resourceProps);
+							appendComponents(a);
+						}
 					));
 				});
 			}
@@ -58,12 +102,17 @@ namespace tte {
 		void createActors() {
 			for (auto &actor : m_node.get_child("actors")) {
 				auto name = actor.second.get<string>("name", "");
-				auto props = actor.second.get<string>("property", "");
+				auto propsName = actor.second.get<string>("property", "");
 				auto parentName = actor.second.get<string>("parent", "");
-				auto createAndAppendChild = [this, &name, &props](Actor &parent) {
-					parent.appendChild(new Actor(
+				auto createAndAppendChild = [this, name, propsName](Actor &p) {
+					p.appendChild(new Actor(
 						Actor::noAction,
-						loadProps(m_assetBase.find(props)) + appendComponents(m_assetBase) + put<string>("_.name", name)
+						[this, name, propsName](Actor &a) {
+							auto &asset = m_assetBase.find(propsName);
+							a.importProps(asset.props());
+							appendComponents(a);
+							a.props().put<string>("_.name", name);
+						}
 					));
 				};
 
@@ -79,7 +128,11 @@ namespace tte {
 			Finder<Actor>::find("sys:root", [this](Actor &a) {
 				for (auto &resource : m_node.get_child("resources")) {
 					auto resourceName = resource.second.get<string>("indexer.name", "<noname>");
-					a.appendAction(findThen(resourceName, exit()));
+					a.appendAction([resourceName](Actor &) {
+						Finder<Actor>::find(resourceName, [](Actor &a) {
+							delete &a;
+						});
+					});
 				}
 				a.appendAction([this](Actor &) {
 					delete &m_actor;
