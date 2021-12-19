@@ -43,7 +43,7 @@ namespace tte {
 			PTree::PropertyV<vec, int32_t, 2> viewOffset;
 			PTree::PropertyV<vec, int32_t, 2> cellSize;
 			PTree::PropertyV<vec, int32_t, 2> blitSize;
-			PTree::PropertyV<vec, int32_t, 2> mapSize;
+			PTree::PropertyV<vec, int32_t, 2> tileSize;
 			PTree::Property<bool> transpose;
 			PTree::PropertyAA<vector<int32_t>> tiles;
 
@@ -52,7 +52,7 @@ namespace tte {
 				viewOffset(node, "viewOffset", 0),
 				cellSize(node, "cellSize", 8),
 				blitSize(node, "blitSize", 8),
-				mapSize(node, "mapSize", 8),
+				tileSize(node, "tileSize", 8),
 				transpose(node, "transpose", false),
 				tiles(node, "tiles")
 			{
@@ -69,12 +69,12 @@ namespace tte {
 			}
 
 			int32_t peek(const vector2i &addr) {
-				const vector2i mapSize_ = mapSize();
+				const vector2i tileSize_ = tileSize();
 				vector2i addr_ = transpose() ? vector2i{ Y(addr), X(addr), } : addr;
-				Y(addr_) = Geometry::modulo(Y(addr_), Y(mapSize_));
+				Y(addr_) = Geometry::modulo(Y(addr_), Y(tileSize_));
 				assert(Y(addr_) < tiles.size());
 				auto horizontal = tiles[Y(addr_)]();
-				X(addr_) = Geometry::modulo(X(addr_), X(mapSize_));
+				X(addr_) = Geometry::modulo(X(addr_), X(tileSize_));
 				assert(X(addr_) < horizontal.size());
 				return horizontal[X(addr_)];
 			}

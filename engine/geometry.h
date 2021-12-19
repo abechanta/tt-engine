@@ -58,25 +58,21 @@ namespace tte {
 			return ret;
 		}
 
-		template<template<typename, int> class C, typename V, int N>
-		C<V, N> mul(const C<V, N> &lhs, const C<V, N> &rhs) {
-			C<V, N> ret = {};
-			auto l = lhs.begin();
-			auto r = rhs.begin();
-			for (auto &e : ret.a) {
-				e = *l++ * *r++;
+		template<typename V>
+		V mul_elements(const V &lhs, const V &rhs) {
+			V ret = {};
+			for (auto i = 0; i < vec_traits<V>::dim; i++) {
+				vec_traits<V>::write_element_idx(i, ret) = vec_traits<V>::read_element_idx(i, lhs) * vec_traits<V>::read_element_idx(i, rhs);
 			}
 			return ret;
 		}
 
-		template<template<typename, int> class C, typename V, int N>
-		C<V, N> div(const C<V, N> &lhs, const C<V, N> &rhs) {
-			C<V, N> ret = {};
-			auto l = lhs.begin();
-			auto r = rhs.begin();
-			for (auto &e : ret.a) {
-				assert(*r != 0);
-				e = *l++ / *r++;
+		template<typename V>
+		V div_elements(const V &lhs, const V &rhs) {
+			V ret = {};
+			for (auto i = 0; i < vec_traits<V>::dim; i++) {
+				// assert(vec_traits<V>::read_element_idx(i, rhs) != 0);
+				vec_traits<V>::write_element_idx(i, ret) = vec_traits<V>::read_element_idx(i, lhs) / vec_traits<V>::read_element_idx(i, rhs);
 			}
 			return ret;
 		}

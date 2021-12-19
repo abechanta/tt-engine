@@ -119,7 +119,7 @@ namespace tte {
 				auto viewOffset_ = m_data.viewOffset();
 				auto cellSize_ = m_data.cellSize();
 				auto blitSize_ = m_data.blitSize();
-				auto mapSize_ = m_data.transpose() ? vector2i{ Y(m_data.mapSize()), X(m_data.mapSize()), } : m_data.mapSize();
+				auto tileSize_ = m_data.transpose() ? vector2i{ Y(m_data.tileSize()), X(m_data.tileSize()), } : m_data.tileSize();
 				const int32_t cellBounds = X(material.size()) / X(cellSize_);
 
 				auto translation = transform.translation();
@@ -134,10 +134,10 @@ namespace tte {
 
 					if (m_data.transpose()) {
 						for (int32_t rp = startPos(X(viewOffset_), X(blitSize_)); rp < X(size_); rp += X(blitSize_)) {
-							int32_t ri = startIdx(X(viewOffset_) + rp, X(blitSize_), X(mapSize_));
+							int32_t ri = startIdx(X(viewOffset_) + rp, X(blitSize_), X(tileSize_));
 							auto vertical = m_data.tiles[ri]();
 							for (int32_t cp = startPos(Y(viewOffset_), Y(blitSize_)); cp < Y(size_); cp += Y(blitSize_)) {
-								int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(mapSize_));
+								int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(tileSize_));
 								auto code = vertical[ci];
 								auto uv = vector2i{ (code % cellBounds) * X(cellSize_), (code / cellBounds) * Y(cellSize_), };
 								material._uv0(material.to_ratio(uv));
@@ -150,10 +150,10 @@ namespace tte {
 						}
 					} else {
 						for (int32_t rp = startPos(Y(viewOffset_), Y(blitSize_)); rp < Y(size_); rp += Y(blitSize_)) {
-							int32_t ri = startIdx(Y(viewOffset_) + rp, Y(blitSize_), Y(mapSize_));
+							int32_t ri = startIdx(Y(viewOffset_) + rp, Y(blitSize_), Y(tileSize_));
 							auto horizontal = m_data.tiles[ri]();
 							for (int32_t cp = startPos(X(viewOffset_), X(blitSize_)); cp < X(size_); cp += X(blitSize_)) {
-								int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(mapSize_));
+								int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(tileSize_));
 								auto code = horizontal[ci];
 								auto uv = vector2i{ (code % cellBounds) * X(cellSize_), (code / cellBounds) * Y(cellSize_), };
 								material._uv0(material.to_ratio(uv));
