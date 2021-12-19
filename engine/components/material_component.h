@@ -111,14 +111,14 @@ namespace tte {
 		}
 
 		vector2i to_pixel(const vector2 &uv) const {
-			return vector2i{ static_cast<int32_t>(X(uv) * X(m_size)), static_cast<int32_t>(Y(uv) * Y(m_size)), };
+			vector2 size = scalar_cast<float>(m_size);
+			return scalar_cast<int32_t>(Geometry::mul_elements<vector2>(uv, size));
 		}
 
 		vector2 to_ratio(const vector2i &uvi) const {
+			vector2 size = scalar_cast<float>(m_size);
 			vector2 uv = scalar_cast<float>(uvi);
-			X(uv) /= X(m_size);
-			Y(uv) /= Y(m_size);
-			return uv;
+			return Geometry::div_elements<vector2>(uv, size);
 		}
 	};
 }
