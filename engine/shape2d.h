@@ -60,17 +60,20 @@ namespace tte {
 
 			vector2i getAddress(const vector2i &wp) {
 				vector2i blitSize_ = blitSize();
-				return vector2i{ X(wp) / X(blitSize_), Y(wp) / Y(blitSize_), };
+				return Geometry::div_elements<vector2i>(wp, blitSize_);
 			}
 
 			vector2i getWp(const vector2i &addr) {
 				vector2i blitSize_ = blitSize();
-				return vector2i{ X(addr) * X(blitSize_), Y(addr) * Y(blitSize_), };
+				return Geometry::mul_elements(addr, blitSize_);
 			}
 
 			int32_t peek(const vector2i &addr) {
 				const vector2i tileSize_ = tileSize();
-				vector2i addr_ = transpose() ? vector2i{ Y(addr), X(addr), } : addr;
+				vector2i addr_ = addr;
+				if (transpose()) {
+					addr_ = YX(addr_);
+				}
 				Y(addr_) = Geometry::modulo(Y(addr_), Y(tileSize_));
 				assert(Y(addr_) < tiles.size());
 				auto horizontal = tiles[Y(addr_)]();

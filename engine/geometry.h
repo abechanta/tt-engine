@@ -77,6 +77,26 @@ namespace tte {
 			return ret;
 		}
 
+		template<typename Vt, typename Vp = vec_traits<Vt>::scalar_type>
+		Vt conv_elements(const unordered_map<string, Vp> &mapping, const initializer_list<string> &vec) {
+			Vt ret = {};
+			auto it = vec.begin();
+			for (auto i = 0; i < vec_traits<Vt>::dim; i++) {
+				vec_traits<Vt>::write_element_idx(i, ret) = mapping.at(*it++);
+			}
+			return ret;
+		}
+
+		template<typename Vt, typename Vp = vec_traits<Vt>::scalar_type, int N = vec_traits<Vt>::dim>
+		Vt conv_elements(const unordered_map<string, Vp> &mapping, const array<string, N> &vec) {
+			Vt ret = {};
+			auto it = vec.begin();
+			for (auto i = 0; i < N; i++) {
+				vec_traits<Vt>::write_element_idx(i, ret) = mapping.at(*it++);
+			}
+			return ret;
+		}
+
 		inline matrix3x4 &identity(matrix3x4 &m) {
 			m = del_row<3>(identity_mat<float, 4>());
 			return m;

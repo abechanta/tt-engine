@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <functional>
 #include <geometry.h>
-#include <initializer_list>
 #include <ptree.h>
 #include <string>
 
