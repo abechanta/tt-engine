@@ -29,13 +29,6 @@
 #include <vector>
 using namespace tte;
 
-template<typename V>
-static V get(Actor &a, const string key, const string val) {
-	auto val_ = a.props().get<V>(key, val);
-	a.props().put<V>(key, val);
-	return val_;
-}
-
 namespace player {
 	inline bool hasCollider(int32_t mapCode) {
 		return mapCode >= 0x20;
@@ -352,9 +345,9 @@ private:
 				player::setSpeedY + player::moveY + player::adjustY +
 				withComponent<Transform>(player::adjustBg) +
 				withComponent<Animator>([&playerAnim](Actor &a, auto &animator) {
-					auto replayName = get<string>(a, "replay", "");
-					auto replayName_ = get<string>(a, "replay_", replayName);
-					if (replayName != replayName_) {
+					auto replayName = a.set<string>("replay", "");
+					auto replayName_ = a.set<string>("replay_", replayName);
+					if (!replayName.empty() && (replayName != replayName_)) {
 						animator.replay(playerAnim, replayName, "moving");
 					}
 				})

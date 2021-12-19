@@ -112,6 +112,14 @@ namespace tte {
 			return pNode ? pNode->get_value<Vp>(defvalue) : defvalue;
 		}
 
+		template<typename Vp>
+		Vp set(const string &key, const Vp &value) {
+			auto &node = PTree::get_child(m_props, key);
+			auto val = node.get_value<Vp>();
+			node.put_value<Vp>(value);
+			return val;
+		}
+
 		//
 		// component operators
 		//
