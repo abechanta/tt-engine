@@ -33,9 +33,9 @@ namespace tte {
 			}
 		} m_extra;
 	public:
-		PTree::PropertyV<vec, float, 4> diffuse;
-		PTree::PropertyV<vec, float, 2> uv0;
-		PTree::PropertyV<vec, float, 2> uv1;
+		PTree::PropertyV<vector4> diffuse;
+		PTree::PropertyV<vector2> uv0;
+		PTree::PropertyV<vector2> uv1;
 
 		//
 		// public methods
@@ -44,7 +44,7 @@ namespace tte {
 		explicit Material(const Asset &asset, property_tree::ptree &node)
 			: CList(tag),
 			m_asset(asset),
-			m_size(PTree::PropertyV<vec, int32_t, 2>::get(asset.props(), "size", 8, PTree::subkeysWH)),
+			m_size(PTree::PropertyV<vector2i>::get(asset.props(), "size", 8, PTree::subkeysWH)),
 			m_extra(),
 			diffuse(node, "diffuse", 1.f, PTree::subkeysRGBA),
 			uv0(node, "uv.0", 0.f),
@@ -60,7 +60,7 @@ namespace tte {
 		explicit Material(const Asset &asset, property_tree::ptree &node, const vector4 &diffuse_, const vector2 &uv0_, const vector2 &uv1_)
 			: CList(tag),
 			m_asset(asset),
-			m_size(PTree::PropertyV<vec, int32_t, 2>::get(asset.props(), "size", 8, PTree::subkeysWH)),
+			m_size(PTree::PropertyV<vector2i>::get(asset.props(), "size", 8, PTree::subkeysWH)),
 			m_extra(),
 			diffuse(node, "diffuse", diffuse_, PTree::subkeysRGBA),
 			uv0(node, "uv.0", uv0_),

@@ -76,9 +76,9 @@ namespace player {
 		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
 			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
 			PTree::Property<float> speedX(a.props(), "speed.value.x", 0.0f);
-			PTree::PropertyV<vec, float, 2> wp(a.props(), "wp", 0.0f);
+			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
-			PTree::PropertyV<vec, float, 2> c2(a.props(), "collider2d", 0.0f);
+			PTree::PropertyV<vector2> c2(a.props(), "collider2d", 0.0f);
 			auto c2_ = c2();
 
 			unordered_map<string, vector2> offsets = {
@@ -120,7 +120,7 @@ namespace player {
 		Finder<Actor>::find<ShapeTilemap>("bg", [&a, &transform](auto &shapeTilemap) {
 			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
 			auto viewOffset_ = tilemap.viewOffset();
-			PTree::PropertyV<vec, float, 2> wp(a.props(), "wp", 0.0f);
+			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
 
 			// set relative pos from world pos
@@ -147,9 +147,9 @@ namespace player {
 			auto speedY_ = speedY();
 			PTree::Property<int32_t> frameLeft(a.props(), "jumping.frame.left", 0);
 			auto frameLeft_ = frameLeft();
-			PTree::PropertyV<vec, float, 2> wp(a.props(), "wp", 0.0f);
+			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
-			PTree::PropertyV<vec, float, 2> c2(a.props(), "collider2d", 0.0f);
+			PTree::PropertyV<vector2> c2(a.props(), "collider2d", 0.0f);
 			auto c2_ = c2();
 
 			unordered_map<string, vector2> offsets = {
@@ -207,9 +207,9 @@ namespace player {
 		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
 			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
 			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
-			PTree::PropertyV<vec, float, 2> wp(a.props(), "wp", 0.0f);
+			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
-			PTree::PropertyV<vec, float, 2> c2(a.props(), "collider2d", 0.0f);
+			PTree::PropertyV<vector2> c2(a.props(), "collider2d", 0.0f);
 			auto c2_ = c2();
 
 			if (speedY() < 0.0f) {

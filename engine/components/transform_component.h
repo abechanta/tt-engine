@@ -22,9 +22,9 @@ namespace tte {
 		// member variables
 		//
 	public:
-		PTree::PropertyV<vec, float, 3> translation;
-		PTree::PropertyV<vec, float, 3> rotation;
-		PTree::PropertyV<vec, float, 3> scaling;
+		PTree::PropertyV<vector3> translation;
+		PTree::PropertyV<vector3> rotation;
+		PTree::PropertyV<vector3> scaling;
 
 		//
 		// public methods

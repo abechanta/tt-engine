@@ -87,11 +87,11 @@ namespace tte {
 			return ret;
 		}
 
-		template<typename Vt, typename Vp = vec_traits<Vt>::scalar_type, int N = vec_traits<Vt>::dim>
-		Vt conv_elements(const unordered_map<string, Vp> &mapping, const array<string, N> &vec) {
+		template<typename Vt, typename Vp = vec_traits<Vt>::scalar_type>
+		Vt conv_elements(const unordered_map<string, Vp> &mapping, const vector<string> &vec) {
 			Vt ret = {};
 			auto it = vec.begin();
-			for (auto i = 0; i < N; i++) {
+			for (auto i = 0; i < vec_traits<Vt>::dim; i++) {
 				vec_traits<Vt>::write_element_idx(i, ret) = mapping.at(*it++);
 			}
 			return ret;

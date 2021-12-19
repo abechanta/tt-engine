@@ -22,10 +22,10 @@ namespace tte {
 		};
 
 		struct Sprite {
-			PTree::PropertyV<vec, float, 2> size;
-			PTree::PropertyV<vec, int32_t, 2> cellSize;
-			PTree::PropertyV<vec, float, 2> anchor;
-			PTree::PropertyV<vec, bool, 2> flip;
+			PTree::PropertyV<vector2> size;
+			PTree::PropertyV<vector2i> cellSize;
+			PTree::PropertyV<vector2> anchor;
+			PTree::PropertyV<vec<bool, 2> > flip;
 			PTree::Property<int32_t> code;
 
 			Sprite(property_tree::ptree &node)
@@ -39,13 +39,13 @@ namespace tte {
 		};
 
 		struct Tilemap {
-			PTree::PropertyV<vec, int32_t, 2> size;
-			PTree::PropertyV<vec, int32_t, 2> viewOffset;
-			PTree::PropertyV<vec, int32_t, 2> cellSize;
-			PTree::PropertyV<vec, int32_t, 2> blitSize;
-			PTree::PropertyV<vec, int32_t, 2> tileSize;
+			PTree::PropertyV<vector2i> size;
+			PTree::PropertyV<vector2i> viewOffset;
+			PTree::PropertyV<vector2i> cellSize;
+			PTree::PropertyV<vector2i> blitSize;
+			PTree::PropertyV<vector2i> tileSize;
 			PTree::Property<bool> transpose;
-			PTree::PropertyAA<vector<int32_t>> tiles;
+			PTree::PropertyAA<vector<int32_t> > tiles;
 
 			Tilemap(property_tree::ptree &node)
 				: size(node, "size", 8),
@@ -84,17 +84,17 @@ namespace tte {
 		};
 
 		struct Text {
-			PTree::PropertyV<vec, int32_t, 2> size;
-			PTree::PropertyV<vec, int32_t, 2> cellSize;
-			PTree::PropertyV<vec, int32_t, 2> blitSize;
-			PTree::PropertyV<array, string, 2> alignment;
+			PTree::PropertyV<vector2i> size;
+			PTree::PropertyV<vector2i> cellSize;
+			PTree::PropertyV<vector2i> blitSize;
+			PTree::PropertyA<vector<string> > alignment;
 			PTree::PropertyA<vector<string> > lines;
 
 			Text(property_tree::ptree &node)
 				: size(node, "size", 8),
 				cellSize(node, "cellSize", 8),
 				blitSize(node, "blitSize", 8),
-				alignment(node, "alignment", "center"),
+				alignment(node, "alignment"),
 				lines(node, "lines")
 			{
 				auto alignment_ = alignment();
