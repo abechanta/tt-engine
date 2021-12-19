@@ -59,7 +59,7 @@ namespace tte {
 
 			template<typename Vt>
 			static Vt stepping(Vt value1, Vt value2, float ratio) {
-				return (ratio < 1.f) ? value1 : value2;
+				return (ratio < 1.f) ? 0.f : value2 - value1;
 			};
 		};
 

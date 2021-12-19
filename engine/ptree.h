@@ -14,12 +14,14 @@
 namespace tte {
 	using namespace boost;
 	using namespace std;
+	template<typename T>
+	using optional = std::optional<T>;
 
 	namespace PTree {
-		static inline const initializer_list<string> subkeysXYZW = { "x", "y", "z", "w", };
-		static inline const initializer_list<string> subkeysWH = { "w", "h", };
-		static inline const initializer_list<string> subkeysXYWH = { "x", "y", "w", "h", };
-		static inline const initializer_list<string> subkeysRGBA = { "r", "g", "b", "a", };
+		static const initializer_list<string> subkeysXYZW = { "x", "y", "z", "w", };
+		static const initializer_list<string> subkeysWH = { "w", "h", };
+		static const initializer_list<string> subkeysXYWH = { "x", "y", "w", "h", };
+		static const initializer_list<string> subkeysRGBA = { "r", "g", "b", "a", };
 
 		inline property_tree::ptree &get_child(property_tree::ptree &node, property_tree::ptree::path_type key) {
 			if (key.empty()) {
@@ -51,7 +53,7 @@ namespace tte {
 			return get_child(node.back().second, key);
 		}
 
-		inline std::optional<property_tree::ptree> get_child_optional(property_tree::ptree &node, property_tree::ptree::path_type key) {
+		inline optional<property_tree::ptree> get_child_optional(property_tree::ptree &node, property_tree::ptree::path_type key) {
 			if (key.empty()) {
 				return node;
 			}
@@ -76,7 +78,7 @@ namespace tte {
 			return get_child_optional(matches.first->second, key);
 		}
 
-		inline std::optional<const property_tree::ptree> get_child_optional(const property_tree::ptree &node, property_tree::ptree::path_type key) {
+		inline optional<const property_tree::ptree> get_child_optional(const property_tree::ptree &node, property_tree::ptree::path_type key) {
 			if (key.empty()) {
 				return node;
 			}
@@ -99,6 +101,28 @@ namespace tte {
 			}
 
 			return get_child_optional(matches.first->second, key);
+		}
+
+		template<template<typename> class C, typename V>
+		C<V> get(const optional<property_tree::ptree> &pNode, const string &key = "") {
+			C<V> ret = {};
+			if (pNode) {
+				for (auto &ch : pNode->get_child(key)) {
+					ret.push_back(ch.second.get<V>(""));
+				}
+			}
+			return ret;
+		}
+
+		template<template<typename, int> class C, typename V, int N>
+		C<V, N> get(const optional<property_tree::ptree> &pNode, const V &defvalue = 0) {
+			static const initializer_list<string> keys = { "x", "y", "z", "w", };
+			C<V, N> ret = {};
+			auto it = keys.begin();
+			for (auto &e : ret.a) {
+				e = pNode ? pNode->get<V>(*it++, defvalue) : defvalue;
+			}
+			return ret;
 		}
 
 		template<typename V>
@@ -236,7 +260,6 @@ namespace tte {
 			}
 
 			static C<V, N> get(const property_tree::ptree &node, const string &key, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW) {
-				C<V, N> val = {};
 				auto pNode = get_child_optional(node, key);
 				assert(pNode);
 				return get(*pNode, defval, subkeys);
