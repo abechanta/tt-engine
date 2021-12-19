@@ -254,6 +254,70 @@ namespace player {
 			}
 		});
 	};
+
+	function<void(Actor &, Animator &)> replay(Asset &playerAnim) {
+		return [&playerAnim](Actor &a, Animator &animator) {
+			auto replayName = a.set<string>("replay", "");
+			auto replayName_ = a.set<string>("replay_", replayName);
+			if (!replayName.empty() && (replayName != replayName_)) {
+				animator.replay(playerAnim, replayName, "moving");
+			}
+		};
+	}
+
+	auto onDead = [](Actor &a) -> bool {
+		PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
+		auto wp_ = wp();
+		return Y(wp_) >= 16 * 16;
+	};
+}
+
+namespace transition {
+	void beginIngame(Asset &assetBase);
+
+	void beginMenu(Asset &assetBase) {
+		Finder<Actor>::find("sys:root", loadPrefab(assetBase.find(L"showcase/menu.json"), assetBase));
+
+		Finder<Actor>::find("menu-guide", [&](Actor &a) {
+			a.appendAction(
+				onButtonPressed("z") * (
+					findThen("prefab:menu", withComponent<Prefab>([](Actor &, auto &prefab) {
+						prefab.unload();
+					})) +
+					findThen("sys:root", [&](Actor &a) {
+						a.appendAction([&](Actor &) {
+							transition::beginIngame(assetBase);
+						});
+					})
+				)
+			);
+		});
+	}
+
+	void beginIngame(Asset &assetBase) {
+		Finder<Actor>::find("sys:root", loadPrefab(assetBase.find(L"showcase/ingame.json"), assetBase));
+
+		Finder<Actor>::find("p1", [&](Actor &a) {
+			auto &playerAnim = assetBase.find(L"showcase/player.anim");
+			a.appendAction(
+				player::setSpeedX + player::moveX + player::adjustX +
+				player::setSpeedY + player::moveY + player::adjustY +
+				withComponent<Transform>(player::adjustBg) +
+				withComponent<Animator>(player::replay(playerAnim)) +
+				player::onDead * (
+					findThen("prefab:showcase", withComponent<Prefab>([](Actor &, auto &prefab) {
+						prefab.unload();
+						cout << "dead" << endl;
+					})) +
+					findThen("sys:root", [&](Actor &a) {
+						a.appendAction([&](Actor &) {
+							transition::beginMenu(assetBase);
+						});
+					})
+				)
+			);
+		});
+	}
 }
 
 class Showcase1 : public App {
@@ -284,16 +348,13 @@ public:
 	virtual void initialize() override {
 		cout << __FUNCTION__ << endl;
 		initializeActors();
-		Finder<Actor>::find("sys:root", 
-			loadPrefab(m_assets->find(L"showcase/ingame.json"), *m_assets) +
-			[this](Actor &) {
-				initializeIngame();
-			}
-		);
+		m_assets->find(L"showcase/common").load();
+		transition::beginMenu(*m_assets);
 	}
 
 	virtual void finalize() override {
 		cout << __FUNCTION__ << endl;
+		m_assets->find(L"showcase/common").unload();
 		m_actors.reset();
 	}
 
@@ -335,24 +396,6 @@ private:
 		root->appendChild(resource);
 		root->appendChild(renderer);
 		m_actors.reset(root);
-	}
-
-	void initializeIngame() {
-		Finder<Actor>::find("p1", [&assetBase = *m_assets](Actor &a) {
-			auto &playerAnim = assetBase.find(L"showcase/player.anim");
-			a.appendAction(
-				player::setSpeedX + player::moveX + player::adjustX +
-				player::setSpeedY + player::moveY + player::adjustY +
-				withComponent<Transform>(player::adjustBg) +
-				withComponent<Animator>([&playerAnim](Actor &a, auto &animator) {
-					auto replayName = a.set<string>("replay", "");
-					auto replayName_ = a.set<string>("replay_", replayName);
-					if (!replayName.empty() && (replayName != replayName_)) {
-						animator.replay(playerAnim, replayName, "moving");
-					}
-				})
-			);
-		});
 	}
 };
 
