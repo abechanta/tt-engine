@@ -12,7 +12,6 @@
 #include <finder.h>
 #include <geometry.h>
 #include <ptree.h>
-#include <renderer2d.h>
 #include <string>
 #include <vector>
 

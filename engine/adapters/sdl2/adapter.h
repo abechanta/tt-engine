@@ -13,9 +13,9 @@
 #include <iostream>
 #include <memory>
 #include <ptree.h>
-#include <renderer2d.h>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
