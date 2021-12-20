@@ -7,7 +7,7 @@
 #include <finder.h>
 #include <functional>
 #include <geometry.h>
-#include <helpers/actor_modifiers.h>
+#include <helpers/actor_actions.h>
 #include <memory>
 #include <SDL.h>
 

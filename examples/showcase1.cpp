@@ -16,7 +16,7 @@
 #include <components/transform_component.h>
 #include <finder.h>
 #include <geometry.h>
-#include <helpers/actor_modifiers.h>
+#include <helpers/actor_actions.h>
 #include <helpers/actor_triggers.h>
 #include <cassert>
 #include <cmath>
