@@ -1,7 +1,8 @@
 #include <actor.h>
 #include <asset_handler.h>
-#include <geometry.h>
 #include <components/transform_component.h>
+#include <geometry.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
@@ -11,7 +12,7 @@ using namespace tte;
 namespace Tutorial6 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		property_tree::ptree props;
+		ptree props;
 		auto transform1 = make_unique<Transform>(props, vector3{ 1, 2, 3, }, vector3{ 4, 5, 6, }, vector3{ 7, 8, 9, });
 		cout << "--- transformation" << endl;
 		cout << transform1->translation << endl;

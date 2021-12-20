@@ -12,7 +12,9 @@
 #include <utility>
 
 namespace tte {
+	using namespace boost;
 	using namespace std;
+	using ptree = property_tree::ptree;
 
 	inline Actor::Action operator+(const Actor::Action &lhs, const Actor::Action &rhs) {
 		return [lhs, rhs](Actor &a) {
@@ -72,7 +74,7 @@ namespace tte {
 		return put<string>(stateKey, stateValue);
 	}
 
-	inline Actor::Action loadProps(const property_tree::ptree &props) {
+	inline Actor::Action loadProps(const ptree &props) {
 		return [&props](Actor &a) {
 			a.importProps(props);
 		};
@@ -100,7 +102,7 @@ namespace tte {
 		};
 	}
 
-	inline Actor::Action notifyEvent(const string &eventName, const function<property_tree::ptree(Actor &a)> &eventSetup = [](Actor &) -> property_tree::ptree { return property_tree::ptree(); }) {
+	inline Actor::Action notifyEvent(const string &eventName, const function<ptree(Actor &a)> &eventSetup = [](Actor &) -> ptree { return ptree(); }) {
 		return [eventName, eventSetup](Actor &a) {
 			a.props().add_child("eventPool." + eventName, eventSetup(a));
 		};

@@ -11,7 +11,6 @@
 #include <vector>
 
 namespace tte {
-	using namespace boost;
 	using namespace std;
 
 	class Renderer2dInterface {

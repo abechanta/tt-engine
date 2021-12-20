@@ -2,6 +2,7 @@
 #include <actor.h>
 #include <adapters/sdl2/handler.h>
 #include <asset.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <components/input_component.h>
 #include <components/material_component.h>
@@ -21,6 +22,10 @@
 
 namespace tte {
 	namespace sdl2 {
+		using namespace boost;
+		using namespace std;
+		using ptree = property_tree::ptree;
+
 		class Adapter {
 			//
 			// public definitions
@@ -33,7 +38,7 @@ namespace tte {
 				uint32_t flags;
 				uint32_t refreshRate;
 
-				static this_type parse(const property_tree::ptree &pt) {
+				static this_type parse(const ptree &pt) {
 					this_type v;
 					PTree::parse<this_type, string>("title", "<title>", [](this_type &v) -> string & { return v.title; })(v, pt);
 					PTree::parse<this_type, vector2i, int32_t>("pos", PTree::subkeysXYZW, { SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, }, [](this_type &v) -> vector2i & { return v.pos; })(v, pt);
@@ -50,7 +55,7 @@ namespace tte {
 				uint32_t flags;
 				vec<uint8_t, 4> clearColor;
 
-				static this_type parse(const property_tree::ptree &pt) {
+				static this_type parse(const ptree &pt) {
 					this_type v;
 					PTree::parse<this_type, int32_t>("index", -1, [](this_type &v) -> int32_t & { return v.index; })(v, pt);
 					PTree::parse<this_type, uint32_t>("flags", SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC, [](this_type &v) -> uint32_t & { return v.flags; })(v, pt);
@@ -106,7 +111,7 @@ namespace tte {
 				string alias;
 				int32_t scancode;
 
-				static this_type parse(const property_tree::ptree &pt) {
+				static this_type parse(const ptree &pt) {
 					this_type v;
 					PTree::parse<this_type, string>("alias", "empty", [](this_type &v) -> string & { return v.alias; })(v, pt);
 					PTree::parse<this_type, int32_t>("scancode", 0, [](this_type &v) -> int32_t & { return v.scancode; })(v, pt);
@@ -118,7 +123,7 @@ namespace tte {
 				typedef VKeys this_type;
 				deque<VKey> vkeys;
 
-				static this_type parse(const property_tree::ptree &pt) {
+				static this_type parse(const ptree &pt) {
 					this_type v;
 					PTree::inserter<this_type, deque<VKey>, VKey>("vkeys", [](this_type &v) -> back_insert_iterator<deque<VKey> > { return back_inserter<deque<VKey> >(v.vkeys); }, VKey::parse)(v, pt);
 					return v;

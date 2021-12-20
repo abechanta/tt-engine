@@ -1,7 +1,6 @@
 #include <actor.h>
 #include <adapters/sdl2/adapter.h>
 #include <adapters/sdl2/handler.h>
-#include <algorithm>
 #include <app.h>
 #include <asset.h>
 #include <asset_handler.h>
@@ -18,6 +17,7 @@
 #include <geometry.h>
 #include <helpers/actor_actions.h>
 #include <helpers/actor_triggers.h>
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>

@@ -1,6 +1,7 @@
 #pragma once
 #include <actor.h>
 #include <asset.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <clist.h>
 #include <components/animator_component.h>
@@ -17,6 +18,10 @@
 #include <string>
 
 namespace tte {
+	using namespace boost;
+	using namespace std;
+	using ptree = property_tree::ptree;
+
 	class Prefab : public CList {
 		//
 		// public definitions
@@ -30,13 +35,13 @@ namespace tte {
 	private:
 		Asset &m_assetBase;
 		Actor &m_actor;
-		property_tree::ptree &m_node;
+		ptree &m_node;
 
 		//
 		// public methods
 		//
 	public:
-		explicit Prefab(Asset &assetBase, Actor &a, property_tree::ptree &node)
+		explicit Prefab(Asset &assetBase, Actor &a, ptree &node)
 			: CList(tag), m_assetBase(assetBase), m_actor(a), m_node(node)
 		{
 			loadResources();

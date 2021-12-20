@@ -1,6 +1,6 @@
 #include <actor.h>
-#include <finder.h>
 #include <components/indexer_component.h>
+#include <finder.h>
 #include <cassert>
 #include <cstdint>
 #include <functional>

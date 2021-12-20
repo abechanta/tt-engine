@@ -1,6 +1,7 @@
 #pragma once
 #include <actor.h>
 #include <asset.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <climits>
 #include <clist.h>
@@ -11,6 +12,10 @@
 #include <string>
 
 namespace tte {
+	using namespace boost;
+	using namespace std;
+	using ptree = property_tree::ptree;
+
 	class Material : public CList {
 		//
 		// public definitions
@@ -42,7 +47,7 @@ namespace tte {
 		// public methods
 		//
 	public:
-		explicit Material(const Asset &asset, property_tree::ptree &node)
+		explicit Material(const Asset &asset, ptree &node)
 			: CList(tag),
 			m_asset(asset),
 			m_size(PTree::PropertyV<vector2i>::get(asset.props(), "size", 8, PTree::subkeysWH)),
@@ -58,7 +63,7 @@ namespace tte {
 			}
 		}
 
-		explicit Material(const Asset &asset, property_tree::ptree &node, const vector4 &diffuse_, const vector2 &uv0_, const vector2 &uv1_)
+		explicit Material(const Asset &asset, ptree &node, const vector4 &diffuse_, const vector2 &uv0_, const vector2 &uv1_)
 			: CList(tag),
 			m_asset(asset),
 			m_size(PTree::PropertyV<vector2i>::get(asset.props(), "size", 8, PTree::subkeysWH)),

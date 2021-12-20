@@ -1,5 +1,6 @@
 #pragma once
 #include <actor.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <clist.h>
 #include <cstdint>
@@ -9,7 +10,9 @@
 #include <string>
 
 namespace tte {
+	using namespace boost;
 	using namespace std;
+	using ptree = property_tree::ptree;
 
 	class Transform : public CList {
 		//
@@ -30,7 +33,7 @@ namespace tte {
 		// public methods
 		//
 	public:
-		explicit Transform(property_tree::ptree &node)
+		explicit Transform(ptree &node)
 			: CList(tag),
 			translation(node, "translation", 0.f),
 			rotation(node, "rotation", 0.f),
@@ -42,7 +45,7 @@ namespace tte {
 			}
 		}
 
-		explicit Transform(property_tree::ptree &node, const vector3 &translation_, const vector3 &rotation_, const vector3 &scaling_)
+		explicit Transform(ptree &node, const vector3 &translation_, const vector3 &rotation_, const vector3 &scaling_)
 			: CList(tag),
 			translation(node, "translation", translation_),
 			rotation(node, "rotation", rotation_),

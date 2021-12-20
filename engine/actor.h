@@ -16,6 +16,7 @@
 namespace tte {
 	using namespace boost;
 	using namespace std;
+	using ptree = property_tree::ptree;
 
 	class Actor : public MTree<Actor> {
 	private:
@@ -54,7 +55,7 @@ namespace tte {
 		//
 	private:
 		Action m_actions;
-		property_tree::ptree m_props;
+		ptree m_props;
 		Components m_components;
 
 		//
@@ -95,15 +96,15 @@ namespace tte {
 		// property methods
 		//
 	public:
-		void importProps(const property_tree::ptree &props) {
+		void importProps(const ptree &props) {
 			m_props.insert(m_props.end(), props.begin(), props.end());
 		}
 
-		const property_tree::ptree &props() const {
+		const ptree &props() const {
 			return m_props;
 		}
 
-		property_tree::ptree &props(const string &key = "") {
+		ptree &props(const string &key = "") {
 			return PTree::get_child(m_props, key);
 		}
 

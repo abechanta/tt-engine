@@ -18,6 +18,7 @@
 namespace tte {
 	using namespace boost;
 	using namespace std;
+	using ptree = property_tree::ptree;
 
 	class Shape : public CList {
 		//
@@ -73,7 +74,7 @@ namespace tte {
 		PTree::Property<int32_t> code;
 
 	public:
-		explicit ShapeSprite(property_tree::ptree &node)
+		explicit ShapeSprite(ptree &node)
 			: Shape(),
 			size(node, "size", 8.f),
 			cellSize(node, "cellSize", 8),
@@ -126,7 +127,7 @@ namespace tte {
 		PTree::PropertyAA<vector<int32_t> > tiles;
 
 	public:
-		explicit ShapeTilemap(property_tree::ptree &node)
+		explicit ShapeTilemap(ptree &node)
 			: Shape(),
 			size(node, "size", 8),
 			viewOffset(node, "viewOffset", 0),
@@ -253,7 +254,7 @@ namespace tte {
 		PTree::PropertyA<vector<string> > lines;
 
 	public:
-		explicit ShapeText(property_tree::ptree &node)
+		explicit ShapeText(ptree &node)
 			: Shape(),
 			size(node, "size", 8),
 			cellSize(node, "cellSize", 8),

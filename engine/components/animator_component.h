@@ -2,6 +2,7 @@
 #include <actor.h>
 #include <asset.h>
 #include <asset_handler.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <climits>
 #include <clist.h>
@@ -21,6 +22,7 @@
 namespace tte {
 	using namespace boost;
 	using namespace std;
+	using ptree = property_tree::ptree;
 
 	namespace Easing {
 		//
@@ -110,7 +112,7 @@ namespace tte {
 			string easing;
 			float value;
 
-			static this_type parse(const property_tree::ptree &pt) {
+			static this_type parse(const ptree &pt) {
 				this_type v;
 				PTree::parse<this_type, int32_t>("frame", 0, [](this_type &v) -> auto & { return v.frame; })(v, pt);
 				PTree::parse<this_type, string>("easing", "linear:in", [](this_type &v) -> auto & { return v.easing; })(v, pt);
@@ -159,7 +161,7 @@ namespace tte {
 			string type;
 			deque<Key> keys;
 
-			static this_type parse(const property_tree::ptree &pt) {
+			static this_type parse(const ptree &pt) {
 				this_type v;
 				PTree::parse<this_type, string>("access", "overwrite", [](this_type &v) -> auto & { return v.access; })(v, pt);
 				PTree::parse<this_type, string>("target", "empty", [](this_type &v) -> auto & { return v.target; })(v, pt);
@@ -182,7 +184,7 @@ namespace tte {
 		//
 		// public methods
 		//
-		static this_type parse(const property_tree::ptree &pt) {
+		static this_type parse(const ptree &pt) {
 			this_type v;
 			PTree::parse<this_type, string>("name", "", [](this_type &v) -> auto & { return v.name; })(v, pt);
 			PTree::parse<this_type, int32_t>("frameLength", 0, [](this_type &v) -> auto & { return v.frameLength; })(v, pt);
@@ -212,7 +214,7 @@ namespace tte {
 		// public methods
 		//
 	public:
-		AnimationSet(const property_tree::ptree &pt)
+		AnimationSet(const ptree &pt)
 			: m_animations()
 		{
 			PTree::inserter<this_type, deque<Animation>, Animation>("animation", [](this_type &v) -> back_insert_iterator<deque<Animation> > { return back_inserter<deque<Animation> >(v.m_animations); }, Animation::parse)(*this, pt);
@@ -230,7 +232,7 @@ namespace tte {
 			assert(filesystem::is_regular_file(a.path()));
 			a.setLoader([](Asset &a, bool bLoad) -> bool {
 				if (bLoad) {
-					property_tree::ptree pt;
+					ptree pt;
 					read_json(ifstream(a.path()), pt);
 					a.handle<AnimationSet>().reset(new AnimationSet(pt));
 				} else {
@@ -250,7 +252,7 @@ namespace tte {
 		// member variables
 		//
 	private:
-		property_tree::ptree &m_out;
+		ptree &m_out;
 		const Animation &m_animation;
 		bool m_bPlaying;
 		bool m_bDone;
@@ -262,7 +264,7 @@ namespace tte {
 		// public methods
 		//
 	public:
-		explicit Timeline(property_tree::ptree &out, const Animation &animation, bool bImmediate = true)
+		explicit Timeline(ptree &out, const Animation &animation, bool bImmediate = true)
 			: m_out(out), m_animation(animation), m_bPlaying(false), m_bDone(false), m_frameBegin(INT_MAX), m_repeatLeft(0)
 		{
 			m_lastValues.resize(m_animation.channelCount, 0.f);
@@ -352,12 +354,12 @@ namespace tte {
 			return valueBegin;
 		}
 
-		static void delta(property_tree::ptree &out, const Animation::Channel &channel, float value, float lastValue) {
+		static void delta(ptree &out, const Animation::Channel &channel, float value, float lastValue) {
 			value = out.get<float>(channel.target, value) - lastValue + value;
 			out.put<float>(channel.target, value);
 		}
 
-		static void overwrite(property_tree::ptree &out, const Animation::Channel &channel, float value, float) {
+		static void overwrite(ptree &out, const Animation::Channel &channel, float value, float) {
 			out.put<float>(channel.target, value);
 		}
 	};
@@ -373,14 +375,14 @@ namespace tte {
 		// member variables
 		//
 	private:
-		property_tree::ptree &m_out;
+		ptree &m_out;
 		list<pair<string, unique_ptr<Timeline> > > m_timelines;
 
 		//
 		// public methods
 		//
 	public:
-		explicit Animator(property_tree::ptree &props)
+		explicit Animator(ptree &props)
 			: CList(tag), m_out(props), m_timelines()
 		{
 		}
