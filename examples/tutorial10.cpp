@@ -3,7 +3,6 @@
 #include <helpers/actor_triggers.h>
 #include <asset.h>
 #include <asset_handler.h>
-#include <button.h>
 #include <geometry.h>
 #include <components/animator_component.h>
 #include <components/indexer_component.h>

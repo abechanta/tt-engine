@@ -2,7 +2,6 @@
 #include <actor.h>
 #include <adapters/sdl2/handler.h>
 #include <asset.h>
-#include <button.h>
 #include <cassert>
 #include <components/input_component.h>
 #include <components/material_component.h>

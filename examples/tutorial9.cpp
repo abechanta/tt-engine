@@ -1,5 +1,4 @@
 #include <actor.h>
-#include <button.h>
 #include <components/input_component.h>
 #include <cassert>
 #include <cstdint>
