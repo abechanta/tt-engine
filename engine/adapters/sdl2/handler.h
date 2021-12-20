@@ -1,6 +1,5 @@
 #pragma once
 #include <actor.h>
-#include <actor_modifiers.h>
 #include <asset.h>
 #include <components/material_component.h>
 #include <components/renderer2d_component.h>
@@ -8,6 +7,7 @@
 #include <finder.h>
 #include <functional>
 #include <geometry.h>
+#include <helpers/actor_modifiers.h>
 #include <memory>
 #include <SDL.h>
 

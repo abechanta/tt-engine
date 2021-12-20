@@ -1,6 +1,6 @@
 #include <actor.h>
-#include <actor_modifiers.h>
-#include <actor_triggers.h>
+#include <helpers/actor_modifiers.h>
+#include <helpers/actor_triggers.h>
 #include <asset.h>
 #include <asset_handler.h>
 #include <button.h>
