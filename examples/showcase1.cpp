@@ -72,8 +72,7 @@ namespace player {
 	};
 
 	auto adjustX = [](Actor &a) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
-			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
 			PTree::Property<float> speedX(a.props(), "speed.value.x", 0.0f);
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
@@ -116,8 +115,7 @@ namespace player {
 	};
 
 	auto adjustBg = [](Actor &a, Transform &transform) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a, &transform](auto &shapeTilemap) {
-			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a, &transform](auto &tilemap) {
 			auto viewOffset_ = tilemap.viewOffset();
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
@@ -139,8 +137,7 @@ namespace player {
 	};
 
 	auto setSpeedY = [](Actor &a) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
-			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
 			auto accelY = a.props().get<float>("accel.yjGravity", 0.0f);
 			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
 			auto speedY_ = speedY();
@@ -203,8 +200,7 @@ namespace player {
 	};
 
 	auto adjustY = [](Actor &a) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
-			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
 			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
