@@ -14,6 +14,7 @@
 #include <components/transform_component.h>
 #include <cstdint>
 #include <finder.h>
+#include <string>
 
 namespace tte {
 	class Prefab : public CList {

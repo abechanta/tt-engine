@@ -8,6 +8,7 @@
 #include <functional>
 #include <geometry.h>
 #include <ptree.h>
+#include <string>
 
 namespace tte {
 	class Material : public CList {
