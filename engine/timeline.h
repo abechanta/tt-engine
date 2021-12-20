@@ -1,9 +1,10 @@
 #pragma once
 #include <cassert>
 #include <climits>
+#include <cmath>
 #include <cstdint>
 #include <deque>
-#include <easing.h>
+#include <functional>
 #include <iostream>
 #include <iterator>
 #include <ptree.h>
@@ -14,6 +15,82 @@
 namespace tte {
 	using namespace boost;
 	using namespace std;
+
+	namespace Easing {
+		//
+		// public definitions
+		//
+		constexpr float pi = 3.14159265358979323846f;	// M_PI
+
+		namespace Function {
+			template<typename Vt>
+			Vt linear(Vt value1, Vt value2, float ratio) {
+				return (value2 - value1) * ratio;
+			}
+
+			template<typename Vt>
+			Vt quadratic(Vt value1, Vt value2, float ratio) {
+				return (value2 - value1) * ratio * ratio;
+			}
+
+			template<typename Vt>
+			Vt cubic(Vt value1, Vt value2, float ratio) {
+				return (value2 - value1) * ratio * ratio * ratio;
+			};
+
+			template<typename Vt>
+			Vt cyclic(Vt value1, Vt value2, float ratio) {
+				return (value2 - value1) * (1 - sqrt(1 - ratio * ratio));
+			};
+
+			template<typename Vt>
+			Vt sine(Vt value1, Vt value2, float ratio) {
+				return (value2 - value1) * (1 - sin((1 - ratio) * pi / 2));
+			};
+
+			template<typename Vt>
+			Vt back(Vt value1, Vt value2, float ratio) {
+				return (value2 - value1) * ratio * ratio * -cos(ratio * pi);
+			};
+
+			template<typename Vt>
+			Vt elastic(Vt value1, Vt value2, float ratio) {
+				return (value2 - value1) * ratio * ratio * ratio * cos((5 * ratio - 1) * pi);
+			};
+
+			template<typename Vt>
+			Vt bounce(Vt value1, Vt value2, float ratio) {
+				Vt ratio0 = ratio * ratio * ratio * cos((3 * ratio - 1) * pi);
+				return (value2 - value1) * (ratio0 < 0.f ? -ratio0 : ratio0);
+			};
+
+			template<typename Vt>
+			Vt stepping(Vt value1, Vt value2, float ratio) {
+				return (ratio < 1.f) ? 0.f : value2 - value1;
+			};
+		}
+
+		//
+		// public methods
+		//
+		template<typename Vt>
+		Vt in(Vt value1, Vt value2, float ratio, const function<Vt(Vt, Vt, float)> &interpolate) {
+			return value1 + interpolate(value1, value2, ratio);
+		}
+
+		template<typename Vt>
+		Vt out(Vt value1, Vt value2, float ratio, const function<Vt(Vt, Vt, float)> &interpolate) {
+			return value2 - interpolate(value1, value2, 1 - ratio);
+		}
+
+		template<typename Vt>
+		Vt inout(Vt value1, Vt value2, float ratio, const function<Vt(Vt, Vt, float)> &interpolate) {
+			if (ratio < 0.5f) {
+				return in<Vt>(value1, (value2 - value1) / 2, 2 * ratio, interpolate);
+			}
+			return out<Vt>((value2 - value1) / 2, value2, 2 * (ratio - 0.5f), interpolate);
+		}
+	}
 
 	struct Animation {
 		//
