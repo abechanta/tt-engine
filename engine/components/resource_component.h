@@ -33,9 +33,10 @@ namespace tte {
 			m_asset.unload();
 		}
 
-		static Actor::Action append(Asset &asset) {
-			return [&asset](Actor &a) {
-				a.appendComponent(new Resource(asset));
+		static Actor::Action append(Asset &asset, bool bParse = false) {
+			return [&asset, bParse](Actor &a) {
+				auto assetName = bParse ? a.props("resource").get<string>("asset", "") : "";
+				a.appendComponent(new Resource(asset.find(assetName)));
 			};
 		}
 

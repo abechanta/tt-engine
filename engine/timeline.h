@@ -45,6 +45,7 @@ namespace tte {
 					{ "sine", Easing::Function::sine<Vt>, },
 					{ "back", Easing::Function::back<Vt>, },
 					{ "elastic", Easing::Function::elastic<Vt>, },
+					{ "bounce", Easing::Function::bounce<Vt>, },
 					{ "stepping", Easing::Function::stepping<Vt>, },
 				};
 				auto name = easing.substr(0, easing.find_first_of(':'));
@@ -91,7 +92,7 @@ namespace tte {
 		string name;
 		int32_t frameLength;
 		int32_t frameDelay;
-		size_t repeatCount;
+		int32_t repeatCount;
 		size_t channelCount;
 		deque<Channel> channels;
 
@@ -103,7 +104,7 @@ namespace tte {
 			PTree::parse<this_type, string>("name", "", [](this_type &v) -> auto & { return v.name; })(v, pt);
 			PTree::parse<this_type, int32_t>("frameLength", 0, [](this_type &v) -> auto & { return v.frameLength; })(v, pt);
 			PTree::parse<this_type, int32_t>("frameDelay", 0, [](this_type &v) -> auto & { return v.frameDelay; })(v, pt);
-			PTree::parse<this_type, size_t>("repeatCount", 0, [](this_type &v) -> auto & { return v.repeatCount; })(v, pt);
+			PTree::parse<this_type, int32_t>("repeatCount", 0, [](this_type &v) -> auto & { return v.repeatCount; })(v, pt);
 			PTree::counter<this_type, size_t>("channels", [](this_type &v) -> auto & { return v.channelCount; })(v, pt);
 			PTree::inserter<this_type, deque<Channel>, Channel>("channels", [](this_type &v) -> back_insert_iterator<deque<Channel> > { return back_inserter<deque<Channel> >(v.channels); }, Channel::parse)(v, pt);
 			return v;
@@ -192,13 +193,15 @@ namespace tte {
 					m_repeatLeft = m_animation.repeatCount;
 				}
 				while (frameSrc - m_frameBegin - m_animation.frameDelay >= m_animation.frameLength) {
-					if (m_bPlaying && (m_repeatLeft == 0)) {
+					if (m_repeatLeft == 0) {
+						m_frameBegin = frameSrc - m_animation.frameDelay - m_animation.frameLength;
 						m_bPlaying = false;
 						m_bDone = true;
 						break;
+					} else if (m_repeatLeft > 0) {
+						m_frameBegin += m_animation.frameLength;
+						m_repeatLeft--;
 					}
-					m_repeatLeft--;
-					m_frameBegin += m_animation.frameLength;
 				}
 			} else {
 				m_frameBegin++;

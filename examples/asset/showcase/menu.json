@@ -1,0 +1,34 @@
+{
+	"contentType": "text/json",
+	"parent": "sys:resource",
+	"components": [
+		"indexer",
+		"prefab"
+	],
+	"indexer": {
+		"name": "prefab:menu"
+	},
+	"prefab": {
+		"resources": [
+			{
+				"parent": "sys:resource",
+				"components": [
+					"indexer",
+					"resource"
+				],
+				"indexer": {
+					"name": "asset:menu"
+				},
+				"resource": {
+					"asset": "showcase/menu"
+				}
+			}
+		],
+		"actors": [
+			{
+				"name": "menu-guide",
+				"property": "showcase/menu/menu.json"
+			}
+		]
+	}
+}

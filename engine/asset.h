@@ -59,10 +59,10 @@ namespace tte {
 
 		bool load() {
 			if (m_loaded == 0) {
+				cout << "Asset::load: " << m_path << endl;
 				if (!m_loader(self(), true)) {
 					return false;
 				}
-				cout << "Asset::load: " << m_path << endl;
 			}
 			m_loaded++;
 			return true;
@@ -87,15 +87,11 @@ namespace tte {
 			return m_path;
 		}
 
-		property_tree::ptree &props() {
-			return m_props;
-		}
-
 		const property_tree::ptree &props() const {
 			return m_props;
 		}
 
-		property_tree::ptree &props(const string &key) {
+		property_tree::ptree &props(const string &key = "") {
 			return PTree::get_child(m_props, key);
 		}
 

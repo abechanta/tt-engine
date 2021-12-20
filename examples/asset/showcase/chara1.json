@@ -1,6 +1,17 @@
 {
 	"contentType": "text/json",
+	"components": [
+		"indexer",
+		"transform",
+		"material",
+		"sprite",
+		"animator"
+	],
+	"indexer": {
+		"name": "chara1"
+	},
 	"sprite": {
+		"renderer": "sys:renderer2d",
 		"size": {
 			"x": 32,
 			"y": 32
@@ -33,6 +44,7 @@
 		}
 	},
 	"material": {
+		"texture": "showcase/hedgehog.png",
 		"diffuse": {
 			"r": 255,
 			"g": 255,

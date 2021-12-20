@@ -1,0 +1,54 @@
+{
+	"contentType": "text/json",
+	"parent": "sys:resource",
+	"components": [
+		"indexer",
+		"prefab"
+	],
+	"indexer": {
+		"name": "prefab:showcase"
+	},
+	"prefab": {
+		"resources": [
+			{
+				"parent": "sys:resource",
+				"components": [
+					"indexer",
+					"resource"
+				],
+				"indexer": {
+					"name": "asset:showcase"
+				},
+				"resource": {
+					"asset": "showcase"
+				}
+			}
+		],
+		"actors": [
+			{
+				"name": "bg",
+				"property": "showcase/bg.json"
+			},
+			{
+				"name": "hud-score",
+				"property": "showcase/hud/score.json"
+			},
+			{
+				"name": "hud-coins",
+				"property": "showcase/hud/coins.json"
+			},
+			{
+				"name": "hud-world",
+				"property": "showcase/hud/world.json"
+			},
+			{
+				"name": "hud-time",
+				"property": "showcase/hud/time.json"
+			},
+			{
+				"name": "p1",
+				"property": "showcase/p1.json"
+			}
+		]
+	}
+}

@@ -1,16 +1,16 @@
 #pragma once
-#include <clist.h>
-#include <mtree.h>
-#include <ptree.h>
 #include <algorithm>
 #include <array>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <cctype>
+#include <clist.h>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <mtree.h>
 #include <optional>
-#include <boost/property_tree/ptree.hpp>
+#include <ptree.h>
 
 namespace tte {
 	using namespace boost;
@@ -29,7 +29,9 @@ namespace tte {
 			// public methods
 			//
 		public:
-			Components() : CList(tag) {
+			Components()
+				: CList(tag)
+			{
 			}
 
 			virtual ~Components() override {
@@ -58,10 +60,9 @@ namespace tte {
 		// public methods
 		//
 	public:
-		Actor(
-			const Action &action,
-			const Action &initializer
-		) : MTree(), m_actions(action), m_props(), m_components() {
+		Actor(const Action &action, const Action &initializer)
+			: MTree(), m_actions(action), m_props(), m_components()
+		{
 			initializer(*this);
 		}
 
@@ -78,9 +79,15 @@ namespace tte {
 		}
 
 		void act() {
-			auto count0 = m_props.get<int32_t>("count0", -1);
-			m_props.put<int32_t>("count0", ++count0);
+			auto ticks = get<int32_t>("_.ticks", -1);
+			m_props.put<int32_t>("_.ticks", ++ticks);
+			auto bReset = get<bool>("_.reset", false);
+
 			m_actions(*this);
+
+			if (bReset) {
+				m_actions = noAction;
+			}
 		}
 
 		//
@@ -91,15 +98,11 @@ namespace tte {
 			m_props.insert(m_props.end(), props.begin(), props.end());
 		}
 
-		property_tree::ptree & props() {
+		const property_tree::ptree &props() const {
 			return m_props;
 		}
 
-		const property_tree::ptree & props() const {
-			return m_props;
-		}
-
-		property_tree::ptree & props(const string &key) {
+		property_tree::ptree &props(const string &key = "") {
 			return PTree::get_child(m_props, key);
 		}
 
@@ -107,6 +110,14 @@ namespace tte {
 		Vp get(const string &key, const Vp &defvalue) const {
 			auto pNode = PTree::get_child_optional(m_props, key);
 			return pNode ? pNode->get_value<Vp>(defvalue) : defvalue;
+		}
+
+		template<typename Vp>
+		Vp set(const string &key, const Vp &value) {
+			auto &node = PTree::get_child(m_props, key);
+			auto val = node.get_value<Vp>();
+			node.put_value<Vp>(value);
+			return val;
 		}
 
 		//

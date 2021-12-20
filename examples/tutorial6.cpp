@@ -4,7 +4,6 @@
 #include <components/transform_component.h>
 #include <cassert>
 #include <cstdint>
-#include <initializer_list>
 #include <iostream>
 #include <memory>
 using namespace tte;

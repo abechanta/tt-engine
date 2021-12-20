@@ -14,12 +14,14 @@
 namespace tte {
 	using namespace boost;
 	using namespace std;
+	template<typename T>
+	using optional = std::optional<T>;
 
 	namespace PTree {
-		static inline const initializer_list<string> subkeysXYZW = { "x", "y", "z", "w", };
-		static inline const initializer_list<string> subkeysWH = { "w", "h", };
-		static inline const initializer_list<string> subkeysXYWH = { "x", "y", "w", "h", };
-		static inline const initializer_list<string> subkeysRGBA = { "r", "g", "b", "a", };
+		static const initializer_list<string> subkeysXYZW = { "x", "y", "z", "w", };
+		static const initializer_list<string> subkeysWH = { "w", "h", };
+		static const initializer_list<string> subkeysXYWH = { "x", "y", "w", "h", };
+		static const initializer_list<string> subkeysRGBA = { "r", "g", "b", "a", };
 
 		inline property_tree::ptree &get_child(property_tree::ptree &node, property_tree::ptree::path_type key) {
 			if (key.empty()) {
@@ -51,7 +53,7 @@ namespace tte {
 			return get_child(node.back().second, key);
 		}
 
-		inline std::optional<property_tree::ptree> get_child_optional(property_tree::ptree &node, property_tree::ptree::path_type key) {
+		inline optional<property_tree::ptree> get_child_optional(property_tree::ptree &node, property_tree::ptree::path_type key) {
 			if (key.empty()) {
 				return node;
 			}
@@ -76,7 +78,7 @@ namespace tte {
 			return get_child_optional(matches.first->second, key);
 		}
 
-		inline std::optional<const property_tree::ptree> get_child_optional(const property_tree::ptree &node, property_tree::ptree::path_type key) {
+		inline optional<const property_tree::ptree> get_child_optional(const property_tree::ptree &node, property_tree::ptree::path_type key) {
 			if (key.empty()) {
 				return node;
 			}
@@ -99,6 +101,28 @@ namespace tte {
 			}
 
 			return get_child_optional(matches.first->second, key);
+		}
+
+		template<typename Vt, typename Vp = vec_traits<Vt>::scalar_type>
+		Vt get(const optional<property_tree::ptree> &pNode, const string &key = "") {
+			C<V> ret = {};
+			if (pNode) {
+				for (auto &ch : pNode->get_child(key)) {
+					ret.push_back(ch.second.get<Vp>(""));
+				}
+			}
+			return ret;
+		}
+
+		template<typename Vt, typename Vp = vec_traits<Vt>::scalar_type>
+		Vt get(const optional<property_tree::ptree> &pNode, const Vp &defvalue = 0) {
+			static const initializer_list<string> keys = { "x", "y", "z", "w", };
+			Vt ret = {};
+			auto it = keys.begin();
+			for (auto &e : ret.a) {
+				e = pNode ? pNode->get<Vp>(*it++, defvalue) : defvalue;
+			}
+			return ret;
 		}
 
 		template<typename V>
@@ -151,8 +175,8 @@ namespace tte {
 
 			void operator()(const C &val) {
 				m_node.clear();
-				for (auto elm : val) {
-					m_node.push_back(make_pair("", elm));
+				for (const auto &elm : val) {
+					m_node.put("", elm);
 				}
 			}
 
@@ -195,48 +219,47 @@ namespace tte {
 			}
 		};
 
-		template<template<typename, int> class C, typename V, int N>
+		template<typename Vt, typename Vp = vec_traits<Vt>::scalar_type>
 		class PropertyV {
 		private:
 			property_tree::ptree &m_node;
 			const string m_key;
-			const V m_defval;
+			const Vp m_defval;
 			const initializer_list<string> m_subkeys;
 
 		public:
-			PropertyV(property_tree::ptree &node, const string &key, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW)
+			PropertyV(property_tree::ptree &node, const string &key, const Vp defval = 0, const initializer_list<string> subkeys = subkeysXYZW)
 				: m_node(get_child(node, key)), m_key(key), m_defval(defval), m_subkeys(subkeys)
 			{
 			}
 
-			PropertyV(property_tree::ptree &node, const string &key, const C<V, N> &val, const initializer_list<string> subkeys = subkeysXYZW)
+			PropertyV(property_tree::ptree &node, const string &key, const Vt &val, const initializer_list<string> subkeys = subkeysXYZW)
 				: m_node(get_child(node, key)), m_key(key), m_defval(0), m_subkeys(subkeys)
 			{
 				operator()(val);
 			}
 
-			C<V, N> operator()() const {
+			Vt operator()() const {
 				return get(m_node, m_defval, m_subkeys);
 			}
 
-			void operator()(const C<V, N> &val) {
+			void operator()(const Vt &val) {
 				auto it = m_subkeys.begin();
 				for (auto &elm : val.a) {
-					m_node.put<V>(*it++, elm);
+					m_node.put<Vp>(*it++, elm);
 				}
 			}
 
-			static C<V, N> get(const property_tree::ptree &node, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW) {
-				C<V, N> val = {};
+			static Vt get(const property_tree::ptree &node, const Vp defval = 0, const initializer_list<string> subkeys = subkeysXYZW) {
+				Vt val = {};
 				auto it = subkeys.begin();
 				for (auto &e : val.a) {
-					e = node.get<V>(*it++, defval);
+					e = node.get<Vp>(*it++, defval);
 				}
 				return val;
 			}
 
-			static C<V, N> get(const property_tree::ptree &node, const string &key, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW) {
-				C<V, N> val = {};
+			static Vt get(const property_tree::ptree &node, const string &key, const Vp defval = 0, const initializer_list<string> subkeys = subkeysXYZW) {
 				auto pNode = get_child_optional(node, key);
 				assert(pNode);
 				return get(*pNode, defval, subkeys);
@@ -247,65 +270,6 @@ namespace tte {
 				auto val = operator()();
 				os << m_key << ": [ ";
 				for (auto &e : val.a) {
-					os << *it++ << ": " << e << ", ";
-				}
-				os << "]";
-				return os;
-			}
-		};
-
-		template<typename V, int N>
-		class PropertyV<array, V, N> {
-		private:
-			property_tree::ptree &m_node;
-			const string m_key;
-			const V m_defval;
-			const initializer_list<string> m_subkeys;
-
-		public:
-			PropertyV(property_tree::ptree &node, const string &key, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW)
-				: m_node(get_child(node, key)), m_key(key), m_defval(defval), m_subkeys(subkeys)
-			{
-			}
-
-			PropertyV(property_tree::ptree &node, const string &key, const array<V, N> &val, const initializer_list<string> subkeys = subkeysXYZW)
-				: m_node(get_child(node, key)), m_key(key), m_defval(0), m_subkeys(subkeys)
-			{
-				operator()(val);
-			}
-
-			array<V, N> operator()() const {
-				return get(m_node, m_defval, m_subkeys);
-			}
-
-			void operator()(const array<V, N> &val) {
-				auto it = m_subkeys.begin();
-				for (auto &elm : val) {
-					m_node.put<V>(*it++, elm);
-				}
-			}
-
-			static array<V, N> get(const property_tree::ptree &node, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW) {
-				array<V, N> val = {};
-				auto it = subkeys.begin();
-				for (auto &e : val) {
-					e = node.get<V>(*it++, defval);
-				}
-				return val;
-			}
-
-			static array<V, N> get(const property_tree::ptree &node, const string &key, const V defval = 0, const initializer_list<string> subkeys = subkeysXYZW) {
-				array<V, N> val = {};
-				auto pNode = get_child_optional(node, key);
-				assert(pNode);
-				return get(*pNode, defval, subkeys);
-			}
-
-			ostream &to_string(ostream &os) const {
-				auto it = m_subkeys.begin();
-				auto val = operator()();
-				os << m_key << ": [ ";
-				for (auto &e : val) {
 					os << *it++ << ": " << e << ", ";
 				}
 				os << "]";
@@ -368,8 +332,8 @@ namespace tte {
 	ostream &operator<<(ostream &os, const PTree::PropertyAA<C> &rhs) {
 		return rhs.to_string(os);
 	}
-	template<template<typename, int> class C, typename V, int N>
-	ostream &operator<<(ostream &os, const PTree::PropertyV<C, V, N> &rhs) {
+	template<typename Vt, typename Vp = vec_traits<Vt>::scalar_type>
+	ostream &operator<<(ostream &os, const PTree::PropertyV<Vt, Vp> &rhs) {
 		return rhs.to_string(os);
 	}
 }

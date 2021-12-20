@@ -55,7 +55,7 @@ namespace Tutorial10 {
 		auto assetRoot = make_unique<Asset>(L"asset/tutorial10", AssetHandler::factory(L""));
 		cout << "--- ctor" << endl;
 		auto actor1 = make_unique<Actor>(
-			onButtonPressed("down") * componentModifier<Animator>([&assetRoot](Actor &, auto &animator) {
+			onButtonPressed("down") * withComponent<Animator>([&assetRoot](Actor &, auto &animator) {
 				animator.replay(assetRoot->find(L"tutorial10.anim"), "0");
 			}),
 			Resource::append(*assetRoot) +
