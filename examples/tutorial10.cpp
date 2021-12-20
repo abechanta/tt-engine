@@ -21,7 +21,7 @@ namespace Tutorial10 {
 		AssetHandler::clear();
 		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
 		AssetHandler::append({ L".json", AssetHandler::typeJson, });
-		AssetHandler::append({ L".anim", AssetHandler::typeAnim, });
+		AssetHandler::append({ L".anim", AnimationSet::typeAnim, });
 		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		auto assetRoot = make_unique<Asset>(L"asset/tutorial10", AssetHandler::factory(L""));
 		cout << "--- ctor" << endl;
@@ -49,7 +49,7 @@ namespace Tutorial10 {
 		AssetHandler::clear();
 		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
 		AssetHandler::append({ L".json", AssetHandler::typeJson, });
-		AssetHandler::append({ L".anim", AssetHandler::typeAnim, });
+		AssetHandler::append({ L".anim", AnimationSet::typeAnim, });
 		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		auto assetRoot = make_unique<Asset>(L"asset/tutorial10", AssetHandler::factory(L""));
 		cout << "--- ctor" << endl;

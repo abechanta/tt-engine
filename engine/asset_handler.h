@@ -5,7 +5,6 @@
 #include <cassert>
 #include <cstdint>
 #include <functional>
-#include <timeline.h>
 #include <unordered_map>
 #include <utility>
 
@@ -78,21 +77,6 @@ namespace tte {
 #endif
 				} else {
 					a.props().clear();
-				}
-				return true;
-			});
-		}
-
-		static void typeAnim(Asset &a) {
-			cout << __FUNCTION__ << ": " << a.path() << endl;
-			assert(filesystem::is_regular_file(a.path()));
-			a.setLoader([](Asset &a, bool bLoad) -> bool {
-				if (bLoad) {
-					property_tree::ptree pt;
-					read_json(ifstream(a.path()), pt);
-					a.handle<AnimationSet>().reset(new AnimationSet(pt));
-				} else {
-					a.handle<AnimationSet>().reset();
 				}
 				return true;
 			});

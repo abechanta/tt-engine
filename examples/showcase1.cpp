@@ -16,7 +16,6 @@
 #include <components/renderer2d_component.h>
 #include <components/resource_component.h>
 #include <components/shape_component.h>
-#include <timeline.h>
 #include <components/transform_component.h>
 #include <algorithm>
 #include <cassert>
@@ -332,7 +331,7 @@ public:
 		AssetHandler::clear();
 		AssetHandler::append({ AssetHandler::extensionUnknown, AssetHandler::typeUnknown, });
 		AssetHandler::append({ L".json", AssetHandler::typeJson, });
-		AssetHandler::append({ L".anim", AssetHandler::typeAnim, });
+		AssetHandler::append({ L".anim", AnimationSet::typeAnim, });
 		AssetHandler::append({ L".png", sdl2::Adapter::typePng(*m_adapter), });
 		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		m_assets = std::make_unique<Asset>(L"asset", AssetHandler::factory(L"asset:"));
