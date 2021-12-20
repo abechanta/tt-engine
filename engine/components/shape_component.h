@@ -1,7 +1,9 @@
 #pragma once
 #include <actor.h>
+#include <array>
 #include <boost/property_tree/ptree.hpp>
 #include <cassert>
+#include <cstdint>
 #include <clist.h>
 #include <components/material_component.h>
 #include <components/renderer2d_component.h>
@@ -9,10 +11,14 @@
 #include <cstdint>
 #include <finder.h>
 #include <geometry.h>
-#include <renderer2d.h>
-#include <shape2d.h>
+#include <ptree.h>
+#include <string>
+#include <vector>
 
 namespace tte {
+	using namespace boost;
+	using namespace std;
+
 	class Shape : public CList {
 		//
 		// public definitions
@@ -60,11 +66,20 @@ namespace tte {
 	public:
 		static inline const string key = "sprite";
 	public:
-		Shape2d::Sprite m_data;
+		PTree::PropertyV<vector2> size;
+		PTree::PropertyV<vector2i> cellSize;
+		PTree::PropertyV<vector2> anchor;
+		PTree::PropertyV<vec<bool, 2> > flip;
+		PTree::Property<int32_t> code;
 
 	public:
-		explicit ShapeSprite(property_tree::ptree &props)
-			: Shape(), m_data(props)
+		explicit ShapeSprite(property_tree::ptree &node)
+			: Shape(),
+			size(node, "size", 8.f),
+			cellSize(node, "cellSize", 8),
+			anchor(node, "anchor", .5f),
+			flip(node, "flip", false),
+			code(node, "code", 0)
 		{
 		}
 
@@ -73,11 +88,11 @@ namespace tte {
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
 			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
-				auto size_ = m_data.size();
-				auto cellSize_ = m_data.cellSize();
-				auto anchor_ = m_data.anchor();
-				auto flip_ = m_data.flip();
-				auto code_ = m_data.code();
+				auto size_ = size();
+				auto cellSize_ = cellSize();
+				auto anchor_ = anchor();
+				auto flip_ = flip();
+				auto code_ = code();
 				const int32_t cellBounds = X(material.size()) / X(cellSize_);
 
 				renderer.pushMatrix();
@@ -102,11 +117,24 @@ namespace tte {
 	public:
 		static inline const string key = "tilemap";
 	public:
-		Shape2d::Tilemap m_data;
+		PTree::PropertyV<vector2i> size;
+		PTree::PropertyV<vector2i> viewOffset;
+		PTree::PropertyV<vector2i> cellSize;
+		PTree::PropertyV<vector2i> blitSize;
+		PTree::PropertyV<vector2i> tileSize;
+		PTree::Property<bool> transpose;
+		PTree::PropertyAA<vector<int32_t> > tiles;
 
 	public:
-		explicit ShapeTilemap(property_tree::ptree &props)
-			: Shape(), m_data(props)
+		explicit ShapeTilemap(property_tree::ptree &node)
+			: Shape(),
+			size(node, "size", 8),
+			viewOffset(node, "viewOffset", 0),
+			cellSize(node, "cellSize", 8),
+			blitSize(node, "blitSize", 8),
+			tileSize(node, "tileSize", 8),
+			transpose(node, "transpose", false),
+			tiles(node, "tiles")
 		{
 		}
 
@@ -115,12 +143,12 @@ namespace tte {
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
 			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
-				auto size_ = m_data.size();
-				auto viewOffset_ = m_data.viewOffset();
-				auto cellSize_ = m_data.cellSize();
-				auto blitSize_ = m_data.blitSize();
-				auto tileSize_ = m_data.tileSize();
-				if (m_data.transpose()) {
+				auto size_ = size();
+				auto viewOffset_ = viewOffset();
+				auto cellSize_ = cellSize();
+				auto blitSize_ = blitSize();
+				auto tileSize_ = tileSize();
+				if (transpose()) {
 					tileSize_ = YX(tileSize_);
 				}
 				const int32_t cellBounds = X(material.size()) / X(cellSize_);
@@ -135,10 +163,10 @@ namespace tte {
 					const auto &anchor = zero_vec<float, 2>();
 					const auto &flip = zero_vec<bool, 2>();
 
-					if (m_data.transpose()) {
+					if (transpose()) {
 						for (int32_t rp = startPos(X(viewOffset_), X(blitSize_)); rp < X(size_); rp += X(blitSize_)) {
 							int32_t ri = startIdx(X(viewOffset_) + rp, X(blitSize_), X(tileSize_));
-							auto vertical = m_data.tiles[ri]();
+							auto vertical = tiles[ri]();
 							for (int32_t cp = startPos(Y(viewOffset_), Y(blitSize_)); cp < Y(size_); cp += Y(blitSize_)) {
 								int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(tileSize_));
 								auto code = vertical[ci];
@@ -154,7 +182,7 @@ namespace tte {
 					} else {
 						for (int32_t rp = startPos(Y(viewOffset_), Y(blitSize_)); rp < Y(size_); rp += Y(blitSize_)) {
 							int32_t ri = startIdx(Y(viewOffset_) + rp, Y(blitSize_), Y(tileSize_));
-							auto horizontal = m_data.tiles[ri]();
+							auto horizontal = tiles[ri]();
 							for (int32_t cp = startPos(X(viewOffset_), X(blitSize_)); cp < X(size_); cp += X(blitSize_)) {
 								int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(tileSize_));
 								auto code = horizontal[ci];
@@ -187,18 +215,61 @@ namespace tte {
 			val += (val < 0) ? wrap : 0;
 			return val;
 		}
+
+	public:
+		vector2i getAddress(const vector2i &wp) {
+			vector2i blitSize_ = blitSize();
+			return Geometry::div_elements<vector2i>(wp, blitSize_);
+		}
+
+		vector2i getWp(const vector2i &addr) {
+			vector2i blitSize_ = blitSize();
+			return Geometry::mul_elements(addr, blitSize_);
+		}
+
+		int32_t peek(const vector2i &addr) {
+			const vector2i tileSize_ = tileSize();
+			vector2i addr_ = addr;
+			if (transpose()) {
+				addr_ = YX(addr_);
+			}
+			Y(addr_) = Geometry::modulo(Y(addr_), Y(tileSize_));
+			assert(Y(addr_) < tiles.size());
+			auto horizontal = tiles[Y(addr_)]();
+			X(addr_) = Geometry::modulo(X(addr_), X(tileSize_));
+			assert(X(addr_) < horizontal.size());
+			return horizontal[X(addr_)];
+		}
 	};
 
 	class ShapeText : public Shape {
 	public:
 		static inline const string key = "text";
 	public:
-		Shape2d::Text m_data;
+		PTree::PropertyV<vector2i> size;
+		PTree::PropertyV<vector2i> cellSize;
+		PTree::PropertyV<vector2i> blitSize;
+		PTree::PropertyA<vector<string> > alignment;
+		PTree::PropertyA<vector<string> > lines;
 
 	public:
-		explicit ShapeText(property_tree::ptree &props)
-			: Shape(), m_data(props)
+		explicit ShapeText(property_tree::ptree &node)
+			: Shape(),
+			size(node, "size", 8),
+			cellSize(node, "cellSize", 8),
+			blitSize(node, "blitSize", 8),
+			alignment(node, "alignment"),
+			lines(node, "lines")
 		{
+			auto alignment_ = alignment();
+			if (Geometry::alignmentConv.find(alignment_[0]) == Geometry::alignmentConv.end()) {
+				alignment_[0] = "center";
+				alignment(alignment_);
+			}
+			if (Geometry::alignmentConv.find(alignment_[1]) == Geometry::alignmentConv.end()) {
+				alignment_[1] = "center";
+				alignment(alignment_);
+			}
 		}
 
 		virtual ~ShapeText() override {
@@ -206,11 +277,11 @@ namespace tte {
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
 			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
-				auto size_ = m_data.size();
-				auto cellSize_ = m_data.cellSize();
-				auto blitSize_ = m_data.blitSize();
-				auto alignment_ = Geometry::conv_elements<vector2>(Geometry::alignmentConv, m_data.alignment());
-				auto lines_ = m_data.lines();
+				auto size_ = size();
+				auto cellSize_ = cellSize();
+				auto blitSize_ = blitSize();
+				auto alignment_ = Geometry::conv_elements<vector2>(Geometry::alignmentConv, alignment());
+				auto lines_ = lines();
 				const int32_t cellBounds = X(material.size()) / X(cellSize_);
 
 				auto translation = transform.translation();

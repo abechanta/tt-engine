@@ -4,6 +4,7 @@
 #include <cassert>
 #include <clist.h>
 #include <cstdint>
+#include <string>
 
 namespace tte {
 	class Resource : public CList {

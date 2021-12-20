@@ -11,6 +11,7 @@
 #include <mtree.h>
 #include <optional>
 #include <ptree.h>
+#include <string>
 
 namespace tte {
 	using namespace boost;

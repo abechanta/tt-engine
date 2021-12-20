@@ -1,9 +1,8 @@
 #include <actor.h>
-#include <actor_modifiers.h>
-#include <actor_triggers.h>
+#include <helpers/actor_modifiers.h>
+#include <helpers/actor_triggers.h>
 #include <asset.h>
 #include <asset_handler.h>
-#include <button.h>
 #include <geometry.h>
 #include <components/animator_component.h>
 #include <components/indexer_component.h>
@@ -22,7 +21,7 @@ namespace Tutorial10 {
 		AssetHandler::clear();
 		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
 		AssetHandler::append({ L".json", AssetHandler::typeJson, });
-		AssetHandler::append({ L".anim", AssetHandler::typeAnim, });
+		AssetHandler::append({ L".anim", AnimationSet::typeAnim, });
 		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		auto assetRoot = make_unique<Asset>(L"asset/tutorial10", AssetHandler::factory(L""));
 		cout << "--- ctor" << endl;
@@ -50,7 +49,7 @@ namespace Tutorial10 {
 		AssetHandler::clear();
 		AssetHandler::append({ L"<undef>", AssetHandler::typeUnknown, });
 		AssetHandler::append({ L".json", AssetHandler::typeJson, });
-		AssetHandler::append({ L".anim", AssetHandler::typeAnim, });
+		AssetHandler::append({ L".anim", AnimationSet::typeAnim, });
 		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		auto assetRoot = make_unique<Asset>(L"asset/tutorial10", AssetHandler::factory(L""));
 		cout << "--- ctor" << endl;

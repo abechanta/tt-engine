@@ -1,14 +1,11 @@
 #include <actor.h>
-#include <actor_modifiers.h>
-#include <actor_triggers.h>
 #include <adapters/sdl2/adapter.h>
-#include <components/animator_component.h>
+#include <adapters/sdl2/handler.h>
+#include <algorithm>
 #include <app.h>
 #include <asset.h>
 #include <asset_handler.h>
-#include <finder.h>
-#include <geometry.h>
-#include <adapters/sdl2/handler.h>
+#include <components/animator_component.h>
 #include <components/indexer_component.h>
 #include <components/input_component.h>
 #include <components/material_component.h>
@@ -16,9 +13,11 @@
 #include <components/renderer2d_component.h>
 #include <components/resource_component.h>
 #include <components/shape_component.h>
-#include <timeline.h>
 #include <components/transform_component.h>
-#include <algorithm>
+#include <finder.h>
+#include <geometry.h>
+#include <helpers/actor_modifiers.h>
+#include <helpers/actor_triggers.h>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -73,8 +72,7 @@ namespace player {
 	};
 
 	auto adjustX = [](Actor &a) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
-			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
 			PTree::Property<float> speedX(a.props(), "speed.value.x", 0.0f);
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
@@ -117,8 +115,7 @@ namespace player {
 	};
 
 	auto adjustBg = [](Actor &a, Transform &transform) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a, &transform](auto &shapeTilemap) {
-			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a, &transform](auto &tilemap) {
 			auto viewOffset_ = tilemap.viewOffset();
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
@@ -140,8 +137,7 @@ namespace player {
 	};
 
 	auto setSpeedY = [](Actor &a) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
-			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
 			auto accelY = a.props().get<float>("accel.yjGravity", 0.0f);
 			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
 			auto speedY_ = speedY();
@@ -204,8 +200,7 @@ namespace player {
 	};
 
 	auto adjustY = [](Actor &a) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &shapeTilemap) {
-			Shape2d::Tilemap &tilemap = shapeTilemap.m_data;
+		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
 			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
@@ -332,7 +327,7 @@ public:
 		AssetHandler::clear();
 		AssetHandler::append({ AssetHandler::extensionUnknown, AssetHandler::typeUnknown, });
 		AssetHandler::append({ L".json", AssetHandler::typeJson, });
-		AssetHandler::append({ L".anim", AssetHandler::typeAnim, });
+		AssetHandler::append({ L".anim", AnimationSet::typeAnim, });
 		AssetHandler::append({ L".png", sdl2::Adapter::typePng(*m_adapter), });
 		AssetHandler::append({ L"", AssetHandler::typeDir, });
 		m_assets = std::make_unique<Asset>(L"asset", AssetHandler::factory(L"asset:"));

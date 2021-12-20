@@ -2,7 +2,6 @@
 #include <actor.h>
 #include <adapters/sdl2/handler.h>
 #include <asset.h>
-#include <button.h>
 #include <cassert>
 #include <components/input_component.h>
 #include <components/material_component.h>
@@ -14,9 +13,9 @@
 #include <iostream>
 #include <memory>
 #include <ptree.h>
-#include <renderer2d.h>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
