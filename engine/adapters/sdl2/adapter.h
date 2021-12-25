@@ -41,8 +41,8 @@ namespace tte {
 				static this_type parse(const ptree &pt) {
 					this_type v;
 					PTree::parse<this_type, string>("title", "<title>", [](this_type &v) -> string & { return v.title; })(v, pt);
-					PTree::parse<this_type, vector2i, int32_t>("pos", PTree::subkeysXYZW, { SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, }, [](this_type &v) -> vector2i & { return v.pos; })(v, pt);
-					PTree::parse<this_type, vector2i, int32_t>("size", PTree::subkeysWH, { 640, 480, }, [](this_type &v) -> vector2i & { return v.size; })(v, pt);
+					PTree::parse<this_type, vector2i>("pos", PTree::subkeysXYZW, { SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, }, [](this_type &v) -> vector2i & { return v.pos; })(v, pt);
+					PTree::parse<this_type, vector2i>("size", PTree::subkeysWH, { 640, 480, }, [](this_type &v) -> vector2i & { return v.size; })(v, pt);
 					PTree::parse<this_type, uint32_t>("flags", SDL_WINDOW_SHOWN, [](this_type &v) -> uint32_t & { return v.flags; })(v, pt);
 					PTree::parse<this_type, uint32_t>("refreshRate", 30, [](this_type &v) -> uint32_t & { return v.refreshRate; })(v, pt);
 					return v;
@@ -59,7 +59,7 @@ namespace tte {
 					this_type v;
 					PTree::parse<this_type, int32_t>("index", -1, [](this_type &v) -> int32_t & { return v.index; })(v, pt);
 					PTree::parse<this_type, uint32_t>("flags", SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC, [](this_type &v) -> uint32_t & { return v.flags; })(v, pt);
-					PTree::parse<this_type, vec<uint8_t, 4>, uint8_t>("clearColor", PTree::subkeysRGBA, { 0, 0, 0, 255, }, [](this_type &v) -> vec<uint8_t, 4> & { return v.clearColor; })(v, pt);
+					PTree::parse<this_type, vec<uint8_t, 4> >("clearColor", PTree::subkeysRGBA, { 0, 0, 0, 255, }, [](this_type &v) -> vec<uint8_t, 4> & { return v.clearColor; })(v, pt);
 					return v;
 				}
 			};
@@ -96,7 +96,7 @@ namespace tte {
 						auto &uv0 = material.to_pixel(material._uv0());
 						auto &uv1 = material.to_pixel(material._uv1());
 						auto srcRect = SDL_Rect{ X(uv0), Y(uv0), X(uv1) - X(uv0), Y(uv1) - Y(uv0), };
-						const vector3i t = scalar_cast<int32_t>(Geometry::pos(m_renderer.matrix(), vector3{ 0.f, 0.f, 0.f, }));
+						const vector3i t = scalar_cast<int32_t>(Geometry::pos(m_renderer.matrix(), zero_vec<float, 3>()));
 						auto dstRect = SDL_Rect{ static_cast<int32_t>(X(pos) + X(t)), static_cast<int32_t>(Y(pos) + Y(t)), X(s), Y(s), };
 						float rotZ = Geometry::angZ(m_renderer.matrix()) * Geometry::rad2deg;
 						auto center = SDL_Point{ static_cast<int32_t>(X(anchor) * X(s)), static_cast<int32_t>(Y(anchor) * Y(s)), };
@@ -125,7 +125,7 @@ namespace tte {
 
 				static this_type parse(const ptree &pt) {
 					this_type v;
-					PTree::inserter<this_type, deque<VKey>, VKey>("vkeys", [](this_type &v) -> back_insert_iterator<deque<VKey> > { return back_inserter<deque<VKey> >(v.vkeys); }, VKey::parse)(v, pt);
+					PTree::inserter<this_type, deque<VKey> >("vkeys", [](this_type &v) -> back_insert_iterator<deque<VKey> > { return back_inserter<deque<VKey> >(v.vkeys); }, VKey::parse)(v, pt);
 					return v;
 				}
 			};

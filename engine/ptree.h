@@ -169,7 +169,7 @@ namespace tte {
 			C get() const {
 				C val = {};
 				for (auto &ch : m_node) {
-					val.push_back(ch.second.get<C::value_type>(""));
+					val.push_back(ch.second.get<typename C::value_type>(""));
 				}
 				return val;
 			}
@@ -194,7 +194,7 @@ namespace tte {
 		};
 
 		template<class C>
-		class PropertyAA : public vector<PTree::PropertyA<C>> {
+		class PropertyAA : public vector<PTree::PropertyA<C> > {
 		private:
 			ptree &m_node;
 			const string m_key;
@@ -293,14 +293,14 @@ namespace tte {
 			};
 		}
 
-		template<typename V, typename Vp, typename Vp2>
+		template<typename V, typename Vp>
 		static function<void(V &, const ptree &)> parse(const string &key, const initializer_list<string> &subkey, const Vp &defval, const function<Vp &(V &)> &setter) {
 			return [key, subkey, defval, setter](V &v, const ptree &pt) {
 				Vp r = defval;
 				auto it = subkey.begin();
 				for (auto &e : r.a) {
 					if (it) {
-						if (auto d = pt.get_optional<Vp2>(key + "." + *it++)) {
+						if (auto d = pt.get_optional<vec_traits<Vp>::scalar_type>(key + "." + *it++)) {
 							e = *d;
 						}
 					}
@@ -309,8 +309,8 @@ namespace tte {
 			};
 		}
 
-		template<typename V, typename Vp, typename Vp2>
-		static function<void(V &, const ptree &)> inserter(const string &key, const function<back_insert_iterator<Vp>(V &)> &setter, const function<Vp2(const ptree &)> &subloader) {
+		template<typename V, typename Vp>
+		static function<void(V &, const ptree &)> inserter(const string &key, const function<back_insert_iterator<Vp>(V &)> &setter, const function<typename Vp::value_type(const ptree &)> &subloader) {
 			return [key, setter, subloader](V &v, const ptree &pt) {
 				if (auto node = pt.get_child_optional(key)) {
 					for (auto &sub : *node) {

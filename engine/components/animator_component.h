@@ -167,7 +167,7 @@ namespace tte {
 				PTree::parse<this_type, string>("access", "overwrite", [](this_type &v) -> auto & { return v.access; })(v, pt);
 				PTree::parse<this_type, string>("target", "empty", [](this_type &v) -> auto & { return v.target; })(v, pt);
 				PTree::parse<this_type, string>("type", "float", [](this_type &v) -> auto & { return v.type; })(v, pt);
-				PTree::inserter<this_type, deque<Key>, Key>("keys", [](this_type &v) -> back_insert_iterator<deque<Key> > { return back_inserter<deque<Key> >(v.keys); }, Key::parse)(v, pt);
+				PTree::inserter<this_type, deque<Key> >("keys", [](this_type &v) -> back_insert_iterator<deque<Key> > { return back_inserter<deque<Key> >(v.keys); }, Key::parse)(v, pt);
 				return v;
 			}
 		};
@@ -192,7 +192,7 @@ namespace tte {
 			PTree::parse<this_type, int32_t>("frameDelay", 0, [](this_type &v) -> auto & { return v.frameDelay; })(v, pt);
 			PTree::parse<this_type, int32_t>("repeatCount", 0, [](this_type &v) -> auto & { return v.repeatCount; })(v, pt);
 			PTree::counter<this_type, size_t>("channels", [](this_type &v) -> auto & { return v.channelCount; })(v, pt);
-			PTree::inserter<this_type, deque<Channel>, Channel>("channels", [](this_type &v) -> back_insert_iterator<deque<Channel> > { return back_inserter<deque<Channel> >(v.channels); }, Channel::parse)(v, pt);
+			PTree::inserter<this_type, deque<Channel> >("channels", [](this_type &v) -> back_insert_iterator<deque<Channel> > { return back_inserter<deque<Channel> >(v.channels); }, Channel::parse)(v, pt);
 			return v;
 		}
 	};
@@ -218,7 +218,7 @@ namespace tte {
 		AnimationSet(const ptree &pt)
 			: m_animations()
 		{
-			PTree::inserter<this_type, deque<Animation>, Animation>("animation", [](this_type &v) -> back_insert_iterator<deque<Animation> > { return back_inserter<deque<Animation> >(v.m_animations); }, Animation::parse)(*this, pt);
+			PTree::inserter<this_type, deque<Animation> >("animation", [](this_type &v) -> back_insert_iterator<deque<Animation> > { return back_inserter<deque<Animation> >(v.m_animations); }, Animation::parse)(*this, pt);
 		}
 
 		const Animation &get(const string &animname) const {
