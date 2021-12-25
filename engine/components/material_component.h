@@ -58,8 +58,8 @@ namespace tte {
 		{
 			auto unit = node.get<string>("uvUnit", "ratio");
 			if (unit == "px") {
-				uv0(to_ratio(scalar_cast<int32_t>(uv0())));
-				uv1(to_ratio(scalar_cast<int32_t>(uv1())));
+				uv0.set(to_ratio(scalar_cast<int32_t>(uv0.get())));
+				uv1.set(to_ratio(scalar_cast<int32_t>(uv1.get())));
 			}
 		}
 

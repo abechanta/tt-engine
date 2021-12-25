@@ -41,7 +41,7 @@ namespace tte {
 		{
 			auto unit = node.get<string>("rotationUnit", "radian");
 			if (auto unitConv = Geometry::rotationConv.at(unit)) {
-				rotation(rotation() * unitConv);
+				rotation.set(rotation.get() * unitConv);
 			}
 		}
 
@@ -63,7 +63,7 @@ namespace tte {
 		}
 
 		matrix3x4 &trs2d(matrix3x4 &m) {
-			return Geometry::trs2d(m, translation(), rotation(), scaling());
+			return Geometry::trs2d(m, translation.get(), rotation.get(), scaling.get());
 		}
 
 		//

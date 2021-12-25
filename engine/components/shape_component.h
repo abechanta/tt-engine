@@ -89,11 +89,11 @@ namespace tte {
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
 			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
-				auto size_ = size();
-				auto cellSize_ = cellSize();
-				auto anchor_ = anchor();
-				auto flip_ = flip();
-				auto code_ = code();
+				auto size_ = size.get();
+				auto cellSize_ = cellSize.get();
+				auto anchor_ = anchor.get();
+				auto flip_ = flip.get();
+				auto code_ = code.get();
 				const int32_t cellBounds = X(material.size()) / X(cellSize_);
 
 				renderer.pushMatrix();
@@ -144,19 +144,19 @@ namespace tte {
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
 			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
-				auto size_ = size();
-				auto viewOffset_ = viewOffset();
-				auto cellSize_ = cellSize();
-				auto blitSize_ = blitSize();
-				auto tileSize_ = tileSize();
-				if (transpose()) {
+				auto size_ = size.get();
+				auto viewOffset_ = viewOffset.get();
+				auto cellSize_ = cellSize.get();
+				auto blitSize_ = blitSize.get();
+				auto tileSize_ = tileSize.get();
+				if (transpose.get()) {
 					tileSize_ = YX(tileSize_);
 				}
 				const int32_t cellBounds = X(material.size()) / X(cellSize_);
 
-				auto translation = transform.translation();
-				auto rotation = transform.rotation();
-				auto scaling = transform.scaling();
+				auto translation = transform.translation.get();
+				auto rotation = transform.rotation.get();
+				auto scaling = transform.scaling.get();
 				renderer.pushMatrix();
 				Geometry::trs2d(renderer.matrix(), translation, rotation, scaling);
 				material.resetUv();
@@ -164,10 +164,10 @@ namespace tte {
 					const auto &anchor = zero_vec<float, 2>();
 					const auto &flip = zero_vec<bool, 2>();
 
-					if (transpose()) {
+					if (transpose.get()) {
 						for (int32_t rp = startPos(X(viewOffset_), X(blitSize_)); rp < X(size_); rp += X(blitSize_)) {
 							int32_t ri = startIdx(X(viewOffset_) + rp, X(blitSize_), X(tileSize_));
-							auto vertical = tiles[ri]();
+							auto vertical = tiles[ri].get();
 							for (int32_t cp = startPos(Y(viewOffset_), Y(blitSize_)); cp < Y(size_); cp += Y(blitSize_)) {
 								int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(tileSize_));
 								auto code = vertical[ci];
@@ -183,7 +183,7 @@ namespace tte {
 					} else {
 						for (int32_t rp = startPos(Y(viewOffset_), Y(blitSize_)); rp < Y(size_); rp += Y(blitSize_)) {
 							int32_t ri = startIdx(Y(viewOffset_) + rp, Y(blitSize_), Y(tileSize_));
-							auto horizontal = tiles[ri]();
+							auto horizontal = tiles[ri].get();
 							for (int32_t cp = startPos(X(viewOffset_), X(blitSize_)); cp < X(size_); cp += X(blitSize_)) {
 								int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(tileSize_));
 								auto code = horizontal[ci];
@@ -219,24 +219,24 @@ namespace tte {
 
 	public:
 		vector2i getAddress(const vector2i &wp) {
-			vector2i blitSize_ = blitSize();
+			vector2i blitSize_ = blitSize.get();
 			return Geometry::div_elements<vector2i>(wp, blitSize_);
 		}
 
 		vector2i getWp(const vector2i &addr) {
-			vector2i blitSize_ = blitSize();
+			vector2i blitSize_ = blitSize.get();
 			return Geometry::mul_elements(addr, blitSize_);
 		}
 
 		int32_t peek(const vector2i &addr) {
-			const vector2i tileSize_ = tileSize();
+			const vector2i tileSize_ = tileSize.get();
 			vector2i addr_ = addr;
-			if (transpose()) {
+			if (transpose.get()) {
 				addr_ = YX(addr_);
 			}
 			Y(addr_) = Geometry::modulo(Y(addr_), Y(tileSize_));
 			assert(Y(addr_) < tiles.size());
-			auto horizontal = tiles[Y(addr_)]();
+			auto horizontal = tiles[Y(addr_)].get();
 			X(addr_) = Geometry::modulo(X(addr_), X(tileSize_));
 			assert(X(addr_) < horizontal.size());
 			return horizontal[X(addr_)];
@@ -262,14 +262,14 @@ namespace tte {
 			alignment(node, "alignment"),
 			lines(node, "lines")
 		{
-			auto alignment_ = alignment();
+			auto alignment_ = alignment.get();
 			if (Geometry::alignmentConv.find(alignment_[0]) == Geometry::alignmentConv.end()) {
 				alignment_[0] = "center";
-				alignment(alignment_);
+				alignment.set(alignment_);
 			}
 			if (Geometry::alignmentConv.find(alignment_[1]) == Geometry::alignmentConv.end()) {
 				alignment_[1] = "center";
-				alignment(alignment_);
+				alignment.set(alignment_);
 			}
 		}
 
@@ -278,16 +278,16 @@ namespace tte {
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
 			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
-				auto size_ = size();
-				auto cellSize_ = cellSize();
-				auto blitSize_ = blitSize();
-				auto alignment_ = Geometry::conv_elements<vector2>(Geometry::alignmentConv, alignment());
-				auto lines_ = lines();
+				auto size_ = size.get();
+				auto cellSize_ = cellSize.get();
+				auto blitSize_ = blitSize.get();
+				auto alignment_ = Geometry::conv_elements<vector2>(Geometry::alignmentConv, alignment.get());
+				auto lines_ = lines.get();
 				const int32_t cellBounds = X(material.size()) / X(cellSize_);
 
-				auto translation = transform.translation();
-				auto rotation = transform.rotation();
-				auto scaling = transform.scaling();
+				auto translation = transform.translation.get();
+				auto rotation = transform.rotation.get();
+				auto scaling = transform.scaling.get();
 				renderer.pushMatrix();
 				Geometry::trs2d(renderer.matrix(), translation, rotation, scaling);
 				material.resetUv();

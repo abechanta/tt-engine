@@ -139,16 +139,16 @@ namespace tte {
 			{
 			}
 
-			V operator()() const {
+			V get() const {
 				return m_node.get<V>(m_key, m_defval);
 			}
 
-			void operator()(const V &val) {
+			void set(const V &val) {
 				m_node.put<V>(m_key, val);
 			}
 
 			ostream &to_string(ostream &os) const {
-				auto val = operator()();
+				auto val = get();
 				os << m_key << ": " << val << "]";
 				return os;
 			}
@@ -166,7 +166,7 @@ namespace tte {
 			{
 			}
 
-			C operator()() const {
+			C get() const {
 				C val = {};
 				for (auto &ch : m_node) {
 					val.push_back(ch.second.get<C::value_type>(""));
@@ -174,7 +174,7 @@ namespace tte {
 				return val;
 			}
 
-			void operator()(const C &val) {
+			void set(const C &val) {
 				m_node.clear();
 				for (const auto &elm : val) {
 					m_node.put("", elm);
@@ -183,7 +183,7 @@ namespace tte {
 
 			ostream &to_string(ostream &os) const {
 				auto it = m_subkeys.begin();
-				auto val = operator()();
+				auto val = get();
 				os << m_key << ": [ ";
 				for (auto &e : val.a) {
 					os << e << ", ";
@@ -237,14 +237,14 @@ namespace tte {
 			PropertyV(ptree &node, const string &key, const Vt &val, const initializer_list<string> subkeys = subkeysXYZW)
 				: m_node(get_child(node, key)), m_key(key), m_defval(0), m_subkeys(subkeys)
 			{
-				operator()(val);
+				set(val);
 			}
 
-			Vt operator()() const {
+			Vt get() const {
 				return get(m_node, m_defval, m_subkeys);
 			}
 
-			void operator()(const Vt &val) {
+			void set(const Vt &val) {
 				auto it = m_subkeys.begin();
 				for (auto &elm : val.a) {
 					m_node.put<Vp>(*it++, elm);
@@ -268,7 +268,7 @@ namespace tte {
 
 			ostream &to_string(ostream &os) const {
 				auto it = m_subkeys.begin();
-				auto val = operator()();
+				auto val = get();
 				os << m_key << ": [ ";
 				for (auto &e : val.a) {
 					os << *it++ << ": " << e << ", ";
