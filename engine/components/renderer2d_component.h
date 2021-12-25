@@ -70,7 +70,7 @@ namespace tte {
 		{
 			matrix3x4 id = Geometry::identity(matrix3x4());
 			m_matrixStack.push_back(id);
-			initializer(a, self());
+			initializer(a, *this);
 		}
 
 		virtual ~Renderer2d() override {
@@ -84,12 +84,12 @@ namespace tte {
 
 		Renderer2d &pushMatrix() {
 			m_matrixStack.push_back(m_matrixStack.back());
-			return self();
+			return *this;
 		}
 
 		Renderer2d &popMatrix() {
 			m_matrixStack.pop_back();
-			return self();
+			return *this;
 		}
 
 		matrix3x4 &matrix() {
@@ -106,14 +106,6 @@ namespace tte {
 
 		operator const Renderer2dInterface &() const {
 			return *m_handle.get();
-		}
-
-		//
-		// utility operators
-		//
-	private:
-		Renderer2d &self() {
-			return *this;
 		}
 	};
 }

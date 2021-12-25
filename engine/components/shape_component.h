@@ -35,7 +35,9 @@ namespace tte {
 		// public methods
 		//
 	public:
-		explicit Shape() : CList(tag) {
+		explicit Shape()
+			: CList(tag)
+		{
 		}
 
 		virtual ~Shape() override {

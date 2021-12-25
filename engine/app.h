@@ -16,9 +16,9 @@ namespace tte {
 			std::unique_ptr<App> m_app;
 
 		public:
-			explicit Runner(
-				std::unique_ptr<App> &&app
-			) : m_app(std::move(app)) {
+			explicit Runner(std::unique_ptr<App> &&app)
+				: m_app(std::move(app))
+			{
 				assert(m_app);
 			}
 
@@ -39,7 +39,7 @@ namespace tte {
 		// public methods
 		//
 	public:
-		App() {}
+		explicit App() {}
 		virtual ~App() {}
 		virtual void initialize() = 0;
 		virtual void finalize() = 0;

@@ -209,7 +209,6 @@ namespace tte {
 		//
 	private:
 		deque<Animation> m_animations;
-		static const Animation s_noAnimation;
 
 		//
 		// public methods
@@ -225,7 +224,7 @@ namespace tte {
 			auto pAnimation = find_if(m_animations.begin(), m_animations.end(), [&animname](auto &anim) -> bool {
 				return anim.name == animname;
 			});
-			return (pAnimation == m_animations.end()) ? s_noAnimation : *pAnimation;
+			return (pAnimation == m_animations.end()) ? noAnimation() : *pAnimation;
 		}
 
 		static void typeAnim(Asset &a) {
@@ -241,6 +240,11 @@ namespace tte {
 				}
 				return true;
 			});
+		}
+
+		static Animation &noAnimation() {
+			static Animation a;
+			return a;
 		}
 	};
 
@@ -430,8 +434,4 @@ namespace tte {
 			}
 		}
 	};
-
-#if defined(tte_declare_static_variables)
-	const Animation AnimationSet::s_noAnimation = Animation();
-#endif	// defined(tte_declare_static_variables)
 }

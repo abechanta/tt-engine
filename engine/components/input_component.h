@@ -23,7 +23,9 @@ namespace tte {
 		// public methods
 		//
 	public:
-		Button() : m_bits(0) {
+		explicit Button()
+			: m_bits(0)
+		{
 		}
 
 		virtual ~Button() {

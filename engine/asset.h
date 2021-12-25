@@ -45,7 +45,7 @@ namespace tte {
 		explicit Asset(const Path &path, const function<void(Asset &)> &initializer)
 			: MTree(), m_path(path), m_props(), m_handle(), m_loader(noLoader), m_loaded(0)
 		{
-			initializer(*this);
+			initializer(self());
 		}
 
 		virtual ~Asset() override {
@@ -115,7 +115,7 @@ namespace tte {
 		//
 	public:
 		Asset &find(const Path &path) {
-			return path.empty() ? *this : find(path.parent_path()).findChild(path.filename());
+			return path.empty() ? self() : find(path.parent_path()).findChild(path.filename());
 		}
 
 		Asset &findChild(const Path &path) {

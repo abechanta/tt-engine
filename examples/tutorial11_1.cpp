@@ -9,7 +9,9 @@ private:
 	bool m_bQuit;
 
 public:
-	Tutorial11_1() : m_bQuit(false) {
+	explicit Tutorial11_1()
+		: m_bQuit(false)
+	{
 		cout << __FUNCTION__ << endl;
 	}
 

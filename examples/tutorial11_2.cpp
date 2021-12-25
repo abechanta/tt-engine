@@ -18,7 +18,9 @@ private:
 	SDL_Surface *m_pSplashSurface;
 
 public:
-	Tutorial11_2() : m_bQuit(false), m_pMainWindow(nullptr), m_pMainSurface(nullptr), m_pSplashSurface(nullptr) {
+	explicit Tutorial11_2()
+		: m_bQuit(false), m_pMainWindow(nullptr), m_pMainSurface(nullptr), m_pSplashSurface(nullptr)
+	{
 		cout << __FUNCTION__ << endl;
 		if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 			cout << SDL_GetError() << endl;

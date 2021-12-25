@@ -305,7 +305,9 @@ private:
 	std::unique_ptr<Actor> m_actors;
 
 public:
-	Showcase1() : App(), m_adapter(sdl2::Adapter::create()), m_assets(), m_actors() {
+	explicit Showcase1()
+		: App(), m_adapter(sdl2::Adapter::create()), m_assets(), m_actors()
+	{
 		cout << __FUNCTION__ << endl;
 		AssetHandler::clear();
 		AssetHandler::append({ AssetHandler::extensionUnknown, AssetHandler::typeUnknown, });

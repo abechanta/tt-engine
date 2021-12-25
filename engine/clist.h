@@ -18,9 +18,9 @@ namespace tte {
 		// public methods
 		//
 	public:
-		explicit CList(
-			uint32_t tag
-		) : m_tag(tag), m_pNext(this), m_pPrev(this) {
+		explicit CList(uint32_t tag)
+			: m_tag(tag), m_pNext(this), m_pPrev(this)
+		{
 		}
 
 		virtual ~CList() {
@@ -37,7 +37,7 @@ namespace tte {
 		//	return lhs;
 		//}
 
-		CList * append(CList *rhs) {
+		CList *append(CList *rhs) {
 			assert(rhs);
 			CList *lhs = this;
 			rhs->detach();
@@ -49,7 +49,7 @@ namespace tte {
 		}
 
 		template<typename V>
-		V * get() {
+		V *get() {
 			for (CList *p = next(); p != end(); p = p->next()) {
 				if (p->tag() == V::tag) {
 					return reinterpret_cast<V *>(p);
@@ -62,7 +62,7 @@ namespace tte {
 		// property methods
 		//
 	public:
-		const uint32_t & tag() const {
+		const uint32_t &tag() const {
 			return m_tag;
 		}
 
@@ -70,11 +70,11 @@ namespace tte {
 		// utility methods
 		//
 	public:
-		CList * next() const {
+		CList *next() const {
 			return m_pNext;
 		}
 
-		const CList * end() const {
+		const CList *end() const {
 			return this;
 		}
 
