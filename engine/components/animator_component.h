@@ -1,5 +1,6 @@
 #pragma once
 #include <actor.h>
+#include <algorithm>
 #include <asset.h>
 #include <asset_handler.h>
 #include <boost/property_tree/ptree.hpp>
@@ -269,20 +270,20 @@ namespace tte {
 		{
 			m_lastValues.resize(m_animation.channelCount, 0.f);
 			if (bImmediate) {
-				replay();
+				pause(false);
 			}
 		}
 
 		virtual ~Timeline() {
 		}
 
-		Timeline &replay() {
-			m_bPlaying = true;
+		Timeline &abort() {
+			m_bDone = true;
 			return *this;
 		}
 
-		Timeline &pause() {
-			m_bPlaying = false;
+		Timeline &pause(bool bPause) {
+			m_bPlaying = !bPause;
 			return *this;
 		}
 
@@ -402,11 +403,11 @@ namespace tte {
 		}
 
 		void replay(Asset &asset, const string &animname, const string &slotname = "") {
-			auto name = slotname.empty() ? animname : slotname;
-			m_timelines.remove_if([name](auto &t) -> bool {
-				return t.first == name;
+			auto slotname_ = slotname.empty() ? animname : slotname;
+			m_timelines.remove_if([slotname_](auto &t) -> bool {
+				return t.first == slotname_;
 			});
-			m_timelines.push_back(pair<string, unique_ptr<Timeline> >{ name, new Timeline(m_out, asset.handle<AnimationSet>()->get(animname)), });
+			m_timelines.push_back(pair<string, unique_ptr<Timeline> >{ slotname_, new Timeline(m_out, asset.handle<AnimationSet>()->get(animname)), });
 		}
 
 		void tick(Actor &a) {
@@ -414,6 +415,19 @@ namespace tte {
 			m_timelines.remove_if([ticks](auto &t) -> bool {
 				return t.second->tick(ticks);
 			});
+		}
+
+		//
+		// property methods
+		//
+	public:
+		void getTimeline(const string &slotname, function<void(Timeline &)> operation) {
+			auto tl = find_if(m_timelines.begin(), m_timelines.end(), [slotname](auto &t) -> bool {
+				return t.first == slotname;
+			});
+			if (tl != m_timelines.end()) {
+				operation(*tl->second);
+			}
 		}
 	};
 

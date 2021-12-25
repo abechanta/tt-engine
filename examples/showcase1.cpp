@@ -137,58 +137,39 @@ namespace player {
 	};
 
 	auto setSpeedY = [](Actor &a) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
-			auto accelY = a.props().get<float>("accel.yjGravity", 0.0f);
-			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
-			auto speedY_ = speedY();
-			PTree::Property<int32_t> frameLeft(a.props(), "jumping.frame.left", 0);
-			auto frameLeft_ = frameLeft();
-			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
-			auto wp_ = wp();
-			PTree::PropertyV<vector2> c2(a.props(), "collider2d", 0.0f);
-			auto c2_ = c2();
+		auto accelY = a.props().get<float>("accel.yjGravity", 0.0f);
+		PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
+		auto speedY_ = speedY();
+		PTree::Property<bool> isJumping(a.props(), "jumping.value", false);
+		PTree::Property<int32_t> frameLeft(a.props(), "jumping.frame.left", 0);
 
-			unordered_map<string, vector2> offsets = {
-				{ "BL", vector2{ X(wp_) - X(c2_) / 2, Y(wp_) + 1, }, },
-				{ "BR", vector2{ X(wp_) + X(c2_) / 2, Y(wp_) + 1, }, },
-			};
-			unordered_map<string, vector2i> mapAddresses;
-			for (auto &offset : offsets) {
-				mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
-			}
-			bool isHitB = hasCollider(tilemap.peek(mapAddresses.at("BL"))) || hasCollider(tilemap.peek(mapAddresses.at("BR")));
-
-			if (speedY_ < 0.0f) {
+		if (isJumping()) {
+			// jumping
+			if (onButtonOn("z")(a) && (frameLeft() > 0)) {
 				// jumping up
-				if (onButtonOn("z")(a) && (frameLeft_ > 0)) {
-					accelY = 0.0f;
-					frameLeft(--frameLeft_);
-				} else {
-					frameLeft(frameLeft_ = 0);
-				}
-			} else if (!isHitB) {
-				// on the air / falling
-				frameLeft(frameLeft_ = 0);
+				accelY = 0.0f;
+				frameLeft(frameLeft() - 1);
 			} else {
-				// standing
-				if (onButtonPressed("z")(a)) {
-					// start jumping
-					accelY = 0.0f;
-					speedY_ = a.props().get<float>("speed.yj0", 0.0f);
-					frameLeft_ = a.props().get<int32_t>("jumping.frame.max", 0);
-					frameLeft(frameLeft_);
-					a.props().put<bool>("jumping.value", true);
-					a.props().put<string>("replay", "jumping");
-				} else {
-					accelY = 0.0f;
-					speedY_ = 0.0f;
-				}
+				frameLeft(0);
 			}
+		} else {
+			// standing
+			if (onButtonPressed("z")(a)) {
+				// start jumping
+				accelY = 0.0f;
+				speedY_ = a.props().get<float>("speed.yj0", 0.0f);
+				isJumping(true);
+				frameLeft(a.props().get<int32_t>("jumping.frame.max", 0));
+				a.props().put<string>("replay", "jumping");
+			} else {
+				accelY = 0.0f;
+				speedY_ = 0.0f;
+			}
+		}
 
-			speedY_ += accelY;
-			speedY_ = clamp(speedY_, a.props().get<float>("speed.min.y", 0.0f), a.props().get<float>("speed.max.y", 0.0f));
-			speedY(speedY_);
-		});
+		speedY_ += accelY;
+		speedY_ = clamp(speedY_, a.props().get<float>("speed.min.y", 0.0f), a.props().get<float>("speed.max.y", 0.0f));
+		speedY(speedY_);
 	};
 
 	auto moveY = [](Actor &a) {
@@ -201,51 +182,48 @@ namespace player {
 
 	auto adjustY = [](Actor &a) {
 		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
+			PTree::Property<bool> isJumping(a.props(), "jumping.value", false);
 			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp();
 			PTree::PropertyV<vector2> c2(a.props(), "collider2d", 0.0f);
 			auto c2_ = c2();
 
-			if (speedY() < 0.0f) {
-				unordered_map<string, vector2> offsets = {
-					{ "TC", vector2{ X(wp_), Y(wp_) - (Y(c2_) + 1), }, },
-				};
-				unordered_map<string, vector2i> mapAddresses;
-				for (auto &offset : offsets) {
-					mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
-				}
-				bool isHitT = hasCollider(tilemap.peek(mapAddresses.at("TC")));
+			unordered_map<string, vector2> offsets = {
+				{ "TC", vector2{ X(wp_), Y(wp_) - (Y(c2_) + 1), }, },
+				{ "BL", vector2{ X(wp_) - X(c2_) / 2, Y(wp_) + 1, }, },
+				{ "BR", vector2{ X(wp_) + X(c2_) / 2, Y(wp_) + 1, }, },
+			};
+			unordered_map<string, vector2i> mapAddresses;
+			for (auto &offset : offsets) {
+				mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
+			}
+			bool isHitT = hasCollider(tilemap.peek(mapAddresses.at("TC")));
+			bool isHitB = hasCollider(tilemap.peek(mapAddresses.at("BL"))) || hasCollider(tilemap.peek(mapAddresses.at("BR")));
 
-				if (isHitT) {
+			if (isJumping()) {
+				// jumping
+				if ((speedY() < 0.0f) && isHitT) {
 					auto posT = tilemap.getWp(mapAddresses.at("TC") + vector2i{ 0, 1, });
 					Y(wp_) = static_cast<float>(Y(posT) + (Y(c2_) + 1));
 					wp(wp_);
+
 					speedY(0.0f);
 					a.props().put<int32_t>("jumping.frame.left", 0);
-				}
-			} else {
-				PTree::Property<bool> isJumping(a.props(), "jumping.value", false);
-
-				unordered_map<string, vector2> offsets = {
-					{ "BL", vector2{ X(wp_) - X(c2_) / 2, Y(wp_) + 1, }, },
-					{ "BR", vector2{ X(wp_) + X(c2_) / 2, Y(wp_) + 1, }, },
-				};
-				unordered_map<string, vector2i> mapAddresses;
-				for (auto &offset : offsets) {
-					mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
-				}
-				bool isHitB = hasCollider(tilemap.peek(mapAddresses.at("BL"))) || hasCollider(tilemap.peek(mapAddresses.at("BR")));
-
-				if (isHitB) {
+				} else if (isHitB) {
 					auto posB = tilemap.getWp(mapAddresses.at("BL"));
 					Y(wp_) = static_cast<float>(Y(posB) - 1);
 					wp(wp_);
-					if (isJumping()) {
-						a.props().put<string>("replay", "standing");
-					}
+
+					isJumping(false);
+					a.props().put<string>("replay", "standing");
 				}
-				isJumping(!isHitB);
+			} else {
+				// standing
+				if (!isHitB) {
+					isJumping(true);
+					a.props().put<int32_t>("jumping.frame.left", 0);
+				}
 			}
 		});
 	};
@@ -254,6 +232,11 @@ namespace player {
 		return [&playerAnim](Actor &a, Animator &animator) {
 			auto replayName = a.set<string>("replay", "");
 			auto replayName_ = a.set<string>("replay_", replayName);
+			if (replayName.empty() && (replayName_.find("running") == 0)) {
+				animator.getTimeline("moving", [](auto &timeline) {
+					timeline.abort();
+				});
+			}
 			if (!replayName.empty() && (replayName != replayName_)) {
 				animator.replay(playerAnim, replayName, "moving");
 			}
