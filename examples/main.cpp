@@ -5,10 +5,8 @@
 #include <stdlib.h>
 #include <functional>
 #include <iostream>
-#include <boost/property_tree/json_parser.hpp>
 #include <map>
 #include <string>
-using namespace boost;
 using namespace std;
 
 extern "C" int tutorial1();
@@ -48,10 +46,6 @@ void checkMemoryLeak() {
 #if defined(_WINDOWS)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif // defined(_WINDOWS)
-}
-
-void dump(const property_tree::ptree &p) {
-	write_json(cout, p);
 }
 
 bool prompt(const string message, string &in) {

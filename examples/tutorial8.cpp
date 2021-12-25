@@ -1,12 +1,12 @@
 #include <actor.h>
-#include <components/animator_component.h>
 #include <asset.h>
 #include <asset_handler.h>
+#include <components/animator_component.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <memory>
-#include <boost/property_tree/ptree.hpp>
 using namespace tte;
 
 namespace Tutorial8 {
@@ -16,11 +16,11 @@ namespace Tutorial8 {
 		cout << "--- load" << endl;
 		asset1->load();
 		cout << "--- ctor" << endl;
-		property_tree::ptree props1;
+		ptree props1;
 		auto animationFalling = asset1->handle<AnimationSet>()->get("falling");
 		auto timeline1 = make_unique<Timeline>(props1, animationFalling, true);
 		cout << "--- replay" << endl;
-		timeline1->replay();
+		timeline1->pause(false);
 		cout << "--- tick" << endl;
 		for (auto i = 0; i < 12; i++) {
 			timeline1->tick(i);

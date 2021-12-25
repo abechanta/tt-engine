@@ -1,14 +1,14 @@
 #include <actor.h>
-#include <helpers/actor_actions.h>
-#include <helpers/actor_triggers.h>
 #include <asset.h>
 #include <asset_handler.h>
-#include <geometry.h>
 #include <components/animator_component.h>
 #include <components/indexer_component.h>
 #include <components/material_component.h>
 #include <components/resource_component.h>
 #include <components/transform_component.h>
+#include <geometry.h>
+#include <helpers/actor_actions.h>
+#include <helpers/actor_triggers.h>
 #include <cassert>
 #include <cstdint>
 #include <iostream>

@@ -1,12 +1,12 @@
 #include <actor.h>
-#include <components/material_component.h>
 #include <asset.h>
 #include <asset_handler.h>
+#include <components/material_component.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <memory>
-#include <boost/property_tree/ptree.hpp>
 using namespace tte;
 
 namespace Tutorial7 {
@@ -15,7 +15,7 @@ namespace Tutorial7 {
 		auto asset1 = make_unique<Asset>(L"asset/tutorial7/font1.png", AssetHandler::typeJson);
 		cout << "--- load" << endl;
 		asset1->load();
-		property_tree::ptree props;
+		ptree props;
 		auto material1 = make_unique<Material>(*asset1, props, vector4{ 1, 1, 1, 0.5f, }, vector2{ 0.f, 0.f, }, vector2{ 0.5f, 0.5f, });
 		cout << "--- material" << endl;
 		cout << material1->diffuse << endl;

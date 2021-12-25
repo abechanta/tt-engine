@@ -1,7 +1,6 @@
 #include <actor.h>
 #include <adapters/sdl2/adapter.h>
 #include <adapters/sdl2/handler.h>
-#include <algorithm>
 #include <app.h>
 #include <asset.h>
 #include <asset_handler.h>
@@ -18,6 +17,7 @@
 #include <geometry.h>
 #include <helpers/actor_actions.h>
 #include <helpers/actor_triggers.h>
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -36,7 +36,7 @@ namespace player {
 	auto setSpeedX = [](Actor &a) {
 		bool isJumping = a.props().get<bool>("jumping.value", false);
 		PTree::Property<float> speedX(a.props(), "speed.value.x", 0.0f);
-		auto speedX_ = speedX();
+		auto speedX_ = speedX.get();
 		auto accelX = a.props().get<float>(isJumping ? "accel.xj" : "accel.xr", 0.0f);
 		auto registX = a.props().get<float>(isJumping ? "accel.xjRegist" : "accel.xrRegist", 0.0f);
 		auto dir = (onButtonOn("left")(a) ? -1 : 0) + (onButtonOn("right")(a) ? +1 : 0);
@@ -60,24 +60,24 @@ namespace player {
 
 		speedX_ += accelX;
 		speedX_ = clamp(speedX_, a.props().get<float>("speed.min.x", 0.0f), a.props().get<float>("speed.max.x", 0.0f));
-		speedX(speedX_);
+		speedX.set(speedX_);
 	};
 
 	auto moveX = [](Actor &a) {
 		auto speedX = a.props().get<float>("speed.value.x", 0.0f);
 		PTree::Property<float> wx(a.props(), "wp.x", 0.0f);
-		auto wx_ = wx();
+		auto wx_ = wx.get();
 
-		wx(wx_ += speedX);
+		wx.set(wx_ += speedX);
 	};
 
 	auto adjustX = [](Actor &a) {
 		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
 			PTree::Property<float> speedX(a.props(), "speed.value.x", 0.0f);
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
-			auto wp_ = wp();
+			auto wp_ = wp.get();
 			PTree::PropertyV<vector2> c2(a.props(), "collider2d", 0.0f);
-			auto c2_ = c2();
+			auto c2_ = c2.get();
 
 			unordered_map<string, vector2> offsets = {
 				{ "LT", vector2{ X(wp_) - (X(c2_) / 2 + 1), Y(wp_) - Y(c2_), }, },
@@ -96,32 +96,32 @@ namespace player {
 				// hit lefthand
 				auto posL = tilemap.getWp(mapAddresses.at("LB") + vector2i{ 1, 0, });
 				X(wp_) = X(posL) + (X(c2_) / 2 + 1);
-				wp(wp_);
-				speedX(0.0f);
+				wp.set(wp_);
+				speedX.set(0.0f);
 			}
 			if (!isHitL && isHitR) {
 				// hit righthand
 				auto posR = tilemap.getWp(mapAddresses.at("RB"));
 				X(wp_) = X(posR) - (X(c2_) / 2 + 1);
-				wp(wp_);
-				speedX(0.0f);
+				wp.set(wp_);
+				speedX.set(0.0f);
 			}
-			if (X(wp_) < X(tilemap.viewOffset()) + X(c2_) / 2) {
+			if (X(wp_) < X(tilemap.viewOffset.get()) + X(c2_) / 2) {
 				// adjust screen left
-				X(wp_) = X(tilemap.viewOffset()) + X(c2_) / 2;
-				wp(wp_);
+				X(wp_) = X(tilemap.viewOffset.get()) + X(c2_) / 2;
+				wp.set(wp_);
 			}
 		});
 	};
 
 	auto adjustBg = [](Actor &a, Transform &transform) {
 		Finder<Actor>::find<ShapeTilemap>("bg", [&a, &transform](auto &tilemap) {
-			auto viewOffset_ = tilemap.viewOffset();
+			auto viewOffset_ = tilemap.viewOffset.get();
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
-			auto wp_ = wp();
+			auto wp_ = wp.get();
 
 			// set relative pos from world pos
-			auto pos = transform.translation();
+			auto pos = transform.translation.get();
 			X(pos) = X(wp_) - X(viewOffset_);
 			Y(pos) = Y(wp_) - Y(viewOffset_);
 
@@ -129,26 +129,68 @@ namespace player {
 			int32_t overflowX = static_cast<int32_t>(X(pos) - 15 * 8);
 			if (overflowX > 0) {
 				X(viewOffset_) += overflowX;
-				tilemap.viewOffset(viewOffset_);
+				tilemap.viewOffset.set(viewOffset_);
 				X(pos) -= static_cast<float>(overflowX);
 			}
-			transform.translation(pos);
+			transform.translation.set(pos);
 		});
 	};
 
 	auto setSpeedY = [](Actor &a) {
+		auto accelY = a.props().get<float>("accel.yjGravity", 0.0f);
+		PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
+		auto speedY_ = speedY.get();
+		PTree::Property<bool> isJumping(a.props(), "jumping.value", false);
+		PTree::Property<int32_t> frameLeft(a.props(), "jumping.frame.left", 0);
+
+		if (isJumping.get()) {
+			// jumping
+			if (onButtonOn("z")(a) && (frameLeft.get() > 0)) {
+				// jumping up
+				accelY = 0.0f;
+				frameLeft.set(frameLeft.get() - 1);
+			} else {
+				frameLeft.set(0);
+			}
+		} else {
+			// standing
+			if (onButtonPressed("z")(a)) {
+				// start jumping
+				accelY = 0.0f;
+				speedY_ = a.props().get<float>("speed.yj0", 0.0f);
+				isJumping.set(true);
+				frameLeft.set(a.props().get<int32_t>("jumping.frame.max", 0));
+				a.props().put<string>("replay", "jumping");
+			} else {
+				accelY = 0.0f;
+				speedY_ = 0.0f;
+			}
+		}
+
+		speedY_ += accelY;
+		speedY_ = clamp(speedY_, a.props().get<float>("speed.min.y", 0.0f), a.props().get<float>("speed.max.y", 0.0f));
+		speedY.set(speedY_);
+	};
+
+	auto moveY = [](Actor &a) {
+		auto speedY = a.props().get<float>("speed.value.y", 0.0f);
+		PTree::Property<float> wy(a.props(), "wp.y", 0.0f);
+		auto wy_ = wy.get();
+
+		wy.set(wy_ += speedY);
+	};
+
+	auto adjustY = [](Actor &a) {
 		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
-			auto accelY = a.props().get<float>("accel.yjGravity", 0.0f);
+			PTree::Property<bool> isJumping(a.props(), "jumping.value", false);
 			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
-			auto speedY_ = speedY();
-			PTree::Property<int32_t> frameLeft(a.props(), "jumping.frame.left", 0);
-			auto frameLeft_ = frameLeft();
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
-			auto wp_ = wp();
+			auto wp_ = wp.get();
 			PTree::PropertyV<vector2> c2(a.props(), "collider2d", 0.0f);
-			auto c2_ = c2();
+			auto c2_ = c2.get();
 
 			unordered_map<string, vector2> offsets = {
+				{ "TC", vector2{ X(wp_), Y(wp_) - (Y(c2_) + 1), }, },
 				{ "BL", vector2{ X(wp_) - X(c2_) / 2, Y(wp_) + 1, }, },
 				{ "BR", vector2{ X(wp_) + X(c2_) / 2, Y(wp_) + 1, }, },
 			};
@@ -156,96 +198,32 @@ namespace player {
 			for (auto &offset : offsets) {
 				mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
 			}
+			bool isHitT = hasCollider(tilemap.peek(mapAddresses.at("TC")));
 			bool isHitB = hasCollider(tilemap.peek(mapAddresses.at("BL"))) || hasCollider(tilemap.peek(mapAddresses.at("BR")));
 
-			if (speedY_ < 0.0f) {
-				// jumping up
-				if (onButtonOn("z")(a) && (frameLeft_ > 0)) {
-					accelY = 0.0f;
-					frameLeft(--frameLeft_);
-				} else {
-					frameLeft(frameLeft_ = 0);
-				}
-			} else if (!isHitB) {
-				// on the air / falling
-				frameLeft(frameLeft_ = 0);
-			} else {
-				// standing
-				if (onButtonPressed("z")(a)) {
-					// start jumping
-					accelY = 0.0f;
-					speedY_ = a.props().get<float>("speed.yj0", 0.0f);
-					frameLeft_ = a.props().get<int32_t>("jumping.frame.max", 0);
-					frameLeft(frameLeft_);
-					a.props().put<bool>("jumping.value", true);
-					a.props().put<string>("replay", "jumping");
-				} else {
-					accelY = 0.0f;
-					speedY_ = 0.0f;
-				}
-			}
-
-			speedY_ += accelY;
-			speedY_ = clamp(speedY_, a.props().get<float>("speed.min.y", 0.0f), a.props().get<float>("speed.max.y", 0.0f));
-			speedY(speedY_);
-		});
-	};
-
-	auto moveY = [](Actor &a) {
-		auto speedY = a.props().get<float>("speed.value.y", 0.0f);
-		PTree::Property<float> wy(a.props(), "wp.y", 0.0f);
-		auto wy_ = wy();
-
-		wy(wy_ += speedY);
-	};
-
-	auto adjustY = [](Actor &a) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
-			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
-			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
-			auto wp_ = wp();
-			PTree::PropertyV<vector2> c2(a.props(), "collider2d", 0.0f);
-			auto c2_ = c2();
-
-			if (speedY() < 0.0f) {
-				unordered_map<string, vector2> offsets = {
-					{ "TC", vector2{ X(wp_), Y(wp_) - (Y(c2_) + 1), }, },
-				};
-				unordered_map<string, vector2i> mapAddresses;
-				for (auto &offset : offsets) {
-					mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
-				}
-				bool isHitT = hasCollider(tilemap.peek(mapAddresses.at("TC")));
-
-				if (isHitT) {
+			if (isJumping.get()) {
+				// jumping
+				if ((speedY.get() < 0.0f) && isHitT) {
 					auto posT = tilemap.getWp(mapAddresses.at("TC") + vector2i{ 0, 1, });
 					Y(wp_) = static_cast<float>(Y(posT) + (Y(c2_) + 1));
-					wp(wp_);
-					speedY(0.0f);
+					wp.set(wp_);
+
+					speedY.set(0.0f);
 					a.props().put<int32_t>("jumping.frame.left", 0);
-				}
-			} else {
-				PTree::Property<bool> isJumping(a.props(), "jumping.value", false);
-
-				unordered_map<string, vector2> offsets = {
-					{ "BL", vector2{ X(wp_) - X(c2_) / 2, Y(wp_) + 1, }, },
-					{ "BR", vector2{ X(wp_) + X(c2_) / 2, Y(wp_) + 1, }, },
-				};
-				unordered_map<string, vector2i> mapAddresses;
-				for (auto &offset : offsets) {
-					mapAddresses.insert({ offset.first, tilemap.getAddress(scalar_cast<int32_t>(offset.second)), });
-				}
-				bool isHitB = hasCollider(tilemap.peek(mapAddresses.at("BL"))) || hasCollider(tilemap.peek(mapAddresses.at("BR")));
-
-				if (isHitB) {
+				} else if (isHitB) {
 					auto posB = tilemap.getWp(mapAddresses.at("BL"));
 					Y(wp_) = static_cast<float>(Y(posB) - 1);
-					wp(wp_);
-					if (isJumping()) {
-						a.props().put<string>("replay", "standing");
-					}
+					wp.set(wp_);
+
+					isJumping.set(false);
+					a.props().put<string>("replay", "standing");
 				}
-				isJumping(!isHitB);
+			} else {
+				// standing
+				if (!isHitB) {
+					isJumping.set(true);
+					a.props().put<int32_t>("jumping.frame.left", 0);
+				}
 			}
 		});
 	};
@@ -254,6 +232,11 @@ namespace player {
 		return [&playerAnim](Actor &a, Animator &animator) {
 			auto replayName = a.set<string>("replay", "");
 			auto replayName_ = a.set<string>("replay_", replayName);
+			if (replayName.empty() && (replayName_.find("running") == 0)) {
+				animator.getTimeline("moving", [](auto &timeline) {
+					timeline.abort();
+				});
+			}
 			if (!replayName.empty() && (replayName != replayName_)) {
 				animator.replay(playerAnim, replayName, "moving");
 			}
@@ -262,7 +245,7 @@ namespace player {
 
 	auto onDead = [](Actor &a) -> bool {
 		PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
-		auto wp_ = wp();
+		auto wp_ = wp.get();
 		return Y(wp_) >= 16 * 16;
 	};
 }

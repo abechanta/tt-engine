@@ -13,6 +13,7 @@
 namespace tte {
 	using namespace boost;
 	using namespace std;
+	using ptree = property_tree::ptree;
 
 	template<typename Dx>
 	struct empty_delete : public std::default_delete<Dx> {
@@ -32,7 +33,7 @@ namespace tte {
 		//
 	private:
 		Path m_path;
-		property_tree::ptree m_props;
+		ptree m_props;
 		std::unique_ptr<uint32_t, empty_delete<uint32_t> > m_handle;
 		function<bool(Asset &, bool)> m_loader;
 		uint32_t m_loaded;
@@ -87,11 +88,11 @@ namespace tte {
 			return m_path;
 		}
 
-		const property_tree::ptree &props() const {
+		const ptree &props() const {
 			return m_props;
 		}
 
-		property_tree::ptree &props(const string &key = "") {
+		ptree &props(const string &key = "") {
 			return PTree::get_child(m_props, key);
 		}
 
