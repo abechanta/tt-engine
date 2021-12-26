@@ -7,12 +7,14 @@ using namespace tte;
 namespace Tutorial0 {
 	struct Value : MTree<Value> {
 		uint32_t m_value;
+
 		explicit Value(uint32_t value)
 			: m_value(value)
 		{
 			cout << "\tctor:" << m_value << endl;
 		}
-		virtual ~Value() {
+
+		virtual ~Value() override {
 			cout << "\tdtor" << endl;
 		}
 	};
