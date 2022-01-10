@@ -1,0 +1,15 @@
+{
+	"contentType": "image/json",
+	"level": 2,
+	"gold": 1200,
+	"spells": [
+		{
+			"name": "Heal",
+			"mp": 3
+		},
+		{
+			"name": "Fire",
+			"weight": 5
+		}
+	]
+}
