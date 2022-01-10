@@ -53,7 +53,7 @@ namespace Tutorial9 {
 	}
 }
 
-extern "C" int tutorial7() {
+extern "C" int tutorial9() {
 	Tutorial9::test1();
 	Tutorial9::test2();
 	return 0;

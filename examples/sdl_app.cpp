@@ -16,6 +16,7 @@
 #include <finder.h>
 #include <geometry.h>
 #include <helpers/actor_actions.h>
+#include <helpers/actor_modifiers.h>
 #include <helpers/actor_triggers.h>
 #include <algorithm>
 #include <cassert>
@@ -72,7 +73,7 @@ namespace player {
 	};
 
 	auto adjustX = [](Actor &a) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
+		Finder<Actor>::find<ShapeTilemap>("levelmap", [&a](auto &tilemap) {
 			PTree::Property<float> speedX(a.props(), "speed.value.x", 0.0f);
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp.get();
@@ -114,8 +115,8 @@ namespace player {
 		});
 	};
 
-	auto adjustBg = [](Actor &a, Transform &transform) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a, &transform](auto &tilemap) {
+	auto adjustLevel = [](Actor &a, Transform &transform) {
+		Finder<Actor>::find<ShapeTilemap>("levelmap", [&a, &transform](auto &tilemap) {
 			auto viewOffset_ = tilemap.viewOffset.get();
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
 			auto wp_ = wp.get();
@@ -181,7 +182,7 @@ namespace player {
 	};
 
 	auto adjustY = [](Actor &a) {
-		Finder<Actor>::find<ShapeTilemap>("bg", [&a](auto &tilemap) {
+		Finder<Actor>::find<ShapeTilemap>("levelmap", [&a](auto &tilemap) {
 			PTree::Property<bool> isJumping(a.props(), "jumping.value", false);
 			PTree::Property<float> speedY(a.props(), "speed.value.y", 0.0f);
 			PTree::PropertyV<vector2> wp(a.props(), "wp", 0.0f);
@@ -248,93 +249,95 @@ namespace player {
 		auto wp_ = wp.get();
 		return Y(wp_) >= 16 * 16;
 	};
+
+	auto action = [](Asset &assetBase, function<void(Asset &)> transition) {
+		auto &playerAnim = assetBase.find(L"ingame/player.anim");
+		return (
+			player::setSpeedX + player::moveX + player::adjustX +
+			player::setSpeedY + player::moveY + player::adjustY +
+			withComponent<Transform>(player::adjustLevel) +
+			withComponent<Animator>(player::replay(playerAnim)) +
+			player::onDead * (
+				findThen("prefab:stage", withComponent<Prefab>([](Actor &, auto &prefab) {
+					prefab.unload();
+					cout << "dead" << endl;
+				})) +
+				findThen("sys:root", appendAction([&assetBase, transition](Actor &) {
+					transition(assetBase);
+				}))
+			)
+		);
+	};
+}
+
+namespace topmenu {
+	auto action = [](Asset &assetBase, function<void(Asset &)> transition) {
+		return (
+			onButtonPressed("z") * (
+				findThen("prefab:topmenu", withComponent<Prefab>([](Actor &, auto &prefab) {
+					prefab.unload();
+				})) +
+				findThen("sys:root", appendAction([&assetBase, transition](Actor &) {
+					transition(assetBase);
+				}))
+			)
+		);
+	};
 }
 
 namespace transition {
 	void beginIngame(Asset &assetBase);
 
 	void beginMenu(Asset &assetBase) {
-		Finder<Actor>::find("sys:root", loadPrefab(assetBase.find(L"showcase/menu.json"), assetBase));
-
-		Finder<Actor>::find("menu-guide", [&](Actor &a) {
-			a.appendAction(
-				onButtonPressed("z") * (
-					findThen("prefab:menu", withComponent<Prefab>([](Actor &, auto &prefab) {
-						prefab.unload();
-					})) +
-					findThen("sys:root", [&](Actor &a) {
-						a.appendAction([&](Actor &) {
-							transition::beginIngame(assetBase);
-						});
-					})
-				)
-			);
-		});
+		appendChildTo("sys:root", loadPrefab(assetBase.find(L"topmenu.json"), assetBase));
+		appendActionTo("guide", topmenu::action(assetBase, beginIngame));
 	}
 
 	void beginIngame(Asset &assetBase) {
-		Finder<Actor>::find("sys:root", loadPrefab(assetBase.find(L"showcase/ingame.json"), assetBase));
-
-		Finder<Actor>::find("p1", [&](Actor &a) {
-			auto &playerAnim = assetBase.find(L"showcase/player.anim");
-			a.appendAction(
-				player::setSpeedX + player::moveX + player::adjustX +
-				player::setSpeedY + player::moveY + player::adjustY +
-				withComponent<Transform>(player::adjustBg) +
-				withComponent<Animator>(player::replay(playerAnim)) +
-				player::onDead * (
-					findThen("prefab:showcase", withComponent<Prefab>([](Actor &, auto &prefab) {
-						prefab.unload();
-						cout << "dead" << endl;
-					})) +
-					findThen("sys:root", [&](Actor &a) {
-						a.appendAction([&](Actor &) {
-							transition::beginMenu(assetBase);
-						});
-					})
-				)
-			);
-		});
+		appendChildTo("sys:root", loadPrefab(assetBase.find(L"ingame.json"), assetBase));
+		appendActionTo("p1", player::action(assetBase, beginMenu));
 	}
 }
 
-class Showcase1 : public App {
+class SdlApp : public App {
 private:
-	std::unique_ptr<sdl2::Adapter> &m_adapter;
+	std::unique_ptr<sdl2::Adapter> m_adapter;
 	std::unique_ptr<Asset> m_assets;
 	std::unique_ptr<Actor> m_actors;
 
 public:
-	explicit Showcase1()
-		: App(), m_adapter(sdl2::Adapter::create()), m_assets(), m_actors()
+	explicit SdlApp()
+		: App(), m_adapter(), m_assets(), m_actors()
 	{
 		cout << __FUNCTION__ << endl;
-		AssetHandler::clear();
-		AssetHandler::append({ AssetHandler::extensionUnknown, AssetHandler::typeUnknown, });
-		AssetHandler::append({ L".json", AssetHandler::typeJson, });
-		AssetHandler::append({ L".anim", AnimationSet::typeAnim, });
-		AssetHandler::append({ L".png", sdl2::Adapter::typePng(*m_adapter), });
-		AssetHandler::append({ L"", AssetHandler::typeDir, });
-		m_assets = std::make_unique<Asset>(L"asset", AssetHandler::factory(L"asset:"));
+		AssetHandler assetHandler;
+		assetHandler.clear();
+		assetHandler.append({ L"<undef>", AssetHandler::typeUnknown, });
+		assetHandler.append({ L".json", AssetHandler::typeJson, });
+		assetHandler.append({ L".anim", AnimationSet::typeAnim, });
+		assetHandler.append({ L".png", sdl2::Adapter::typePng, });
+		assetHandler.append({ L"", AssetHandler::typeDir, });
+		m_assets = std::make_unique<Asset>(L"asset/sdl", assetHandler);
 	}
 
-	virtual ~Showcase1() override {
+	virtual ~SdlApp() override {
 		cout << __FUNCTION__ << endl;
 		m_assets.reset();
+		AssetHandler assetHandler;
+		assetHandler.clear();
 		m_adapter.reset();
-		AssetHandler::clear();
 	}
 
 	virtual void initialize() override {
 		cout << __FUNCTION__ << endl;
 		initializeActors();
-		m_assets->find(L"showcase/common").load();
+		m_assets->find(L"common").load();
 		transition::beginMenu(*m_assets);
 	}
 
 	virtual void finalize() override {
 		cout << __FUNCTION__ << endl;
-		m_assets->find(L"showcase/common").unload();
+		m_assets->find(L"common").unload();
 		m_actors.reset();
 	}
 
@@ -358,31 +361,24 @@ private:
 	void initializeActors() {
 		auto &config = m_assets->find(L"config.json");
 		config.load();
-		auto root = new Actor(Actor::noAction, Indexer::append("sys:root") + put<bool>("_.reset", true));
-		auto window = m_adapter->createWindowActor(config, Indexer::append("sys:window"));
-		auto input = m_adapter->createInputActor(config, Indexer::append("sys:input"));
-		auto inputKbd = m_adapter->createKeyboardActor(config, [](Actor &a) {
-			a.appendAction(onButtonPressed("escape") * findThen("sys:input", put<bool>("quit", true)));
-		});
-		auto resource = new Actor(Actor::noAction, Indexer::append("sys:resource"));
-		auto renderer = m_adapter->createRendererActor(config, Indexer::append("sys:renderer2d"));
+		m_adapter.reset(new sdl2::Adapter(config));
 		config.unload();
 
+		m_actors.reset(m_adapter->initializeActors());
 		auto appGlobal = new Actor(Actor::noAction, Indexer::append("global"));
+		m_actors->appendChild(appGlobal);
 
-		root->appendChild(appGlobal);
-		root->appendChild(window);
-		root->appendChild(input->appendChild(inputKbd));
-		root->appendChild(resource);
-		root->appendChild(renderer);
-		m_actors.reset(root);
+		appendActionTo(
+			"sys:inputKbd",
+			onButtonPressed("escape") * findThen("sys:input", put<bool>("quit", true))
+		);
 	}
 };
 
-extern "C" int showcase1() {
+extern "C" int sdl_app() {
 	cout << __FUNCTION__ << endl;
 	{
-		auto app = make_unique<Showcase1>();
+		auto app = make_unique<SdlApp>();
 		App::Runner runner(std::move(app));
 		runner.run();
 	}

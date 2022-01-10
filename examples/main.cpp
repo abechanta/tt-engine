@@ -25,7 +25,7 @@ extern "C" int tutorial14();
 extern "C" int column1();
 extern "C" int column2();
 extern "C" int sdl_splash();
-extern "C" int showcase1();
+extern "C" int sdl_app();
 unordered_map<string, function<int()> > invokeTable = {
 	{ "1", tutorial1, },
 	{ "2", tutorial2, },
@@ -43,8 +43,8 @@ unordered_map<string, function<int()> > invokeTable = {
 	{ "14", tutorial14, },
 	{ "c1", column1, },
 	{ "c2", column2, },
-	{ "sdl_1", sdl_splash, },
-	{ "s1", showcase1, },
+	{ "s1", sdl_splash, },
+	{ "s2", sdl_app, },
 };
 
 void checkMemoryLeak() {
