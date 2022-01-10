@@ -35,7 +35,7 @@ namespace tte {
 		Path m_path;
 		ptree m_props;
 		std::unique_ptr<uint32_t, empty_delete<uint32_t> > m_handle;
-		function<bool(Asset &, bool)> m_loader;
+		function<bool(Asset &, bool)> m_handler;
 		uint32_t m_loaded;
 
 		//
@@ -43,7 +43,7 @@ namespace tte {
 		//
 	public:
 		explicit Asset(const Path &path, const function<void(Asset &)> &initializer)
-			: MTree(), m_path(path), m_props(), m_handle(), m_loader(noLoader), m_loaded(0)
+			: MTree(), m_path(path), m_props(), m_handle(), m_handler(noHandler), m_loaded(0)
 		{
 			initializer(self());
 		}
@@ -61,7 +61,7 @@ namespace tte {
 		bool load() {
 			if (m_loaded == 0) {
 				cout << "Asset::load: " << m_path << endl;
-				if (!m_loader(self(), true)) {
+				if (!m_handler(self(), true)) {
 					return false;
 				}
 			}
@@ -71,7 +71,7 @@ namespace tte {
 
 		bool unload() {
 			if (m_loaded == 1) {
-				if (!m_loader(self(), false)) {
+				if (!m_handler(self(), false)) {
 					return false;
 				}
 				cout << "Asset::unload: " << m_path << endl;
@@ -106,8 +106,8 @@ namespace tte {
 			return *reinterpret_cast<const std::unique_ptr<V> *>(&m_handle);
 		}
 
-		void setLoader(const function<bool(Asset &, bool)> &loader) {
-			m_loader = loader;
+		void setHandler(const function<bool(Asset &, bool)> &handler) {
+			m_handler = handler;
 		}
 
 		//
@@ -129,7 +129,7 @@ namespace tte {
 		// utility operators
 		//
 	public:
-		static bool noLoader(Asset &, bool) {
+		static bool noHandler(Asset &, bool) {
 			return false;
 		}
 

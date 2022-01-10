@@ -37,6 +37,12 @@ namespace tte {
 		};
 	}
 
+	inline Actor::Action appendAction(const Actor::Action &action) {
+		return [action](Actor &a) {
+			a.appendAction(action);
+		};
+	}
+
 	template<typename Vc1>
 	Actor::Action withComponent(const function<void(Actor &, Vc1 &)> &action) {
 		return [action](Actor &a) {
@@ -50,7 +56,7 @@ namespace tte {
 	Actor::Action withComponent(const function<void(Actor &, Vc1 &, Vc2 &)> &action) {
 		return [action](Actor &a) {
 			a.getComponent<Vc1>([action, &a](Vc1 &component1) {
-				a.getComponent<Vc1>([action, &a, &component1](Vc2 &component2) {
+				a.getComponent<Vc2>([action, &a, &component1](Vc2 &component2) {
 					action(a, component1, component2);
 				});
 			});
@@ -91,14 +97,9 @@ namespace tte {
 	inline Actor::Action loadPrefab(Asset &asset, Asset &assetBase) {
 		return [&asset, &assetBase](Actor &a) {
 			asset.load();
-			auto parentName = asset.props().get<string>("parent", "sys:root");
-			Finder<Actor>::find(parentName, [&asset, &assetBase](Actor &p) {
-				p.appendChild(new Actor(
-					Actor::noAction,
-					loadProps(asset) + Indexer::append() + Prefab::append(assetBase)
-				));
-			});
+			loadProps(asset)(a);
 			asset.unload();
+			Prefab::appendComponents(a, assetBase);
 		};
 	}
 

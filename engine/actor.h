@@ -62,7 +62,7 @@ namespace tte {
 		// public methods
 		//
 	public:
-		explicit Actor(const Action &action, const Action &initializer)
+		explicit Actor(const Action &action = noAction, const Action &initializer = noAction)
 			: MTree(), m_actions(action), m_props(), m_components()
 		{
 			initializer(self());

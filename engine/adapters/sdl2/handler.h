@@ -43,27 +43,23 @@ namespace std {
 
 namespace tte {
 	namespace sdl2 {
-		static constexpr char windowActor[] = "sys:window";
-		static constexpr char rendererActor[] = "sys:renderer2d";
+		static constexpr char rootActor[] = "sys:root";
+		static constexpr char resourceActor[] = "sys:resource";
+		static constexpr char renderer2dActor[] = "sys:renderer2d";
 		static constexpr char inputActor[] = "sys:input";
+		static constexpr char inputKbdActor[] = "sys:inputKbd";
 
-		struct Material : public tte::Material {
-			typedef tte::Material Component;
-			typedef SDL_Texture Handle;
-
-			static Handle *get(const Component &material) {
+		namespace Material {
+			inline SDL_Texture *get(const tte::Material &material) {
 				const Asset &a = material;
-				return a.handle<Handle>().get();
+				return a.handle<SDL_Texture>().get();
 			}
 		};
 
-		struct Renderer2d : public tte::Renderer2d {
-			typedef tte::Renderer2d Component;
-			typedef SDL_Renderer Handle;
-
-			static Handle *get(const Component &renderer) {
-				const tte::Renderer2dInterface &renderer2d = renderer;
-				return renderer2d.handle<Handle>().get();
+		namespace Renderer2d {
+			inline SDL_Renderer *get(const tte::Renderer2d &renderer) {
+				const Renderer2dInterface &renderer2d = renderer;
+				return renderer2d.handle<SDL_Renderer>().get();
 			}
 		};
 	}

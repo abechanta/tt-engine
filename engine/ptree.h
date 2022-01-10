@@ -149,7 +149,7 @@ namespace tte {
 
 			ostream &to_string(ostream &os) const {
 				auto val = get();
-				os << m_key << ": " << val << "]";
+				os << m_key << ": " << val;
 				return os;
 			}
 		};
@@ -182,10 +182,9 @@ namespace tte {
 			}
 
 			ostream &to_string(ostream &os) const {
-				auto it = m_subkeys.begin();
 				auto val = get();
 				os << m_key << ": [ ";
-				for (auto &e : val.a) {
+				for (auto &e : val) {
 					os << e << ", ";
 				}
 				os << "]";

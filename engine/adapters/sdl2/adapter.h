@@ -11,6 +11,9 @@
 #include <cstdint>
 #include <deque>
 #include <finder.h>
+#include <helpers/actor_actions.h>
+#include <helpers/actor_modifiers.h>
+#include <helpers/actor_triggers.h>
 #include <iostream>
 #include <memory>
 #include <ptree.h>
@@ -28,7 +31,7 @@ namespace tte {
 
 		class Adapter {
 			//
-			// public definitions
+			// definitions
 			//
 		private:
 			struct WindowProperty {
@@ -64,48 +67,6 @@ namespace tte {
 				}
 			};
 
-			class Renderer2dInterface : public tte::Renderer2dInterface {
-			private:
-				tte::Renderer2d &m_renderer;
-
-			public:
-				explicit Renderer2dInterface(std::unique_ptr<SDL_Window> &mainWindow, RendererProperty &rendererProps, tte::Renderer2d &renderer)
-					: m_renderer(renderer)
-				{
-					handle<SDL_Renderer>().reset(SDL_CreateRenderer(
-						mainWindow.get(),
-						rendererProps.index,
-						rendererProps.flags
-					));
-					assert(handle<SDL_Renderer>());
-					m_renderer.setRenderer(this);
-				}
-
-				virtual ~Renderer2dInterface() {
-				}
-
-				virtual void drawPoint(Actor &a, const vector2 &point) const override {}
-				virtual void drawPoints(Actor &a, const vector<vector2> &points) const override {}
-				virtual void drawLine(Actor &a, const vector2 &lineS, const vector2 &lineE) const override {}
-				virtual void drawLines(Actor &a, const vector<vector2> &lineS, const vector<vector2> &lineE) const override {}
-				virtual void drawLines(Actor &a, const vector<vector2> &points, const vector<int32_t> &lines) const override {}
-
-				virtual void drawRect(Actor &a, const vector2 &pos, const vector2 &size, const vector2 &anchor, const vec<bool, 2> &flip) const override {
-					a.getComponent<tte::Material>([this, &pos, &size, &anchor, &flip, &a](auto &material) {
-						const vector2i &s = scalar_cast<int32_t>(size);
-						auto &uv0 = material.to_pixel(material._uv0());
-						auto &uv1 = material.to_pixel(material._uv1());
-						auto srcRect = SDL_Rect{ X(uv0), Y(uv0), X(uv1) - X(uv0), Y(uv1) - Y(uv0), };
-						const vector3i t = scalar_cast<int32_t>(Geometry::pos(m_renderer.matrix(), zero_vec<float, 3>()));
-						auto dstRect = SDL_Rect{ static_cast<int32_t>(X(pos) + X(t)), static_cast<int32_t>(Y(pos) + Y(t)), X(s), Y(s), };
-						float rotZ = Geometry::angZ(m_renderer.matrix()) * Geometry::rad2deg;
-						auto center = SDL_Point{ static_cast<int32_t>(X(anchor) * X(s)), static_cast<int32_t>(Y(anchor) * Y(s)), };
-						auto flipFlag = (X(flip) ? SDL_FLIP_HORIZONTAL : 0) | (Y(flip) ? SDL_FLIP_VERTICAL : 0);
-						SDL_RenderCopyEx(Renderer2d::get(m_renderer), Material::get(material), &srcRect, &dstRect, rotZ, &center, static_cast<SDL_RendererFlip>(flipFlag));
-					});
-				}
-			};
-
 			struct VKey {
 				typedef VKey this_type;
 				string alias;
@@ -130,13 +91,57 @@ namespace tte {
 				}
 			};
 
+			class Renderer2dImpl : public Renderer2dInterface {
+			private:
+				tte::Renderer2d &m_renderer;
+
+			public:
+				explicit Renderer2dImpl(SDL_Renderer *renderer2d, tte::Renderer2d &renderer)
+					: m_renderer(renderer)
+				{
+					handle<SDL_Renderer>().reset(renderer2d);
+				}
+
+				virtual ~Renderer2dImpl() override {
+					// handle<SDL_Renderer>().reset();	// intentionally not releasing here.
+				}
+
+				virtual void drawPoint(Actor &a, const vector2 &point) const override {}
+				virtual void drawPoints(Actor &a, const vector<vector2> &points) const override {}
+				virtual void drawLine(Actor &a, const vector2 &lineS, const vector2 &lineE) const override {}
+				virtual void drawLines(Actor &a, const vector<vector2> &lineS, const vector<vector2> &lineE) const override {}
+				virtual void drawLines(Actor &a, const vector<vector2> &points, const vector<int32_t> &lines) const override {}
+
+				virtual void drawRect(Actor &a, const vector2 &pos, const vector2 &size, const vector2 &anchor, const vec<bool, 2> &flip) const override {
+					a.getComponent<tte::Material>([this, &pos, &size, &anchor, &flip, &a](auto &material) {
+						const vector2i &s = scalar_cast<int32_t>(size);
+						const vector2i &uv0 = material.to_pixel(material._uv0());
+						const vector2i &uv1 = material.to_pixel(material._uv1());
+						const SDL_Rect &srcRect = SDL_Rect{ X(uv0), Y(uv0), X(uv1) - X(uv0), Y(uv1) - Y(uv0), };
+						const vector3i t = scalar_cast<int32_t>(Geometry::pos(m_renderer.matrix(), zero_vec<float, 3>()));
+						const SDL_Rect &dstRect = SDL_Rect{ static_cast<int32_t>(X(pos) + X(t)), static_cast<int32_t>(Y(pos) + Y(t)), X(s), Y(s), };
+						const float rotZ = Geometry::angZ(m_renderer.matrix()) * Geometry::rad2deg;
+						const SDL_Point &center = SDL_Point{ static_cast<int32_t>(X(anchor) * X(s)), static_cast<int32_t>(Y(anchor) * Y(s)), };
+						const auto flipFlag = (X(flip) ? SDL_FLIP_HORIZONTAL : 0) | (Y(flip) ? SDL_FLIP_VERTICAL : 0);
+						SDL_RenderCopyEx(
+							Renderer2d::get(m_renderer),
+							Material::get(material),
+							&srcRect,
+							&dstRect,
+							rotZ,
+							&center,
+							static_cast<SDL_RendererFlip>(flipFlag)
+						);
+					});
+				}
+			};
 
 			//
 			// member variables
 			//
 		private:
 			std::unique_ptr<SDL_Window> m_mainWindow;
-			std::unique_ptr<SDL_Surface, empty_delete<SDL_Surface> > m_mainSurface;
+			std::unique_ptr<SDL_Renderer> m_renderer2d;
 			WindowProperty m_windowProps;
 			RendererProperty m_rendererProps;
 			VKeys m_vkeys;
@@ -144,9 +149,13 @@ namespace tte {
 			//
 			// public methods
 			//
-		private:
-			explicit Adapter()
-				: m_mainWindow(), m_mainSurface()
+		public:
+			explicit Adapter(Asset &config)
+				: m_mainWindow(),
+				m_renderer2d(),
+				m_windowProps(WindowProperty::parse(config.props("window/sdl2"))),
+				m_rendererProps(RendererProperty::parse(config.props("renderer/sdl2"))),
+				m_vkeys(VKeys::parse(config.props("input/sdl2")))
 			{
 				if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 					cout << SDL_GetError() << endl;
@@ -156,83 +165,79 @@ namespace tte {
 					cout << IMG_GetError() << endl;
 					assert(false);
 				}
+				m_mainWindow.reset(SDL_CreateWindow(
+					m_windowProps.title.c_str(),
+					X(m_windowProps.pos),
+					Y(m_windowProps.pos),
+					X(m_windowProps.size),
+					Y(m_windowProps.size),
+					m_windowProps.flags
+				));
+				assert(m_mainWindow);
+				m_renderer2d.reset(SDL_CreateRenderer(
+					m_mainWindow.get(),
+					m_rendererProps.index,
+					m_rendererProps.flags
+				));
+				assert(m_renderer2d);
 			}
 
-		public:
 			virtual ~Adapter() {
-				m_mainSurface.reset();
+				m_renderer2d.reset();
 				m_mainWindow.reset();
 				IMG_Quit();
 				SDL_Quit();
 			}
 
-			static std::unique_ptr<Adapter> &create() {
-				static std::unique_ptr<Adapter> s_adapter;
-				assert(!s_adapter);
-				s_adapter.reset(new Adapter());
-				return s_adapter;
-			}
-
-			//
-			// window management
-			//
 		public:
-			Actor *createWindowActor(Asset &config, const Actor::Action &initializer) {
-				return new Actor(
-					[this](Actor &a) {
-						// SDL_UpdateWindowSurface(this->m_mainWindow.get());
-						SDL_Delay(1000 / m_windowProps.refreshRate);
-					},
-					[this, &config](Actor &a) {
-						m_windowProps = WindowProperty::parse(config.props("window/sdl2"));
-						m_mainWindow.reset(SDL_CreateWindow(
-							m_windowProps.title.c_str(),
-							X(m_windowProps.pos),
-							Y(m_windowProps.pos),
-							X(m_windowProps.size),
-							Y(m_windowProps.size),
-							m_windowProps.flags
-						));
-						assert(m_mainWindow);
-						// this->m_mainSurface.reset(SDL_GetWindowSurface(this->m_mainWindow.get()));
-						// assert(m_mainSurface);
-					} + initializer
-				);
+			//
+			// actor management
+			//
+			Actor *initializeActors() {
+				auto root = new Actor(Actor::noAction, Indexer::append(rootActor) + put<bool>("_.reset", true));
+				auto input = createInputActor(Indexer::append(inputActor));
+				auto inputKbd = createKeyboardActor(Indexer::append(inputKbdActor));
+				auto resource = new Actor(Actor::noAction, Indexer::append(resourceActor));
+				auto renderer = createRendererActor(Indexer::append(renderer2dActor));
+
+				root->appendChild(input->appendChild(inputKbd));
+				root->appendChild(resource);
+				root->appendChild(renderer);
+				return root;
 			}
 
+		private:
 			//
 			// renderer management
 			//
-			Actor *createRendererActor(Asset &config, const Actor::Action &initializer) {
+			Actor *createRendererActor(const Actor::Action &initializer) {
 				return new Actor(
-					[this](Actor &a) {
-						a.getComponent<tte::Renderer2d>([this, &a](auto &renderer) {
-							SDL_RenderPresent(sdl2::Renderer2d::get(renderer));
-							SDL_SetRenderDrawColor(
-								sdl2::Renderer2d::get(renderer),
-								X(m_rendererProps.clearColor),
-								Y(m_rendererProps.clearColor),
-								Z(m_rendererProps.clearColor),
-								W(m_rendererProps.clearColor)
-							);
-							SDL_RenderClear(sdl2::Renderer2d::get(renderer));
-						});
-					},
-					[this, &config](Actor &a) {
-						m_rendererProps = RendererProperty::parse(config.props("renderer/sdl2"));
-						tte::Renderer2d::append([this](Actor &, tte::Renderer2d &renderer) {
-							new Renderer2dInterface(m_mainWindow, m_rendererProps, renderer);
-						})(a);
-					} + initializer
+					withComponent<tte::Renderer2d>([this](Actor &, auto &renderer) {
+						SDL_RenderPresent(Renderer2d::get(renderer));
+						SDL_SetRenderDrawColor(
+							Renderer2d::get(renderer),
+							X(m_rendererProps.clearColor),
+							Y(m_rendererProps.clearColor),
+							Z(m_rendererProps.clearColor),
+							W(m_rendererProps.clearColor)
+						);
+						SDL_RenderClear(Renderer2d::get(renderer));
+						// SDL_Delay(1000 / m_windowProps.refreshRate);
+					}),
+					tte::Renderer2d::append([this](tte::Renderer2d &renderer) {
+						renderer.setRenderer(
+							new Renderer2dImpl(m_renderer2d.get(), renderer)
+						);
+					}) + initializer
 				);
 			}
 
 			//
 			// input management
 			//
-			Actor *createInputActor(Asset &config, const Actor::Action &initializer) {
+			Actor *createInputActor(const Actor::Action &initializer) {
 				return new Actor(
-					[](Actor &a) {
+					withComponent<Input>([](Actor &a, auto &input) {
 						SDL_Event e;
 						while (SDL_PollEvent(&e) != 0) {
 							//if ((e.type == SDL_MOUSEBUTTONDOWN) || (e.type == SDL_MOUSEBUTTONUP)) {
@@ -249,61 +254,77 @@ namespace tte {
 								continue;
 							}
 						}
-						a.getComponent<Input>([](auto &input) {
-							input.update();
-						});
-					},
-					[&config](Actor &a) {
-						Input::append()(a);
-						a.props().put<bool>("quit", false);
-					} + initializer
+						input.update();
+					}),
+					Input::append() + put<bool>("quit", false) + initializer
 				);
 			}
 
-			Actor *createKeyboardActor(Asset &config, const Actor::Action &initializer) {
+			Actor *createKeyboardActor(const Actor::Action &initializer) {
 				return new Actor(
-					[this](Actor &a) {
-						Finder<Actor>::find<Input>(inputActor, [this, &a](auto &input) {
-							auto kbdInput = SDL_GetKeyboardState(nullptr);
-							for (auto &vkey : m_vkeys.vkeys) {
-								input.buttons(vkey.alias).update(kbdInput[vkey.scancode]);
-							}
-						});
-					},
-					[this, &config](Actor &a) {
-						Finder<Actor>::find<Input>(inputActor, [this, &config](auto &input) {
-							m_vkeys = VKeys::parse(config.props("input/sdl2"));
-							for (auto &vkey : m_vkeys.vkeys) {
-								input.buttons(vkey.alias).update(0);
-							}
-						});
-					} + initializer
+					findThen(inputActor, withComponent<Input>([this](Actor &, auto &input) {
+						auto kbdInput = SDL_GetKeyboardState(nullptr);
+						for (auto &vkey : m_vkeys.vkeys) {
+							input.buttons(vkey.alias).update(kbdInput[vkey.scancode]);
+						}
+					})),
+					findThen(inputActor, withComponent<Input>([this](Actor &, auto &input) {
+						for (auto &vkey : m_vkeys.vkeys) {
+							input.buttons(vkey.alias).update(0);
+						}
+					})) + initializer
 				);
 			}
 
 		public:
-			static function<void(Asset &)> typePng(Adapter &adapter) {
-				return [&adapter](Asset &a) {
-					cout << __FUNCTION__ << ": " << a.path() << endl;
-					assert(filesystem::is_regular_file(a.path()));
-					a.setLoader([&adapter](Asset &a, bool bLoad) -> bool {
-						if (bLoad) {
-							std::unique_ptr<SDL_Surface> surface(IMG_Load(a.path().string().c_str()));
-							assert(surface);
-							a.props().put<string>("contentType", "image/png");
-							a.props().put<int32_t>("size.w", surface->w);
-							a.props().put<int32_t>("size.h", surface->h);
-							a.props().put<uint32_t>("format", surface->format->format);
-							Finder<Actor>::find<tte::Renderer2d>(rendererActor, [&a, &surface](auto &renderer) {
-								a.handle<SDL_Texture>().reset(SDL_CreateTextureFromSurface(sdl2::Renderer2d::get(renderer), surface.get()));
-							});
-						} else {
-							a.handle<SDL_Texture>().reset();
-							a.props().clear();
-						}
-						return true;
-					});
-				};
+			static void typeBmp(Asset &a) {
+				cout << __FUNCTION__ << ": " << a.path() << endl;
+				typeAny(a, "image/bmp");
+			}
+
+			static void typeGif(Asset &a) {
+				cout << __FUNCTION__ << ": " << a.path() << endl;
+				typeAny(a, "image/gif");
+			}
+
+			static void typeJpg(Asset &a) {
+				cout << __FUNCTION__ << ": " << a.path() << endl;
+				typeAny(a, "image/jpg");
+			}
+
+			static void typePng(Asset &a) {
+				cout << __FUNCTION__ << ": " << a.path() << endl;
+				typeAny(a, "image/png");
+			}
+
+			static void typeTga(Asset &a) {
+				cout << __FUNCTION__ << ": " << a.path() << endl;
+				typeAny(a, "image/tga");
+			}
+
+		private:
+			static void typeAny(Asset &a, const string &mimeType) {
+				assert(filesystem::is_regular_file(a.path()));
+				a.setHandler([mimeType](Asset &a, bool bLoad) -> bool {
+					if (bLoad) {
+						std::unique_ptr<SDL_Surface> surface(IMG_Load(a.path().string().c_str()));
+						assert(surface);
+						a.props().put<string>("contentType", mimeType);
+						a.props().put<int32_t>("size.w", surface->w);
+						a.props().put<int32_t>("size.h", surface->h);
+						a.props().put<uint32_t>("format", surface->format->format);
+						Finder<Actor>::find<tte::Renderer2d>(renderer2dActor, [&a, &surface](auto &renderer) {
+							a.handle<SDL_Texture>().reset(SDL_CreateTextureFromSurface(
+								Renderer2d::get(renderer),
+								surface.get()
+							));
+						});
+					} else {
+						a.handle<SDL_Texture>().reset();
+						a.props().clear();
+					}
+					return true;
+				});
 			}
 		};
 	}

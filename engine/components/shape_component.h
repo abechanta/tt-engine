@@ -91,28 +91,33 @@ namespace tte {
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
 			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
-				auto size_ = size.get();
-				auto cellSize_ = cellSize.get();
-				auto anchor_ = anchor.get();
-				auto flip_ = flip.get();
-				auto code_ = code.get();
-				const int32_t cellBounds = X(material.size()) / X(cellSize_);
-
-				renderer.pushMatrix();
-				transform.trs2d(renderer.matrix());
-				material.resetUv();
-				{
-					auto uv = Geometry::mul_elements<vector2i>(vector2i{ code_ % cellBounds, code_ / cellBounds, }, cellSize_);
-					material._uv0(material.to_ratio(uv));
-					material._uv1(material.to_ratio(uv + cellSize_));
-					auto anchorOffset = Geometry::mul_elements<vector2>(anchor_, scalar_cast<float>(cellSize_));
-
-					const Renderer2dInterface &renderer2d = renderer;
-					renderer2d.drawRect(a, -anchorOffset, size_, anchor_, flip_);
-				}
-				material.resetUv();
-				renderer.popMatrix();
+				draw(renderer, a, transform, material);
 			});
+		}
+
+	private:
+		void draw(Renderer2d &renderer, Actor &a, Transform &transform, Material &material) {
+			auto size_ = size.get();
+			auto cellSize_ = cellSize.get();
+			auto anchor_ = anchor.get();
+			auto flip_ = flip.get();
+			auto code_ = code.get();
+			const int32_t cellBounds = X(material.size()) / X(cellSize_);
+
+			renderer.pushMatrix();
+			transform.trs2d(renderer.matrix());
+			material.resetUv();
+			{
+				auto uv = Geometry::mul_elements<vector2i>(vector2i{ code_ % cellBounds, code_ / cellBounds, }, cellSize_);
+				material._uv0(material.to_ratio(uv));
+				material._uv1(material.to_ratio(uv + cellSize_));
+				auto anchorOffset = Geometry::mul_elements<vector2>(anchor_, scalar_cast<float>(cellSize_));
+
+				const Renderer2dInterface &renderer2d = renderer;
+				renderer2d.drawRect(a, -anchorOffset, size_, anchor_, flip_);
+			}
+			material.resetUv();
+			renderer.popMatrix();
 		}
 	};
 
@@ -146,63 +151,68 @@ namespace tte {
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
 			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
-				auto size_ = size.get();
-				auto viewOffset_ = viewOffset.get();
-				auto cellSize_ = cellSize.get();
-				auto blitSize_ = blitSize.get();
-				auto tileSize_ = tileSize.get();
+				draw(renderer, a, transform, material);
+			});
+		}
+
+	private:
+		void draw(Renderer2d &renderer, Actor &a, Transform &transform, Material &material) {
+			auto size_ = size.get();
+			auto viewOffset_ = viewOffset.get();
+			auto cellSize_ = cellSize.get();
+			auto blitSize_ = blitSize.get();
+			auto tileSize_ = tileSize.get();
+			if (transpose.get()) {
+				tileSize_ = YX(tileSize_);
+			}
+			const int32_t cellBounds = X(material.size()) / X(cellSize_);
+
+			auto translation = transform.translation.get();
+			auto rotation = transform.rotation.get();
+			auto scaling = transform.scaling.get();
+			renderer.pushMatrix();
+			Geometry::trs2d(renderer.matrix(), translation, rotation, scaling);
+			material.resetUv();
+			{
+				const auto &anchor = zero_vec<float, 2>();
+				const auto &flip = zero_vec<bool, 2>();
+
 				if (transpose.get()) {
-					tileSize_ = YX(tileSize_);
-				}
-				const int32_t cellBounds = X(material.size()) / X(cellSize_);
+					for (int32_t rp = startPos(X(viewOffset_), X(blitSize_)); rp < X(size_); rp += X(blitSize_)) {
+						int32_t ri = startIdx(X(viewOffset_) + rp, X(blitSize_), X(tileSize_));
+						auto vertical = tiles[ri].get();
+						for (int32_t cp = startPos(Y(viewOffset_), Y(blitSize_)); cp < Y(size_); cp += Y(blitSize_)) {
+							int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(tileSize_));
+							auto code = vertical[ci];
+							auto uv = Geometry::mul_elements<vector2i>(vector2i{ code % cellBounds, code / cellBounds, }, cellSize_);
+							material._uv0(material.to_ratio(uv));
+							material._uv1(material.to_ratio(uv + cellSize_));
+							auto pos = vector2i{ rp, cp, };
 
-				auto translation = transform.translation.get();
-				auto rotation = transform.rotation.get();
-				auto scaling = transform.scaling.get();
-				renderer.pushMatrix();
-				Geometry::trs2d(renderer.matrix(), translation, rotation, scaling);
-				material.resetUv();
-				{
-					const auto &anchor = zero_vec<float, 2>();
-					const auto &flip = zero_vec<bool, 2>();
-
-					if (transpose.get()) {
-						for (int32_t rp = startPos(X(viewOffset_), X(blitSize_)); rp < X(size_); rp += X(blitSize_)) {
-							int32_t ri = startIdx(X(viewOffset_) + rp, X(blitSize_), X(tileSize_));
-							auto vertical = tiles[ri].get();
-							for (int32_t cp = startPos(Y(viewOffset_), Y(blitSize_)); cp < Y(size_); cp += Y(blitSize_)) {
-								int32_t ci = startIdx(Y(viewOffset_) + cp, Y(blitSize_), Y(tileSize_));
-								auto code = vertical[ci];
-								auto uv = Geometry::mul_elements<vector2i>(vector2i{ code % cellBounds, code / cellBounds, }, cellSize_);
-								material._uv0(material.to_ratio(uv));
-								material._uv1(material.to_ratio(uv + cellSize_));
-								auto pos = vector2i{ rp, cp, };
-
-								const Renderer2dInterface &renderer2d = renderer;
-								renderer2d.drawRect(a, scalar_cast<float>(pos), scalar_cast<float>(blitSize_), anchor, flip);
-							}
+							const Renderer2dInterface &renderer2d = renderer;
+							renderer2d.drawRect(a, scalar_cast<float>(pos), scalar_cast<float>(blitSize_), anchor, flip);
 						}
-					} else {
-						for (int32_t rp = startPos(Y(viewOffset_), Y(blitSize_)); rp < Y(size_); rp += Y(blitSize_)) {
-							int32_t ri = startIdx(Y(viewOffset_) + rp, Y(blitSize_), Y(tileSize_));
-							auto horizontal = tiles[ri].get();
-							for (int32_t cp = startPos(X(viewOffset_), X(blitSize_)); cp < X(size_); cp += X(blitSize_)) {
-								int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(tileSize_));
-								auto code = horizontal[ci];
-								auto uv = Geometry::mul_elements<vector2i>(vector2i{ code % cellBounds, code / cellBounds, }, cellSize_);
-								material._uv0(material.to_ratio(uv));
-								material._uv1(material.to_ratio(uv + cellSize_));
-								auto pos = vector2i{ rp, cp, };
+					}
+				} else {
+					for (int32_t rp = startPos(Y(viewOffset_), Y(blitSize_)); rp < Y(size_); rp += Y(blitSize_)) {
+						int32_t ri = startIdx(Y(viewOffset_) + rp, Y(blitSize_), Y(tileSize_));
+						auto horizontal = tiles[ri].get();
+						for (int32_t cp = startPos(X(viewOffset_), X(blitSize_)); cp < X(size_); cp += X(blitSize_)) {
+							int32_t ci = startIdx(X(viewOffset_) + cp, X(blitSize_), X(tileSize_));
+							auto code = horizontal[ci];
+							auto uv = Geometry::mul_elements<vector2i>(vector2i{ code % cellBounds, code / cellBounds, }, cellSize_);
+							material._uv0(material.to_ratio(uv));
+							material._uv1(material.to_ratio(uv + cellSize_));
+							auto pos = vector2i{ rp, cp, };
 
-								const Renderer2dInterface &renderer2d = renderer;
-								renderer2d.drawRect(a, scalar_cast<float>(pos), scalar_cast<float>(blitSize_), anchor, flip);
-							}
+							const Renderer2dInterface &renderer2d = renderer;
+							renderer2d.drawRect(a, scalar_cast<float>(pos), scalar_cast<float>(blitSize_), anchor, flip);
 						}
 					}
 				}
-				material.resetUv();
-				renderer.popMatrix();
-			});
+			}
+			material.resetUv();
+			renderer.popMatrix();
 		}
 
 	private:
@@ -280,45 +290,50 @@ namespace tte {
 
 		virtual void draw(Renderer2d &renderer, Actor &a) override {
 			a.getComponent<Transform, Material>([this, &a, &renderer](auto &transform, auto &material) {
-				auto size_ = size.get();
-				auto cellSize_ = cellSize.get();
-				auto blitSize_ = blitSize.get();
-				auto alignment_ = Geometry::conv_elements<vector2>(Geometry::alignmentConv, alignment.get());
-				auto lines_ = lines.get();
-				const int32_t cellBounds = X(material.size()) / X(cellSize_);
+				draw(renderer, a, transform, material);
+			});
+		}
 
-				auto translation = transform.translation.get();
-				auto rotation = transform.rotation.get();
-				auto scaling = transform.scaling.get();
-				renderer.pushMatrix();
-				Geometry::trs2d(renderer.matrix(), translation, rotation, scaling);
-				material.resetUv();
-				{
-					const auto &anchor = zero_vec<float, 2>();
-					const auto &flip = zero_vec<bool, 2>();
+	private:
+		void draw(Renderer2d &renderer, Actor &a, Transform &transform, Material &material) {
+			auto size_ = size.get();
+			auto cellSize_ = cellSize.get();
+			auto blitSize_ = blitSize.get();
+			auto alignment_ = Geometry::conv_elements<vector2>(Geometry::alignmentConv, alignment.get());
+			auto lines_ = lines.get();
+			const int32_t cellBounds = X(material.size()) / X(cellSize_);
 
-					for (int32_t r = 0; r < lines_.size(); r++) {
-						int32_t rp = r * Y(blitSize_);
-						auto offset = Geometry::mul_elements<vector2i>(
-							vector2i{ static_cast<int32_t>(lines_[r].length()), static_cast<int32_t>(lines_.size()), },
-							scalar_cast<int32_t>(Geometry::mul_elements<vector2>(alignment_, scalar_cast<float>(blitSize_)))
-						);
-						for (int32_t c = 0; c < lines_[r].length(); c++) {
-							int32_t cp = c * X(blitSize_);
-							auto code = lines_[r][c];
-							auto uv = Geometry::mul_elements<vector2i>(vector2i{ code % cellBounds, code / cellBounds, }, cellSize_);
-							material._uv0(material.to_ratio(uv));
-							material._uv1(material.to_ratio(uv + cellSize_));
-							auto pos = vector2i{ cp - X(offset), rp - Y(offset), };
+			auto translation = transform.translation.get();
+			auto rotation = transform.rotation.get();
+			auto scaling = transform.scaling.get();
+			renderer.pushMatrix();
+			Geometry::trs2d(renderer.matrix(), translation, rotation, scaling);
+			material.resetUv();
+			{
+				const auto &anchor = zero_vec<float, 2>();
+				const auto &flip = zero_vec<bool, 2>();
 
-							const Renderer2dInterface &renderer2d = renderer;
-							renderer2d.drawRect(a, scalar_cast<float>(pos), scalar_cast<float>(blitSize_), anchor, flip);
-						}
+				for (int32_t r = 0; r < lines_.size(); r++) {
+					int32_t rp = r * Y(blitSize_);
+					auto offset = Geometry::mul_elements<vector2i>(
+						vector2i{ static_cast<int32_t>(lines_[r].length()), static_cast<int32_t>(lines_.size()), },
+						scalar_cast<int32_t>(Geometry::mul_elements<vector2>(alignment_, scalar_cast<float>(blitSize_)))
+					);
+					for (int32_t c = 0; c < lines_[r].length(); c++) {
+						int32_t cp = c * X(blitSize_);
+						auto code = lines_[r][c];
+						auto uv = Geometry::mul_elements<vector2i>(vector2i{ code % cellBounds, code / cellBounds, }, cellSize_);
+						material._uv0(material.to_ratio(uv));
+						material._uv1(material.to_ratio(uv + cellSize_));
+						auto pos = vector2i{ cp - X(offset), rp - Y(offset), };
+
+						const Renderer2dInterface &renderer2d = renderer;
+						renderer2d.drawRect(a, scalar_cast<float>(pos), scalar_cast<float>(blitSize_), anchor, flip);
 					}
 				}
-				material.resetUv();
-				renderer.popMatrix();
-			});
+			}
+			material.resetUv();
+			renderer.popMatrix();
 		}
 	};
 }
