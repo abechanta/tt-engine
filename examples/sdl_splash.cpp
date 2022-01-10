@@ -6,20 +6,17 @@
 #include <memory>
 using namespace tte;
 
-class Tutorial11_2 : public App {
-private:
-	static constexpr int32_t screenWidth = 256;
-	static constexpr int32_t screenHeight = 240;
-
+class SdlSplash : public App {
 private:
 	bool m_bQuit;
 	SDL_Window *m_pMainWindow;
-	SDL_Surface *m_pMainSurface;
-	SDL_Surface *m_pSplashSurface;
+	SDL_Renderer *m_pRenderer;
+	SDL_Texture *m_pTexture;
 
 public:
-	explicit Tutorial11_2()
-		: m_bQuit(false), m_pMainWindow(nullptr), m_pMainSurface(nullptr), m_pSplashSurface(nullptr)
+	explicit SdlSplash()
+		: m_bQuit(false),
+		m_pMainWindow(nullptr), m_pRenderer(nullptr), m_pTexture(nullptr)
 	{
 		cout << __FUNCTION__ << endl;
 		if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -32,7 +29,7 @@ public:
 		}
 	}
 
-	virtual ~Tutorial11_2() override {
+	virtual ~SdlSplash() override {
 		cout << __FUNCTION__ << endl;
 		IMG_Quit();
 		SDL_Quit();
@@ -41,18 +38,36 @@ public:
 	virtual void initialize() override {
 		cout << __FUNCTION__ << endl;
 		m_bQuit = false;
-		m_pMainWindow = SDL_CreateWindow(__FILE__, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenWidth, screenHeight, SDL_WINDOW_SHOWN);
+		m_pMainWindow = SDL_CreateWindow(
+			__FILE__,
+			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+			256, 240,
+			SDL_WINDOW_SHOWN
+		);
 		assert(m_pMainWindow);
-		m_pMainSurface = SDL_GetWindowSurface(m_pMainWindow);
-		assert(m_pMainSurface);
-		m_pSplashSurface = IMG_Load("asset/boot/splash.png");
-		assert(m_pSplashSurface);
+		m_pRenderer = SDL_CreateRenderer(
+			m_pMainWindow, -1,
+			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+		);
+		assert(m_pRenderer);
+		SDL_Surface *pSurface = IMG_Load("asset/sdl/splash.png");
+		assert(pSurface);
+		m_pTexture = SDL_CreateTextureFromSurface(
+			m_pRenderer,
+			pSurface
+		);
+		assert(m_pTexture);
+		SDL_FreeSurface(pSurface);
 	}
 
 	virtual void finalize() override {
 		cout << __FUNCTION__ << endl;
-		SDL_FreeSurface(m_pSplashSurface), m_pSplashSurface = nullptr;
-		SDL_DestroyWindow(m_pMainWindow), m_pMainWindow = nullptr, m_pMainSurface = nullptr;
+		SDL_DestroyTexture(m_pTexture);
+		m_pTexture = nullptr;
+		SDL_DestroyRenderer(m_pRenderer);
+		m_pRenderer = nullptr;
+		SDL_DestroyWindow(m_pMainWindow);
+		m_pMainWindow = nullptr;
 	}
 
 	virtual bool isRunning() override {
@@ -60,10 +75,22 @@ public:
 	}
 
 	virtual void tick() override {
-		cout << __FUNCTION__ << endl;
-		SDL_BlitSurface(m_pSplashSurface, nullptr, m_pMainSurface, nullptr);
-		SDL_UpdateWindowSurface(m_pMainWindow);
-		SDL_Delay(200);
+		SDL_RenderPresent(m_pRenderer);
+		SDL_SetRenderDrawColor(
+			m_pRenderer,
+			192, 192, 192, 255
+		);
+		SDL_RenderClear(m_pRenderer);
+		SDL_RenderCopyEx(
+			m_pRenderer,
+			m_pTexture,
+			&SDL_Rect{0, 0, 256, 240},
+			&SDL_Rect{0, 0, 256, 240},
+			0.0f,
+			&SDL_Point{0, 0},
+			static_cast<SDL_RendererFlip>(0)
+		);
+		// SDL_Delay(200);
 		m_bQuit = handleEvent();
 	}
 
@@ -91,10 +118,9 @@ private:
 	}
 };
 
-extern "C" int tutorial11_2() {
-	cout << __FUNCTION__ << endl;
+extern "C" int sdl_splash() {
 	{
-		auto app = make_unique<Tutorial11_2>();
+		auto app = make_unique<SdlSplash>();
 		App::Runner runner(std::move(app));
 		runner.run();
 	}
