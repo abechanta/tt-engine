@@ -19,7 +19,6 @@ extern "C" int tutorial7();
 extern "C" int tutorial8();
 extern "C" int tutorial9();
 extern "C" int tutorial13();
-extern "C" int tutorial11_1();
 extern "C" int tutorial14();
 extern "C" int column1();
 extern "C" int column2();
