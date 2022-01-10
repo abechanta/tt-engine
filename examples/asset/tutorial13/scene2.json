@@ -1,0 +1,33 @@
+{
+	"contentType": "text/json",
+	"components": [
+		"indexer",
+		"resource",
+		"prefab"
+	],
+	"indexer": {
+		"name": "asset:scene2"
+	},
+	"resource": {
+		"asset": "scene2"
+	},
+	"prefab": {
+		"resources": [
+			{
+				"name": "asset:scene3",
+				"property": "scene3.json",
+				"parent": "sys:root"
+			}
+		],
+		"actors": [
+			{
+				"name": "p1",
+				"property": "scene2/hedgehog1.json"
+			},
+			{
+				"name": "p2",
+				"property": "scene2/hedgehog2.json"
+			}
+		]
+	}
+}

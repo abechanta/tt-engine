@@ -1,0 +1,28 @@
+{
+	"contentType": "text/json",
+	"components": [
+		"indexer",
+		"resource",
+		"prefab"
+	],
+	"indexer": {
+		"name": "asset:scene3"
+	},
+	"resource": {
+		"asset": "scene3"
+	},
+	"prefab": {
+		"resources": [
+		],
+		"actors": [
+			{
+				"name": "e1",
+				"property": "scene3/e1.json"
+			},
+			{
+				"name": "e2",
+				"property": "scene3/e2.json"
+			}
+		]
+	}
+}
