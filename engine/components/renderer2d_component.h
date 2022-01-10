@@ -1,6 +1,5 @@
 #pragma once
 #include <actor.h>
-#include <asset.h>
 #include <cassert>
 #include <clist.h>
 #include <cmath>
@@ -28,6 +27,14 @@ namespace tte {
 		// public methods
 		//
 	public:
+		explicit Renderer2dInterface()
+			: m_handle()
+		{
+		}
+
+		virtual ~Renderer2dInterface() {
+		}
+
 		template<typename V>
 		std::unique_ptr<V> &handle() {
 			return *reinterpret_cast<std::unique_ptr<V> *>(&m_handle);
@@ -58,38 +65,38 @@ namespace tte {
 		// member variables
 		//
 	private:
-		std::unique_ptr<Renderer2dInterface> m_handle;
+		std::unique_ptr<Renderer2dInterface> m_renderer;
 		vector<matrix3x4> m_matrixStack;
 
 		//
 		// public methods
 		//
 	public:
-		explicit Renderer2d(Actor &a, const function<void(Actor &, Renderer2d &)> &initializer)
+		explicit Renderer2d(const function<void(Renderer2d &)> &initializer)
 			: CList(tag), m_matrixStack()
 		{
 			matrix3x4 id = Geometry::identity(matrix3x4());
 			m_matrixStack.push_back(id);
-			initializer(a, self());
+			initializer(*this);
 		}
 
 		virtual ~Renderer2d() override {
 		}
 
-		static Actor::Action append(const function<void(Actor &, Renderer2d &)> &initializer) {
+		static Actor::Action append(const function<void(Renderer2d &)> &initializer) {
 			return [&initializer](Actor &a) {
-				a.appendComponent(new Renderer2d(a, initializer));
+				a.appendComponent(new Renderer2d(initializer));
 			};
 		}
 
 		Renderer2d &pushMatrix() {
 			m_matrixStack.push_back(m_matrixStack.back());
-			return self();
+			return *this;
 		}
 
 		Renderer2d &popMatrix() {
 			m_matrixStack.pop_back();
-			return self();
+			return *this;
 		}
 
 		matrix3x4 &matrix() {
@@ -101,19 +108,11 @@ namespace tte {
 		//
 	public:
 		void setRenderer(Renderer2dInterface *renderer) {
-			m_handle.reset(renderer);
+			m_renderer.reset(renderer);
 		}
 
 		operator const Renderer2dInterface &() const {
-			return *m_handle.get();
-		}
-
-		//
-		// utility operators
-		//
-	private:
-		Renderer2d &self() {
-			return *this;
+			return *m_renderer.get();
 		}
 	};
 }

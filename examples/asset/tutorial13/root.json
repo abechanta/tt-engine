@@ -1,0 +1,21 @@
+{
+	"contentType": "text/json",
+	"components": [
+		"indexer",
+		"prefab"
+	],
+	"indexer": {
+		"name": "sys:root"
+	},
+	"prefab": {
+		"resources": [
+			{
+				"name": "asset:scene2",
+				"property": "scene2.json",
+				"parent": "sys:root"
+			}
+		],
+		"actors": [
+		]
+	}
+}

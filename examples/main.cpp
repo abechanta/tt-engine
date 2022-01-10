@@ -2,11 +2,10 @@
 #	define _CRTDBG_MAP_ALLOC
 #	include <crtdbg.h>
 #endif // defined(_WINDOWS)
-#include <stdlib.h>
 #include <functional>
 #include <iostream>
-#include <map>
 #include <string>
+#include <unordered_map>
 using namespace std;
 
 extern "C" int tutorial1();
@@ -19,12 +18,15 @@ extern "C" int tutorial7();
 extern "C" int tutorial8();
 extern "C" int tutorial9();
 extern "C" int tutorial10();
-extern "C" int tutorial11_1();
-extern "C" int tutorial11_2();
+extern "C" int tutorial11();
+extern "C" int tutorial12();
+extern "C" int tutorial13();
+extern "C" int tutorial14();
 extern "C" int column1();
 extern "C" int column2();
-extern "C" int showcase1();
-map<string, function<int()> > invokeTable = {
+extern "C" int sdl_splash();
+extern "C" int sdl_app();
+unordered_map<string, function<int()> > invokeTable = {
 	{ "1", tutorial1, },
 	{ "2", tutorial2, },
 	{ "3", tutorial3, },
@@ -35,11 +37,14 @@ map<string, function<int()> > invokeTable = {
 	{ "8", tutorial8, },
 	{ "9", tutorial9, },
 	{ "10", tutorial10, },
-	{ "11_1", tutorial11_1, },
-	{ "11_2", tutorial11_2, },
+	{ "11", tutorial11, },
+	{ "12", tutorial12, },
+	{ "13", tutorial13, },
+	{ "14", tutorial14, },
 	{ "c1", column1, },
 	{ "c2", column2, },
-	{ "s1", showcase1, },
+	{ "s1", sdl_splash, },
+	{ "s2", sdl_app, },
 };
 
 void checkMemoryLeak() {

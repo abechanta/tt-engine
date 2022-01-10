@@ -1,4 +1,5 @@
 {
 	"contentType": "text/json",
-	"file": "foo"
+	"time": 400,
+	"world": [ 1, 1 ]
 }

@@ -1,7 +1,7 @@
 #include <actor.h>
-#include <asset.h>
 #include <asset_handler.h>
-#include <components/animator_component.h>
+#include <components/transform_component.h>
+#include <geometry.h>
 #include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <cstdint>
@@ -12,50 +12,38 @@ using namespace tte;
 namespace Tutorial8 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		auto asset1 = make_unique<Asset>(L"asset/tutorial8.anim", AnimationSet::typeAnim);
-		cout << "--- load" << endl;
-		asset1->load();
-		cout << "--- ctor" << endl;
-		ptree props1;
-		auto animationFalling = asset1->handle<AnimationSet>()->get("falling");
-		auto timeline1 = make_unique<Timeline>(props1, animationFalling, true);
-		cout << "--- replay" << endl;
-		timeline1->pause(false);
-		cout << "--- tick" << endl;
-		for (auto i = 0; i < 12; i++) {
-			timeline1->tick(i);
-			cout << props1.get<float>("transform.translation.y", 0.f) << endl;
-		}
-		cout << "--- unload" << endl;
-		asset1->unload();
-		cout << "--- dtor" << endl;
+		ptree props;
+		auto transform1 = make_unique<Transform>(
+			props, vector3{ 1, 2, 3, }, vector3{ 4, 5, 6, }, vector3{ 7, 8, 9, }
+		);
+		cout << "--- transformation" << endl;
+		cout << "\t" << transform1->translation << endl;
+		cout << "\t" << transform1->rotation << endl;
+		cout << "\t" << transform1->scaling << endl;
 	}
 
 	void test2() {
 		cout << __FUNCTION__ << endl;
-		auto asset1 = make_unique<Asset>(L"asset/tutorial8.anim", AnimationSet::typeAnim);
-		cout << "--- load" << endl;
-		asset1->load();
 		cout << "--- ctor" << endl;
-		auto actor1 = make_unique<Actor>(
+		auto a = make_unique<Actor>(
+			Actor::noAction,
 			[](Actor &a) {
-				cout << a.get<float>("transform.translation.y", 100.f) << endl;
-			},
-			[](Actor &a) {
-				Animator::append()(a);
+				auto a1 = make_unique<Asset>(L"asset/tutorial8/arrow.json", AssetHandler::typeJson);
+				a1->load();
+				a.importProps(a1->props());
+				a1->unload();
+				Transform::append()(a);
 			}
 		);
-		cout << "--- replay" << endl;
-		actor1->getComponent<Animator>([&asset1](auto &animator) {
-			animator.replay(*asset1, "falling");
+		cout << "--- transformation" << endl;
+		a->getComponent<Transform>([](auto &transform) {
+			vector3 t = transform.translation.get();
+			vector3 p = { 1.f, 2.f, 3.f, };
+			matrix3x4 m = Geometry::identity(matrix3x4());
+			vector3 q = Geometry::pos(transform.trs2d(m), p);
+			cout << "\t" << "t=" << X(t) << " " << Y(t) << " " << Z(t) << endl;
+			cout << "\t" << "q=" << X(q) << " " << Y(q) << " " << Z(q) << endl;
 		});
-		cout << "--- tick" << endl;
-		for (auto i = 0; i < 12; i++) {
-			actor1->act();
-		}
-		cout << "--- unload" << endl;
-		asset1->unload();
-		cout << "--- dtor" << endl;
 	}
 }
 

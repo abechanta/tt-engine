@@ -134,7 +134,7 @@ namespace tte {
 			const V m_defval;
 
 		public:
-			Property(ptree &node, const string &key, const V &defval = 0)
+			explicit Property(ptree &node, const string &key, const V &defval = 0)
 				: m_node(node), m_key(key), m_defval(defval)
 			{
 			}
@@ -149,7 +149,7 @@ namespace tte {
 
 			ostream &to_string(ostream &os) const {
 				auto val = get();
-				os << m_key << ": " << val << "]";
+				os << m_key << ": " << val;
 				return os;
 			}
 		};
@@ -161,7 +161,7 @@ namespace tte {
 			const string m_key;
 
 		public:
-			PropertyA(ptree &node, const string &key)
+			explicit PropertyA(ptree &node, const string &key)
 				: m_node(get_child(node, key)), m_key(key)
 			{
 			}
@@ -182,10 +182,9 @@ namespace tte {
 			}
 
 			ostream &to_string(ostream &os) const {
-				auto it = m_subkeys.begin();
 				auto val = get();
 				os << m_key << ": [ ";
-				for (auto &e : val.a) {
+				for (auto &e : val) {
 					os << e << ", ";
 				}
 				os << "]";
@@ -200,7 +199,7 @@ namespace tte {
 			const string m_key;
 
 		public:
-			PropertyAA(ptree &node, const string &key)
+			explicit PropertyAA(ptree &node, const string &key)
 				: m_node(get_child(node, key)), m_key(key)
 			{
 				for (auto &ch : m_node) {
@@ -229,12 +228,12 @@ namespace tte {
 			const initializer_list<string> m_subkeys;
 
 		public:
-			PropertyV(ptree &node, const string &key, const Vp defval = 0, const initializer_list<string> subkeys = subkeysXYZW)
+			explicit PropertyV(ptree &node, const string &key, const Vp defval = 0, const initializer_list<string> subkeys = subkeysXYZW)
 				: m_node(get_child(node, key)), m_key(key), m_defval(defval), m_subkeys(subkeys)
 			{
 			}
 
-			PropertyV(ptree &node, const string &key, const Vt &val, const initializer_list<string> subkeys = subkeysXYZW)
+			explicit PropertyV(ptree &node, const string &key, const Vt &val, const initializer_list<string> subkeys = subkeysXYZW)
 				: m_node(get_child(node, key)), m_key(key), m_defval(0), m_subkeys(subkeys)
 			{
 				set(val);

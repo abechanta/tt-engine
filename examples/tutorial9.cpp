@@ -1,8 +1,10 @@
 #include <actor.h>
-#include <components/input_component.h>
+#include <asset.h>
+#include <asset_handler.h>
+#include <components/material_component.h>
+#include <boost/property_tree/ptree.hpp>
 #include <cassert>
 #include <cstdint>
-#include <initializer_list>
 #include <iostream>
 #include <memory>
 using namespace tte;
@@ -10,52 +12,44 @@ using namespace tte;
 namespace Tutorial9 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		auto input1 = make_unique<Input>();
-		cout << "--- frames" << endl;
-		auto key1 = initializer_list<bool>{
-			0,0,0,0,1,1,0,0, 0,0,0,0,0,0,0,0, 0,1,1,1,1,1,1,1, 1,1,1,1,0,0,0,0,
-			0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,1, 0,0,0,0,0,0,1,1, 1,1,1,1,1,1,1,1,
-		};
-		cout << "\tpast<<<";
-		for (auto &it : key1) {
-			cout << it;
-			input1->update();
-			input1->buttons("key1").update(it);
-		}
-		cout << "<<<now" << endl;
-		cout << "--- check" << endl;
-		for (auto &n : { 1, 4, 8, 15, }) {
-			cout << "\ton(" << n << ")=" << input1->buttons("key1").on(n);
-		}
-		cout << endl;
-		for (auto &n : { 10, 20, 40, 60, }) {
-			cout << "\tpressed(" << n << ")=" << input1->buttons("key1").pressed(n);
-		}
-		cout << endl;
+		auto img = make_unique<Asset>(L"asset/tutorial9/p1.png", AssetHandler::typeJson);
+		cout << "--- load" << endl;
+		img->load();
+		ptree props;
+		auto material1 = make_unique<Material>(
+			*img, props, vector4{ 1.f, 1.f, 1.f, 0.5f, }, vector2{ 0.f, 0.f, }, vector2{ 0.5f, 0.5f, }
+		);
+		cout << "--- unload" << endl;
+		img->unload();
+		cout << "--- material" << endl;
+		cout << "\t" << material1->diffuse << endl;
+		cout << "\t" << material1->uv0 << endl;
+		cout << "\t" << material1->uv1 << endl;
+		cout << "--- dtor" << endl;
 	}
 
 	void test2() {
 		cout << __FUNCTION__ << endl;
-		auto input1 = make_unique<Input>();
-		cout << "--- frames" << endl;
-		auto device = [](const initializer_list<bool> &data) -> function<bool()> {
-			auto d = data.begin();
-			return[d, end = data.end()]() mutable -> bool {
-				return (d == end) ? false : *d++;
-			};
-		};
-		auto kbd1 = device({ 0,0,0,0,0,0,0,0, 0,1,1,1,1,1,1,1, 1,1,1,1,0,0,0,0, });
-		auto pad1 = device({ 0,0,0,0,0,0,0,1, 0,0,0,0,0,0,1,1, 1,1,1,1,1,1,1,1, });
-		for (auto i = 0; i < 24; i++) {
-			input1->update();
-			input1->buttons("left").update(kbd1());
-			input1->buttons("left").update(pad1() | input1->buttons("left").on());
-		}
-		cout << "--- check" << endl;
-		for (auto &n : { 1, 4, 8, 15, }) {
-			cout << "\ton(" << n << ")=" << input1->buttons("left").on(n);
-		}
-		cout << endl;
+		auto a = make_unique<Actor>(
+			Actor::noAction,
+			[](Actor &a) {
+				auto img = make_unique<Asset>(L"asset/tutorial9/p1.png", AssetHandler::typeJson);
+				auto def = make_unique<Asset>(L"asset/tutorial9/p1.json", AssetHandler::typeJson);
+				def->load();
+				a.importProps(def->props());
+				def->unload();
+				img->load();
+				Material::append(*img)(a);
+				img->unload();
+			}
+		);
+		cout << "--- material" << endl;
+		a->getComponent<Material>([](auto &material) {
+			cout << "\t" << material.diffuse << endl;
+			cout << "\t" << material.uv0 << endl;
+			cout << "\t" << material.uv1 << endl;
+		});
+		cout << "--- dtor" << endl;
 	}
 }
 

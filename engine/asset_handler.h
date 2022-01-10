@@ -29,15 +29,31 @@ namespace tte {
 		// public methods
 		//
 	public:
-		static void clear() {
+		AssetHandler() {
+		}
+
+		virtual ~AssetHandler() {
+		}
+
+		void clear() const {
 			s_handlers.clear();
 		}
 
-		static void append(const pair<Asset::Path, function<void(Asset &)> > &entry) {
+		void append(const pair<Asset::Path, function<void(Asset &)> > &entry) const {
 			s_handlers[entry.first] = entry.second;
 		}
 
-		static const function<void(Asset &)> & factory(const Asset::Path &filename) {
+		//
+		// others
+		//
+	public:
+		operator const function<void(Asset &)> () const {
+			return [this](Asset &a) {
+				lookup(a.path())(a);
+			};
+		}
+
+		const function<void(Asset &)> &lookup(const Asset::Path &filename) const {
 			Asset::Path &extension = filename.extension();
 			auto &it = s_handlers[extension];
 			return it ? it : s_handlers[extensionUnknown];
@@ -49,15 +65,16 @@ namespace tte {
 	public:
 		static void typeDir(Asset &a) {
 			cout << __FUNCTION__ << ": " << a.path() << endl;
-			a.setLoader([](Asset &a, bool bLoad) -> bool {
+			a.setHandler([](Asset &a, bool bLoad) -> bool {
 				for_each(a.begin_children(), a.end_children(), [bLoad](Asset &a) {
 					bLoad ? a.load() : a.unload();
 				});
 				return true;
 			});
 
+			AssetHandler assetHandler;
 			for (auto &f : filesystem::directory_iterator(a.path())) {
-				Asset *c = new Asset(Asset::Path(f), factory(Asset::Path(f)));
+				Asset *c = new Asset(Asset::Path(f), assetHandler);
 				a.appendChild(c);
 			}
 		}
@@ -69,7 +86,7 @@ namespace tte {
 		static void typeJson(Asset &a) {
 			cout << __FUNCTION__ << ": " << a.path() << endl;
 			assert(filesystem::is_regular_file(a.path()));
-			a.setLoader([](Asset &a, bool bLoad) -> bool {
+			a.setHandler([](Asset &a, bool bLoad) -> bool {
 				if (bLoad) {
 					read_json(ifstream(a.path()), a.props());
 #if defined(_DEBUG)
@@ -81,13 +98,6 @@ namespace tte {
 				return true;
 			});
 		}
-
-		//
-		// others
-		//
-	private:
-		AssetHandler() {}
-		~AssetHandler() {}
 	};
 
 #if defined(tte_declare_static_variables)

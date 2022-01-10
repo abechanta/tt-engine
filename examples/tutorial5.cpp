@@ -1,6 +1,5 @@
 #include <actor.h>
-#include <components/indexer_component.h>
-#include <finder.h>
+#include <clist.h>
 #include <cassert>
 #include <cstdint>
 #include <functional>
@@ -9,48 +8,64 @@
 using namespace tte;
 
 namespace Tutorial5 {
+	class ComponentA : public CList {
+	public:
+		static constexpr uint32_t tag = makeTag("CMP1");
+		ComponentA() : CList(tag) {}
+		virtual ~ComponentA() override {
+			cout << "Component1::dtor" << endl;
+		}
+		void execute() {
+			cout << __FUNCTION__ << endl;
+			cout << "\t" << "Hello world." << endl;
+		}
+	};
+
+	class ComponentB : public CList {
+	public:
+		static constexpr uint32_t tag = makeTag("CMP2");
+		ComponentB() : CList(tag) {}
+		virtual ~ComponentB() override {
+			cout << "Component2::dtor" << endl;
+		}
+		void execute(const string name) {
+			cout << __FUNCTION__ << endl;
+			cout << "\t" << "Hello, " << name << endl;
+		}
+	};
+
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		auto actor1 = make_unique<Actor>(Actor::noAction, Actor::noAction);
-		{
-			auto indexer1 = make_unique<Indexer>("actor1", *actor1);
-			cout << "--- find1" << endl;
-			Finder<Actor>::find("actor1", [](Actor &) {
-				cout << "actor1 found." << endl;
-			});
+		CList clist(0);
+		auto c1 = new ComponentA();
+		auto c2 = new ComponentB();
+		clist.append(c1);
+		clist.append(c2);
+		cout << "--- exec" << endl;
+		if (auto component = clist.get<ComponentA>()) {
+			component->execute();
 		}
-		{
-			cout << "--- find2" << endl;
-			Finder<Actor>::find("actor1", [](Actor &) {
-				cout << "actor1 found." << endl;
-			});
+		if (auto component = clist.get<ComponentB>()) {
+			component->execute("Alice");
 		}
 		cout << "--- dtor" << endl;
+		delete c1;
+		delete c2;
 	}
 
 	void test2() {
 		cout << __FUNCTION__ << endl;
-		{
-			cout << "--- ctor" << endl;
-			auto actor1 = make_unique<Actor>(Actor::noAction, Indexer::append("a1"));
-			auto actor2 = make_unique<Actor>(Actor::noAction, Indexer::append("a2"));
-			auto actor3 = make_unique<Actor>(Actor::noAction, Indexer::append("a3"));
-			cout << "--- find1" << endl;
-			Finder<Actor>::find("a2", [](Actor &) {
-				cout << "actor2 found." << endl;
-			});
-			Finder<Actor>::find("a4", [](Actor &) {
-				cout << "actor4 found." << endl;
-			});
-			cout << "--- dtor" << endl;
-		}
-		{
-			cout << "--- find2" << endl;
-			Finder<Actor>::find("a2", [](Actor &) {
-				cout << "actor2 found." << endl;
-			});
-		}
-		cout << endl;
+		Actor a;
+		a.appendComponent(new ComponentA());
+		a.appendComponent(new ComponentB());
+		cout << "--- exec" << endl;
+		a.getComponent<ComponentA>([](auto &component) {
+			component.execute();
+		});
+		a.getComponent<ComponentB>([](auto &component) {
+			component.execute("Alice");
+		});
+		cout << "--- dtor" << endl;
 	}
 }
 

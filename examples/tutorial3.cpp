@@ -1,4 +1,5 @@
-#include <actor.h>
+#include <asset.h>
+#include <asset_handler.h>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
@@ -8,79 +9,41 @@ using namespace tte;
 namespace Tutorial3 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		Actor a([](Actor &) {}, [](Actor &) {});
-		a.appendAction([](Actor &) { cout << "a.action1" << endl; });
-		a.appendAction([](Actor &) { cout << "a.action2" << endl; });
-		cout << "--- act" << endl;
-		a.act();
+		AssetHandler assetHandler;
+		assetHandler.clear();
+		assetHandler.append({ L"<undef>", AssetHandler::typeUnknown, });
+		assetHandler.append({ L".json", AssetHandler::typeJson, });
+		cout << "--- ctor" << endl;
+		Asset a(L"asset/tutorial3/dialog.json", assetHandler);
+		Asset b(L"asset/tutorial3/dialog/message_body.rsrc", assetHandler);
 		cout << "--- dtor" << endl;
 	}
 
 	void test2() {
 		cout << __FUNCTION__ << endl;
-		Actor *a = new Actor([](Actor &) { cout << "a.action1" << endl; }, [](Actor &) {});
-		Actor *b = new Actor([](Actor &) { cout << "b.action1" << endl; }, [](Actor &) {});
-		a->appendChild(b);
-		cout << "--- act" << endl;
-		for (auto &p : *a) {
-			p.act();
-		}
+		AssetHandler assetHandler;
+		assetHandler.clear();
+		assetHandler.append({ L"<undef>", AssetHandler::typeUnknown, });
+		assetHandler.append({ L".json", AssetHandler::typeJson, });
+		assetHandler.append({ L"", AssetHandler::typeDir, });
+		cout << "--- ctor" << endl;
+		Asset assets(L"asset/tutorial3", assetHandler);
+		auto &a = assets.find(L"dialog/button_yes.json");
+		auto &b = assets.find(L"dialog");
+		cout << "--- load1" << endl;
+		a.load();
+		cout << "--- load2" << endl;
+		b.load();
+		cout << "--- unload1" << endl;
+		a.unload();
+		cout << "--- unload2" << endl;
+		b.unload();
 		cout << "--- dtor" << endl;
-		delete a;
-	}
-
-	void test3() {
-		Actor::Action action = [](const Actor &a) {
-			cout << static_cast<const void *>(&a) << ":" << a.get<string>("name", "<undef>")
-				<< endl;
-		};
-
-		auto put = [](const string &key, const string &value) -> Actor::Action {
-			return [key, value](Actor &a) {
-				a.props().put<string>(key, value);
-			};
-		};
-
-		cout << __FUNCTION__ << endl;
-		Actor *a = new Actor(
-			[&](Actor &a) {
-				cout << "---" << endl;
-				action(a);
-				for_each(a.begin(true), a.end(), [](Actor &a) {
-					a.act();
-				});
-			},
-			put("name", "a")
-		);
-		Actor *b = new Actor(action, put("name", "b"));
-		Actor *c = new Actor(action, put("name", "c"));
-		Actor *d = new Actor(action, put("name", "d"));
-		Actor *e = new Actor(action, put("name", "e"));
-		Actor *f = new Actor(
-			action,
-			[&](Actor &a) {
-				a.props().put<string>("name", "f");
-				a.appendAction(action);
-			}
-		);
-		Actor *g = new Actor(action, put("name", "g"));
-
-		a->appendChild(
-			b->appendChild(c)->appendChild(d)
-		)->appendChild(
-			e->appendChild(f->appendChild(g))
-		);
-
-		cout << "--- act" << endl;
-		a->act();
-		cout << "--- dtor" << endl;
-		delete a;
 	}
 }
 
 extern "C" int tutorial3() {
 	Tutorial3::test1();
 	Tutorial3::test2();
-	Tutorial3::test3();
 	return 0;
 }

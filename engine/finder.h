@@ -25,9 +25,9 @@ namespace tte {
 			string m_key;
 
 		private:
-			Indexer(
-				const string &key, V &value
-			) : m_key(key) {
+			explicit Indexer(const string &key, V &value)
+				: m_key(key)
+			{
 				add(m_key, value);
 			}
 
@@ -35,9 +35,9 @@ namespace tte {
 			// public methods
 			//
 		public:
-			Indexer(
-				Indexer &&rhs
-			) : m_key(rhs.m_key) {
+			explicit Indexer(Indexer &&rhs)
+				: m_key(rhs.m_key)
+			{
 				rhs.m_key = "";
 			}
 

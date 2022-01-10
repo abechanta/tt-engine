@@ -1,0 +1,66 @@
+{
+	"contentType": "text/json",
+	"components": [
+		"indexer",
+		"transform",
+		"material",
+		"sprite",
+		"animator"
+	],
+	"indexer": {
+		"name": "p2"
+	},
+	"sprite": {
+		"renderer": "sys:renderer2d",
+		"size": {
+			"x": 32,
+			"y": 32
+		},
+		"cellSize": {
+			"x": 32,
+			"y": 32
+		},
+		"anchor": {
+			"x": 0.5,
+			"y": 1.0
+		},
+		"flip": {
+			"x": false,
+			"y": false
+		}
+	},
+	"transform": {
+		"translation": {
+			"x": 64,
+			"y": 128
+		},
+		"rotationUnit": "degree",
+		"rotation": {
+			"z": 0
+		},
+		"scaling": {
+			"x": 1,
+			"y": 1
+		}
+	},
+	"material": {
+		"texture": "scene2/hedgehog.png",
+		"diffuse": {
+			"r": 255,
+			"g": 192,
+			"b": 192,
+			"a": 255
+		},
+		"uvUnit": "px",
+		"uv": [
+			{
+				"x": 0,
+				"y": 0
+			},
+			{
+				"x": 32,
+				"y": 32
+			}
+		]
+	}
+}

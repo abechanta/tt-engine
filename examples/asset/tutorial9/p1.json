@@ -1,0 +1,23 @@
+{
+	"contentType": "text/json",
+	"material": {
+		"texture": "p1.png",
+		"diffuse": {
+			"r": 255,
+			"g": 255,
+			"b": 255,
+			"a": 255
+		},
+		"uvUnit": "px",
+		"uv": [
+			{
+				"x": 0,
+				"y": 0
+			},
+			{
+				"x": 16,
+				"y": 16
+			}
+		]
+	}
+}

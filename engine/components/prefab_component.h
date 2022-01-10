@@ -57,7 +57,7 @@ namespace tte {
 			};
 		}
 
-		void appendComponents(Actor &a) {
+		static Actor &appendComponents(Actor &a, Asset &assetBase) {
 			for (auto &component : a.props("components")) {
 				auto componentType = component.second.get<string>("", "");
 				if (componentType == "animator") {
@@ -70,10 +70,13 @@ namespace tte {
 					Input::append()(a);
 				}
 				if (componentType == "material") {
-					Material::append(m_assetBase, true)(a);
+					Material::append(assetBase, true)(a);
+				}
+				if (componentType == "prefab") {
+					Prefab::append(assetBase)(a);
 				}
 				if (componentType == "resource") {
-					Resource::append(m_assetBase, true)(a);
+					Resource::append(assetBase, true)(a);
 				}
 				if (componentType == "sprite") {
 					Shape::append<ShapeSprite>()(a);
@@ -88,20 +91,31 @@ namespace tte {
 					Transform::append()(a);
 				}
 			}
+			return a;
 		}
 
 		void loadResources() {
 			for (auto &resource : m_node.get_child("resources")) {
+				auto name = resource.second.get<string>("name", "");
+				auto propsName = resource.second.get<string>("property");
 				auto parentName = resource.second.get<string>("parent");
-				Finder<Actor>::find(parentName, [this, &resourceProps = resource.second](Actor &p) {
+				auto appendChildTo = [this, name, propsName](Actor &p) {
 					p.appendChild(new Actor(
 						Actor::noAction,
-						[this, &resourceProps](Actor &a) {
-							a.importProps(resourceProps);
-							appendComponents(a);
+						[this, name, propsName](Actor &a) {
+							auto &asset = m_assetBase.find(propsName);
+							asset.load();
+							a.importProps(asset.props());
+							asset.unload();
+							if (!name.empty()) {
+								a.props().put<string>("_.name", name);
+							}
+							appendComponents(a, m_assetBase);
 						}
 					));
-				});
+				};
+
+				Finder<Actor>::find(parentName, appendChildTo);
 			}
 		}
 
@@ -110,22 +124,24 @@ namespace tte {
 				auto name = actor.second.get<string>("name", "");
 				auto propsName = actor.second.get<string>("property", "");
 				auto parentName = actor.second.get<string>("parent", "");
-				auto createAndAppendChild = [this, name, propsName](Actor &p) {
+				auto appendChildTo = [this, name, propsName](Actor &p) {
 					p.appendChild(new Actor(
 						Actor::noAction,
 						[this, name, propsName](Actor &a) {
 							auto &asset = m_assetBase.find(propsName);
 							a.importProps(asset.props());
-							appendComponents(a);
-							a.props().put<string>("_.name", name);
+							if (!name.empty()) {
+								a.props().put<string>("_.name", name);
+							}
+							appendComponents(a, m_assetBase);
 						}
 					));
 				};
 
 				if (parentName.empty()) {
-					createAndAppendChild(m_actor);
+					appendChildTo(m_actor);
 				} else {
-					Finder<Actor>::find(parentName, createAndAppendChild);
+					Finder<Actor>::find(parentName, appendChildTo);
 				}
 			}
 		}

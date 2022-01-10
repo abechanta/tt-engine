@@ -21,7 +21,9 @@ namespace tte {
 		// public methods
 		//
 	public:
-		MTree() : m_pParent(nullptr), m_pSibling(nullptr), m_pChildren(nullptr) {
+		explicit MTree()
+			: m_pParent(nullptr), m_pSibling(nullptr), m_pChildren(nullptr)
+		{
 		}
 
 		virtual ~MTree() {
@@ -32,7 +34,7 @@ namespace tte {
 			assert(!m_pChildren);
 		}
 
-		Node * appendChild(Node *p) {
+		Node *appendChild(Node *p) {
 			assert(p);
 			assert(!p->m_pParent && !p->m_pSibling);
 			p->m_pParent = self();
@@ -40,7 +42,7 @@ namespace tte {
 			return self();
 		}
 
-		Node * prependChild(Node *p) {
+		Node *prependChild(Node *p) {
 			assert(p);
 			assert(!p->m_pParent && !p->m_pSibling);
 			p->m_pParent = self();
@@ -53,11 +55,11 @@ namespace tte {
 		// downcast operators
 		//
 	private:
-		Node * self() {
+		Node *self() {
 			return reinterpret_cast<Node *>(this);
 		}
 
-		const Node * self() const {
+		const Node *self() const {
 			return reinterpret_cast<const Node *>(this);
 		}
 
@@ -66,7 +68,9 @@ namespace tte {
 		//
 	public:
 		struct iterator : iterator_adaptor<iterator, Node *, Node, forward_traversal_tag> {
-			iterator(Node *p, bool bSkipSelf = false) : iterator_adaptor<iterator, Node *, Node, forward_traversal_tag>(p) {
+			iterator(Node *p, bool bSkipSelf = false)
+				: iterator_adaptor<iterator, Node *, Node, forward_traversal_tag>(p)
+			{
 				if (bSkipSelf) {
 					increment();
 				}
@@ -86,7 +90,9 @@ namespace tte {
 		}
 
 		struct const_iterator : iterator_adaptor<const_iterator, const Node *, Node, forward_traversal_tag> {
-			const_iterator(const Node *p, bool bSkipSelf = false) : iterator_adaptor<const_iterator, const Node *, Node, forward_traversal_tag>(p) {
+			const_iterator(const Node *p, bool bSkipSelf = false)
+				: iterator_adaptor<const_iterator, const Node *, Node, forward_traversal_tag>(p)
+			{
 				if (bSkipSelf) {
 					increment();
 				}
@@ -106,7 +112,9 @@ namespace tte {
 		}
 
 		struct children_iterator : iterator_adaptor<children_iterator, Node *, Node, forward_traversal_tag> {
-			children_iterator(Node *p) : iterator_adaptor<children_iterator, Node *, Node, forward_traversal_tag>(p) {
+			children_iterator(Node *p)
+				: iterator_adaptor<children_iterator, Node *, Node, forward_traversal_tag>(p)
+			{
 			}
 
 			void increment() {
@@ -123,7 +131,9 @@ namespace tte {
 		}
 
 		struct const_children_iterator : iterator_adaptor<const_children_iterator, const Node *, Node, forward_traversal_tag> {
-			const_children_iterator(const Node *p) : iterator_adaptor<const_children_iterator, const Node *, Node, forward_traversal_tag>(p) {
+			const_children_iterator(const Node *p)
+				: iterator_adaptor<const_children_iterator, const Node *, Node, forward_traversal_tag>(p)
+			{
 			}
 
 			void increment() {
@@ -143,12 +153,12 @@ namespace tte {
 		// others
 		//
 	private:
-		static Node * next(const Node *p) {
+		static Node *next(const Node *p) {
 			assert(p);
 			return p->m_pChildren ? p->m_pChildren : nextUpward(p);
 		}
 
-		static Node * nextUpward(const Node *p) {
+		static Node *nextUpward(const Node *p) {
 			assert(p);
 			for (; !p->m_pSibling; p = p->m_pParent) {
 				if (!p->m_pParent) {
@@ -158,7 +168,7 @@ namespace tte {
 			return p->m_pSibling;
 		}
 
-		static Node ** findRight(Node **pp, Node *t) {
+		static Node **findRight(Node **pp, Node *t) {
 			assert(pp);
 			for (; *pp != t; pp = &(*pp)->m_pSibling) {
 				;
@@ -175,7 +185,7 @@ namespace tte {
 			p->m_pSibling = nullptr;
 		}
 
-		static Node * nextSibling(const Node *p) {
+		static Node *nextSibling(const Node *p) {
 			return p->m_pSibling ? p->m_pSibling : p->m_pParent;
 		}
 	};

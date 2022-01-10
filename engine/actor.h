@@ -31,7 +31,7 @@ namespace tte {
 			// public methods
 			//
 		public:
-			Components()
+			explicit Components()
 				: CList(tag)
 			{
 			}
@@ -62,10 +62,10 @@ namespace tte {
 		// public methods
 		//
 	public:
-		Actor(const Action &action, const Action &initializer)
+		explicit Actor(const Action &action = noAction, const Action &initializer = noAction)
 			: MTree(), m_actions(action), m_props(), m_components()
 		{
-			initializer(*this);
+			initializer(self());
 		}
 
 		virtual ~Actor() override {
@@ -85,7 +85,7 @@ namespace tte {
 			m_props.put<int32_t>("_.ticks", ++ticks);
 			auto bReset = get<bool>("_.reset", false);
 
-			m_actions(*this);
+			m_actions(self());
 
 			if (bReset) {
 				m_actions = noAction;
@@ -157,6 +157,11 @@ namespace tte {
 		//
 		// others
 		//
+	private:
+		Actor &self() {
+			return *this;
+		}
+
 	public:
 		static void noAction(Actor &) {
 		}

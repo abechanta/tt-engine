@@ -70,7 +70,7 @@ namespace tte {
 			template<typename Vt>
 			Vt bounce(Vt value1, Vt value2, float ratio) {
 				Vt ratio0 = ratio * ratio * ratio * cos((3 * ratio - 1) * pi);
-				return (value2 - value1) * (ratio0 < 0.f ? -ratio0 : ratio0);
+				return (value2 - value1) * abs(ratio0);
 			};
 
 			template<typename Vt>
@@ -209,7 +209,6 @@ namespace tte {
 		//
 	private:
 		deque<Animation> m_animations;
-		static const Animation s_noAnimation;
 
 		//
 		// public methods
@@ -218,20 +217,26 @@ namespace tte {
 		AnimationSet(const ptree &pt)
 			: m_animations()
 		{
-			PTree::inserter<this_type, deque<Animation> >("animation", [](this_type &v) -> back_insert_iterator<deque<Animation> > { return back_inserter<deque<Animation> >(v.m_animations); }, Animation::parse)(*this, pt);
+			PTree::inserter<this_type, deque<Animation> >(
+				"animation",
+				[](this_type &v) -> auto {
+					return back_inserter<deque<Animation> >(v.m_animations);
+				},
+				Animation::parse
+			)(*this, pt);
 		}
 
 		const Animation &get(const string &animname) const {
 			auto pAnimation = find_if(m_animations.begin(), m_animations.end(), [&animname](auto &anim) -> bool {
 				return anim.name == animname;
 			});
-			return (pAnimation == m_animations.end()) ? s_noAnimation : *pAnimation;
+			return (pAnimation == m_animations.end()) ? noAnimation() : *pAnimation;
 		}
 
 		static void typeAnim(Asset &a) {
 			cout << __FUNCTION__ << ": " << a.path() << endl;
 			assert(filesystem::is_regular_file(a.path()));
-			a.setLoader([](Asset &a, bool bLoad) -> bool {
+			a.setHandler([](Asset &a, bool bLoad) -> bool {
 				if (bLoad) {
 					ptree pt;
 					read_json(ifstream(a.path()), pt);
@@ -241,6 +246,11 @@ namespace tte {
 				}
 				return true;
 			});
+		}
+
+		static Animation &noAnimation() {
+			static Animation a;
+			return a;
 		}
 	};
 
@@ -396,7 +406,7 @@ namespace tte {
 				a.appendComponent(new Animator(a.props()));
 				a.appendAction([](Actor &a) {
 					a.getComponent<Animator>([&a](auto &animator) {
-						animator.tick(a);
+						animator.tick(a.get<int32_t>("_.ticks", 0));
 					});
 				});
 			};
@@ -410,8 +420,7 @@ namespace tte {
 			m_timelines.push_back(pair<string, unique_ptr<Timeline> >{ slotname_, new Timeline(m_out, asset.handle<AnimationSet>()->get(animname)), });
 		}
 
-		void tick(Actor &a) {
-			auto ticks = a.get<int32_t>("_.ticks", 0);
+		void tick(int32_t ticks) {
 			m_timelines.remove_if([ticks](auto &t) -> bool {
 				return t.second->tick(ticks);
 			});
@@ -430,8 +439,4 @@ namespace tte {
 			}
 		}
 	};
-
-#if defined(tte_declare_static_variables)
-	const Animation AnimationSet::s_noAnimation = Animation();
-#endif	// defined(tte_declare_static_variables)
 }

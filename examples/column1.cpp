@@ -7,24 +7,24 @@ using namespace std;
 namespace Column1 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		std::unique_ptr<uint32_t> ptr1 = make_unique<uint32_t>(123);
-		std::unique_ptr<uint32_t> ptr2;
+		std::unique_ptr<int32_t> p1 = make_unique<int32_t>(123);
+		std::unique_ptr<int32_t> p2;
 		cout << "--- access1" << endl;
-		if (ptr1) {
-			cout << "\t*ptr1=" << *ptr1 << endl;
+		if (p1) {
+			cout << "\t*p1=" << *p1 << endl;
 		}
-		if (ptr2) {
-			cout << "\t*ptr2=" << *ptr2 << endl;
+		if (p2) {
+			cout << "\t*p2=" << *p2 << endl;
 		}
-		cout << "--- set" << endl;
-		ptr1.reset();
-		ptr2 = make_unique<uint32_t>(456);
+
+		p1.reset();
+		p2 = make_unique<int32_t>(456);
 		cout << "--- access2" << endl;
-		if (ptr1) {
-			cout << "\t*ptr1=" << *ptr1 << endl;
+		if (p1) {
+			cout << "\t*p1=" << *p1 << endl;
 		}
-		if (ptr2) {
-			cout << "\t*ptr2=" << *ptr2 << endl;
+		if (p2) {
+			cout << "\t*p2=" << *p2 << endl;
 		}
 		cout << "--- dtor" << endl;
 	}

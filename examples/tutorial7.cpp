@@ -1,10 +1,9 @@
 #include <actor.h>
-#include <asset.h>
-#include <asset_handler.h>
-#include <components/material_component.h>
-#include <boost/property_tree/ptree.hpp>
+#include <components/indexer_component.h>
+#include <finder.h>
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <iostream>
 #include <memory>
 using namespace tte;
@@ -12,44 +11,50 @@ using namespace tte;
 namespace Tutorial7 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		auto asset1 = make_unique<Asset>(L"asset/tutorial7/font1.png", AssetHandler::typeJson);
-		cout << "--- load" << endl;
-		asset1->load();
-		ptree props;
-		auto material1 = make_unique<Material>(*asset1, props, vector4{ 1, 1, 1, 0.5f, }, vector2{ 0.f, 0.f, }, vector2{ 0.5f, 0.5f, });
-		cout << "--- material" << endl;
-		cout << material1->diffuse << endl;
-		cout << material1->uv0 << endl;
-		cout << material1->uv1 << endl;
-		cout << "--- unload" << endl;
-		asset1->unload();
+		Actor a(Actor::noAction, [](Actor &a) {
+			a.props().put<string>("name", "a");
+		});
+		cout << "--- find1" << endl;
+		{
+			auto indexer1 = make_unique<Indexer>("actor-a", a);
+			Finder<Actor>::find("actor-a", [](Actor &a) {
+				auto name = a.get<string>("name", "");
+				cout << "\t" << "actor-a(name=" << name << ") found." << endl;
+			});
+		}
+		cout << "--- find2" << endl;
+		{
+			Finder<Actor>::find("actor-a", [](Actor &a) {
+				auto name = a.get<string>("name", "");
+				cout << "\t" << "actor-a(name=" << name << ") found." << endl;
+			});
+		}
 		cout << "--- dtor" << endl;
 	}
 
 	void test2() {
 		cout << __FUNCTION__ << endl;
-		auto assetImg = make_unique<Asset>(L"asset/tutorial7/font1.png", AssetHandler::typeJson);
-		auto assetProp = make_unique<Asset>(L"asset/tutorial7/tutorial7.json", AssetHandler::typeJson);
-		cout << "--- load" << endl;
-		assetImg->load();
-		assetProp->load();
-		auto actor1 = make_unique<Actor>(
-			Actor::noAction,
-			[&assetImg, &assetProp](Actor &a) {
-				a.importProps(assetProp->props());
-				Material::append(*assetImg)(a);
+		{
+			cout << "--- ctor" << endl;
+			auto a = make_unique<Actor>(Actor::noAction, Indexer::append("p1"));
+			auto b = make_unique<Actor>(Actor::noAction, Indexer::append("p2"));
+			cout << "--- find1" << endl;
+			{
+				Finder<Actor>::find("p2", [](Actor &) {
+					cout << "\t" << "p2 found." << endl;
+				});
+				Finder<Actor>::find("p3", [](Actor &) {
+					cout << "\t" << "p3 found." << endl;
+				});
 			}
-		);
-		cout << "--- unload" << endl;
-		assetProp->unload();
-		assetImg->unload();
-		cout << "--- material" << endl;
-		actor1->getComponent<Material>([](Material &material) {
-			cout << material.diffuse << endl;
-			cout << material.uv0 << endl;
-			cout << material.uv1 << endl;
-		});
-		cout << "--- dtor" << endl;
+			cout << "--- dtor" << endl;
+		}
+		cout << "--- find2" << endl;
+		{
+			Finder<Actor>::find("p2", [](Actor &) {
+				cout << "\t" << "p2 found." << endl;
+			});
+		}
 	}
 }
 

@@ -12,17 +12,17 @@ namespace Column2 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
 		ptree pt;
-		read_json(ifstream("asset/tutorial1.json"), pt);
+		read_json(ifstream("asset/tutorial2/status.json"), pt);
 		cout << "--- access1" << endl;
-		cout << "\ttag1=" << pt.get<int32_t>("tag1") << endl;
+		cout << "\tlevel=" << pt.get<int32_t>("level") << endl;
+		cout << "\tgold=" << pt.get<int32_t>("gold") << endl;
 		cout << "--- access2" << endl;
-		for (const ptree::value_type &arr : pt.get_child("array")) {
-			cout << "\tarray.value=" << arr.second.get<int32_t>("value") << endl;
+		for (const ptree::value_type &arr : pt.get_child("spells")) {
+			cout << "\tspells[].name=" << arr.second.get<string>("name") << endl;
 		}
 		cout << "--- access3" << endl;
 		write_json(cout, pt);
 		cout << "--- dtor" << endl;
-		cout << endl;
 	}
 }
 

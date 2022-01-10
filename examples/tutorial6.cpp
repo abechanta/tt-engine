@@ -1,10 +1,10 @@
 #include <actor.h>
+#include <asset.h>
 #include <asset_handler.h>
-#include <components/transform_component.h>
-#include <geometry.h>
-#include <boost/property_tree/ptree.hpp>
+#include <components/resource_component.h>
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <iostream>
 #include <memory>
 using namespace tte;
@@ -12,37 +12,36 @@ using namespace tte;
 namespace Tutorial6 {
 	void test1() {
 		cout << __FUNCTION__ << endl;
-		ptree props;
-		auto transform1 = make_unique<Transform>(props, vector3{ 1, 2, 3, }, vector3{ 4, 5, 6, }, vector3{ 7, 8, 9, });
-		cout << "--- transformation" << endl;
-		cout << transform1->translation << endl;
-		cout << transform1->rotation << endl;
-		cout << transform1->scaling << endl;
+		auto a = make_unique<Asset>(L"asset/tutorial6/player_globals.json", AssetHandler::typeJson);
+		cout << "--- ctor" << endl;
+		auto resource1 = make_unique<Resource>(*a);
+		cout << "--- dtor" << endl;
 	}
 
 	void test2() {
 		cout << __FUNCTION__ << endl;
-		auto asset1 = make_unique<Asset>(L"asset/tutorial6.json", AssetHandler::typeJson);
-		cout << "--- load" << endl;
-		asset1->load();
+		AssetHandler assetHandler;
+		assetHandler.clear();
+		assetHandler.append({ L"<undef>", AssetHandler::typeUnknown, });
+		assetHandler.append({ L".json", AssetHandler::typeJson, });
+		assetHandler.append({ L"", AssetHandler::typeDir, });
+		auto assets = make_unique<Asset>(L"asset/tutorial6", assetHandler);
 		cout << "--- ctor" << endl;
-		auto actor1 = make_unique<Actor>(
-			Actor::noAction,
-			[&asset1](Actor &a) {
-				a.importProps(asset1->props());
-				Transform::append()(a);
-			}
+		unique_ptr<Actor> a = make_unique<Actor>(
+			[](Actor &a) {
+				auto &pl = Resource::find(a, L"player_globals.json");
+				int32_t score = pl.props().get<int32_t>("score", 0);
+				int32_t coins = pl.props().get<int32_t>("coins", 0);
+				int32_t playersLeft = pl.props().get<int32_t>("playersLeft", 0);
+				cout << "\t" << "score=" << score << endl;
+				cout << "\t" << "coins=" << coins << endl;
+				cout << "\t" << "playersLeft=" << playersLeft << endl;
+			},
+			Resource::append(*assets)
 		);
-		cout << "--- unload" << endl;
-		asset1->unload();
-		cout << "--- transformation" << endl;
-		actor1->getComponent<Transform>([](Transform &transform) {
-			vector3 t = transform.translation.get();
-			vector3 p = { 1.f, 2.f, 3.f, };
-			vector3 q = Geometry::pos(transform.trs2d(Geometry::identity(matrix3x4())), p);
-			cout << "t=" << X(t) << " " << Y(t) << " " << Z(t) << endl;
-			cout << "q=" << X(q) << " " << Y(q) << " " << Z(q) << endl;
-		});
+		cout << "--- tick" << endl;
+		a->act();
+		cout << "--- dtor" << endl;
 	}
 }
 
