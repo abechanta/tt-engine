@@ -1,0 +1,10 @@
+{
+	"contentType": "image/json",
+	"button": {
+		"label": "No",
+		"size": {
+			"width": 100,
+			"height": 50
+		}
+	}
+}

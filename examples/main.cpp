@@ -10,7 +10,7 @@ using namespace std;
 
 extern "C" int tutorial0();
 extern "C" int tutorial1();
-extern "C" int tutorial2();
+extern "C" int tutorial3();
 extern "C" int tutorial4();
 extern "C" int tutorial5();
 extern "C" int tutorial6();
@@ -29,7 +29,7 @@ extern "C" int showcase1();
 unordered_map<string, function<int()> > invokeTable = {
 	{ "0", tutorial0, },
 	{ "1", tutorial1, },
-	{ "2", tutorial2, },
+	{ "3", tutorial3, },
 	{ "4", tutorial4, },
 	{ "5", tutorial5, },
 	{ "6", tutorial6, },
