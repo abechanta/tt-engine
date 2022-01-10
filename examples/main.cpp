@@ -16,7 +16,7 @@ extern "C" int tutorial4();
 extern "C" int tutorial5();
 extern "C" int tutorial6();
 extern "C" int tutorial7();
-extern "C" int tutorial8();
+extern "C" int tutorial11();
 extern "C" int tutorial12();
 extern "C" int tutorial13();
 extern "C" int tutorial14();
@@ -33,7 +33,7 @@ unordered_map<string, function<int()> > invokeTable = {
 	{ "5", tutorial5, },
 	{ "6", tutorial6, },
 	{ "7", tutorial7, },
-	{ "8", tutorial8, },
+	{ "11", tutorial11, },
 	{ "12", tutorial12, },
 	{ "13", tutorial13, },
 	{ "14", tutorial14, },

@@ -1,0 +1,53 @@
+{
+	"contentType": "text/json",
+	"animation": [
+		{
+			"name": "falling-overwrite",
+			"frameLength": 10,
+			"frameDelay": 0,
+			"repeatCount": 0,
+			"channels": [
+				{
+					"access": "overwrite",
+					"target": "transform.translation.y",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 0
+						},
+						{
+							"frame": 10,
+							"easing": "quadratic:in",
+							"value": 100
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "falling-delta",
+			"frameLength": 10,
+			"frameDelay": 0,
+			"repeatCount": 0,
+			"channels": [
+				{
+					"access": "delta",
+					"target": "transform.translation.y",
+					"type": "float",
+					"keys": [
+						{
+							"frame": 0,
+							"value": 0
+						},
+						{
+							"frame": 10,
+							"easing": "quadratic:in",
+							"value": 100
+						}
+					]
+				}
+			]
+		}
+	]
+}
