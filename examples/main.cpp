@@ -20,6 +20,7 @@ extern "C" int tutorial8();
 extern "C" int tutorial9();
 extern "C" int tutorial10();
 extern "C" int tutorial11_1();
+extern "C" int tutorial14();
 extern "C" int column1();
 extern "C" int column2();
 extern "C" int sdl_splash();
@@ -37,6 +38,7 @@ unordered_map<string, function<int()> > invokeTable = {
 	{ "9", tutorial9, },
 	{ "10", tutorial10, },
 	{ "11_1", tutorial11_1, },
+	{ "14", tutorial14, },
 	{ "c1", column1, },
 	{ "c2", column2, },
 	{ "sdl_1", sdl_splash, },
