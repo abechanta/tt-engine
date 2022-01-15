@@ -81,11 +81,11 @@ namespace tte {
 				if (componentType == "sprite") {
 					Shape::append<ShapeSprite>()(a);
 				}
-				if (componentType == "tilemap") {
-					Shape::append<ShapeTilemap>()(a);
-				}
 				if (componentType == "text") {
 					Shape::append<ShapeText>()(a);
+				}
+				if (componentType == "tilemap") {
+					Shape::append<ShapeTilemap>()(a);
 				}
 				if (componentType == "transform") {
 					Transform::append()(a);

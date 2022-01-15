@@ -1,4 +1,5 @@
 #include <actor.h>
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
@@ -18,8 +19,10 @@ namespace Tutorial4 {
 
 	void test2() {
 		cout << __FUNCTION__ << endl;
-		Actor *a = new Actor([](Actor &) { cout << "\t" << "Hello world, from a." << endl; });
-		Actor *b = new Actor([](Actor &) { cout << "\t" << "Hello world, from b." << endl; });
+		Actor *a = new Actor();
+		Actor *b = new Actor();
+		a->appendAction([](Actor &) { cout << "\t" << "Hello world, from a." << endl; });
+		b->appendAction([](Actor &) { cout << "\t" << "Hello world, from b." << endl; });
 		a->appendChild(b);
 		cout << "--- act" << endl;
 		for (auto &p : *a) {
