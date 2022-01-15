@@ -47,11 +47,11 @@ namespace Tutorial14 {
 				if (p1.props().get<string>("state", "") == "standing") {
 					Finder<Actor>::find("sys:input", [&assets, &p1](Actor &in) {
 						in.getComponent<Input>([&assets, &p1](auto &input) {
-							if (input.buttons("attack").pressed()) {
+							if (input.buttons("jump").pressed()) {
 								p1.getComponent<Animator>([&assets](auto &animator) {
 									animator.replay(assets->find(L"scene2/falling.anim"), "falling-delta");
 								});
-								p1.props().put<string>("state", "attacking");
+								p1.props().put<string>("state", "jumping");
 							}
 						});
 					});
@@ -85,11 +85,11 @@ namespace Tutorial14 {
 
 		cout << "--- appendAction" << endl;
 		appendActionTo("p1",
-			inState("standing") * onButtonPressed("attack") * (
+			inState("standing") * onButtonPressed("jump") * (
 				withComponent<Animator>([&assets](Actor &p1, auto &animator) {
 					animator.replay(assets->find(L"scene2/falling.anim"), "falling-delta");
 				}) +
-				changeState("attacking")
+				changeState("jumping")
 			)
 		);
 

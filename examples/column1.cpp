@@ -11,20 +11,20 @@ namespace Column1 {
 		std::unique_ptr<int32_t> p2;
 		cout << "--- access1" << endl;
 		if (p1) {
-			cout << "\t*p1=" << *p1 << endl;
+			cout << "\t" << "*p1=" << *p1 << endl;
 		}
 		if (p2) {
-			cout << "\t*p2=" << *p2 << endl;
+			cout << "\t" << "*p2=" << *p2 << endl;
 		}
 
 		p1.reset();
 		p2 = make_unique<int32_t>(456);
 		cout << "--- access2" << endl;
 		if (p1) {
-			cout << "\t*p1=" << *p1 << endl;
+			cout << "\t" << "*p1=" << *p1 << endl;
 		}
 		if (p2) {
-			cout << "\t*p2=" << *p2 << endl;
+			cout << "\t" << "*p2=" << *p2 << endl;
 		}
 		cout << "--- dtor" << endl;
 	}

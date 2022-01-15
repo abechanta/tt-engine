@@ -47,12 +47,12 @@ namespace Tutorial12 {
 		cout << "--- frames" << endl;
 		for (auto i = 0; i < 24; i++) {
 			input1->update();
-			input1->buttons("attack").update(kbdZ());
-			input1->buttons("attack").update(padA() | input1->buttons("attack").on());
+			input1->buttons("jump").update(kbdZ());
+			input1->buttons("jump").update(padA() | input1->buttons("jump").on());
 		}
 		cout << "--- check" << endl;
 		for (auto &n : { 1, 4, 8, 15, }) {
-			cout << "\t" << "on(" << n << ")=" << input1->buttons("attack").on(n) << "\t";
+			cout << "\t" << "on(" << n << ")=" << input1->buttons("jump").on(n) << "\t";
 		}
 		cout << endl;
 	}
