@@ -63,7 +63,7 @@ namespace tte {
 		};
 	}
 
-	inline Actor::Action exit() {
+	inline Actor::Action dispose() {
 		return [](Actor &a) {
 			delete &a;
 		};
