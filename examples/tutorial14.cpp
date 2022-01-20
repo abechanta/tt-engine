@@ -40,7 +40,6 @@ namespace Tutorial14 {
 				Prefab::append(*assets)(a);
 			}
 		);
-
 		cout << "--- appendAction" << endl;
 		Finder<Actor>::find("p1", [&assets](Actor &p1) {
 			p1.appendAction([&assets](Actor &p1) {
@@ -58,7 +57,6 @@ namespace Tutorial14 {
 				}
 			});
 		});
-
 		cout << "--- unload" << endl;
 		root.unload();
 		cout << "--- dtor" << endl;
@@ -82,7 +80,6 @@ namespace Tutorial14 {
 			Actor::noAction,
 			loadProps(root) + Indexer::append() + Prefab::append(*assets)
 		);
-
 		cout << "--- appendAction" << endl;
 		appendActionTo("p1",
 			inState("standing") * onButtonPressed("jump") * (
@@ -92,7 +89,6 @@ namespace Tutorial14 {
 				changeState("jumping")
 			)
 		);
-
 		cout << "--- unload" << endl;
 		root.unload();
 		cout << "--- dtor" << endl;
