@@ -6,7 +6,7 @@
 -	データドリブン
 -	小さなコードセットと少ない学習コスト
 
-詳しくは「C++ で挑む 2D アニメーションシステム制作演習」（すらりんラボ発行、技術書展５にて頒布）をご覧ください。
+詳しくは「C++ で挑む 2D アニメーションシステム制作演習」（すらりんラボ発行、技術書展・BOOTH 等にて頒布）をご覧ください。
 
 ### ※１: 標準提供される描画サブシステム用アダプター
 
@@ -14,14 +14,14 @@
 
 ## 使用例
 
--	[Showcase1::initialize() in tt-engine/examples/showcase1.cpp](https://github.com/abechanta/tt-engine/blob/revise-examples/examples/showcase1.cpp#L51)
+-	[sdl_app::transition::beginMenu() in tt-engine/examples/sdl_app.cpp](https://github.com/abechanta/tt-engine/blob/revise-for-2nd-edition/examples/sdl_app.cpp#L291)
 
 ## ビルド環境の準備
 
 ### Windows 10
 
 -	git for Windows をインストールする
--	Visual Studio 2019 をインストールする
+-	Visual Studio 2019 か Visual Studio 2022 をインストールする
 -	Visual Studio Installer で以下の拡張をインストールする
 	-	ワークロード「C++ によるデスクトップ開発」
 	-	個別のコンポーネント「CMake の Visual C++ ツール」
