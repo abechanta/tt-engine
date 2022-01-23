@@ -39,35 +39,26 @@ public:
 		cout << __FUNCTION__ << endl;
 		m_bQuit = false;
 		m_pMainWindow = SDL_CreateWindow(
-			__FILE__,
-			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			256, 240,
-			SDL_WINDOW_SHOWN
+			__FILE__, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+			256, 240, SDL_WINDOW_SHOWN
 		);
 		assert(m_pMainWindow);
 		m_pRenderer = SDL_CreateRenderer(
-			m_pMainWindow, -1,
-			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+			m_pMainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
 		);
 		assert(m_pRenderer);
 		SDL_Surface *pSurface = IMG_Load("asset/sdl/splash.png");
 		assert(pSurface);
-		m_pTexture = SDL_CreateTextureFromSurface(
-			m_pRenderer,
-			pSurface
-		);
+		m_pTexture = SDL_CreateTextureFromSurface(m_pRenderer, pSurface);
 		assert(m_pTexture);
 		SDL_FreeSurface(pSurface);
 	}
 
 	virtual void finalize() override {
 		cout << __FUNCTION__ << endl;
-		SDL_DestroyTexture(m_pTexture);
-		m_pTexture = nullptr;
-		SDL_DestroyRenderer(m_pRenderer);
-		m_pRenderer = nullptr;
-		SDL_DestroyWindow(m_pMainWindow);
-		m_pMainWindow = nullptr;
+		SDL_DestroyTexture(m_pTexture); m_pTexture = nullptr;
+		SDL_DestroyRenderer(m_pRenderer); m_pRenderer = nullptr;
+		SDL_DestroyWindow(m_pMainWindow); m_pMainWindow = nullptr;
 	}
 
 	virtual bool isRunning() override {
@@ -76,10 +67,7 @@ public:
 
 	virtual void tick() override {
 		SDL_RenderPresent(m_pRenderer);
-		SDL_SetRenderDrawColor(
-			m_pRenderer,
-			192, 192, 192, 255
-		);
+		SDL_SetRenderDrawColor(m_pRenderer, 192, 192, 192, 255);
 		SDL_RenderClear(m_pRenderer);
 		SDL_RenderCopyEx(
 			m_pRenderer,

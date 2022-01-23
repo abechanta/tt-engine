@@ -44,7 +44,7 @@
 		}
 	},
 	"material": {
-		"texture": "showcase/SMB_BANK1@16.png",
+		"texture": "ingame/p1.png",
 		"diffuse": {
 			"r": 255,
 			"g": 255,

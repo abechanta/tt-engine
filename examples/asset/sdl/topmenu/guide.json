@@ -1,14 +1,18 @@
 {
 	"contentType": "text/json",
 	"components": [
+		"indexer",
 		"transform",
 		"material",
 		"text"
 	],
+	"indexer": {
+		"name": "guide"
+	},
 	"transform": {
 		"translation": {
-			"x": 164,
-			"y": 8
+			"x": 256,
+			"y": 128
 		},
 		"rotationUnit": "degree",
 		"rotation": {
@@ -20,7 +24,7 @@
 		}
 	},
 	"material": {
-		"texture": "showcase/common/font8x8.png",
+		"texture": "common/font8x8.png",
 		"diffuse": {
 			"r": 255,
 			"g": 255,
@@ -32,7 +36,7 @@
 		"renderer": "sys:renderer2d",
 		"size": {
 			"x": 256,
-			"y": 192
+			"y": 16
 		},
 		"cellSize": {
 			"x": 8,
@@ -44,11 +48,10 @@
 		},
 		"alignment": {
 			"x": "center",
-			"y": "begin"
+			"y": "center"
 		},
 		"lines": [
-			"WORLD",
-			"0-0"
+			"PRESS Z KEY TO START"
 		]
 	}
 }

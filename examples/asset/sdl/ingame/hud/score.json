@@ -20,7 +20,7 @@
 		}
 	},
 	"material": {
-		"texture": "showcase/common/font8x8.png",
+		"texture": "common/font8x8.png",
 		"diffuse": {
 			"r": 255,
 			"g": 255,

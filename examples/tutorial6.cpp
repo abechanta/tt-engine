@@ -22,7 +22,6 @@ namespace Tutorial6 {
 		cout << __FUNCTION__ << endl;
 		AssetHandler assetHandler;
 		assetHandler.clear();
-		assetHandler.append({ L"<undef>", AssetHandler::typeUnknown, });
 		assetHandler.append({ L".json", AssetHandler::typeJson, });
 		assetHandler.append({ L"", AssetHandler::typeDir, });
 		auto assets = make_unique<Asset>(L"asset/tutorial6", assetHandler);
@@ -30,12 +29,9 @@ namespace Tutorial6 {
 		unique_ptr<Actor> a = make_unique<Actor>(
 			[](Actor &a) {
 				auto &pl = Resource::find(a, L"player_globals.json");
-				int32_t score = pl.props().get<int32_t>("score", 0);
-				int32_t coins = pl.props().get<int32_t>("coins", 0);
-				int32_t playersLeft = pl.props().get<int32_t>("playersLeft", 0);
-				cout << "\t" << "score=" << score << endl;
-				cout << "\t" << "coins=" << coins << endl;
-				cout << "\t" << "playersLeft=" << playersLeft << endl;
+				cout << "\t" << "score=" << pl.props().get<int32_t>("score", 0) << endl;
+				cout << "\t" << "coins=" << pl.props().get<int32_t>("coins", 0) << endl;
+				cout << "\t" << "playersLeft=" << pl.props().get<int32_t>("playersLeft", 0) << endl;
 			},
 			Resource::append(*assets)
 		);

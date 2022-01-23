@@ -1,0 +1,25 @@
+{
+	"contentType": "text/json",
+	"parent": "sys:resource",
+	"components": [
+		"indexer",
+		"resource",
+		"prefab"
+	],
+	"indexer": {
+		"name": "prefab:topmenu"
+	},
+	"resource": {
+		"asset": "topmenu"
+	},
+	"prefab": {
+		"resources": [
+		],
+		"actors": [
+			{
+				"name": "guide",
+				"property": "topmenu/guide.json"
+			}
+		]
+	}
+}

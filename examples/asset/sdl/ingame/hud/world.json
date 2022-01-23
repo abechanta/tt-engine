@@ -1,18 +1,14 @@
 {
 	"contentType": "text/json",
 	"components": [
-		"indexer",
 		"transform",
 		"material",
 		"text"
 	],
-	"indexer": {
-		"name": "menu-guide"
-	},
 	"transform": {
 		"translation": {
-			"x": 256,
-			"y": 128
+			"x": 164,
+			"y": 8
 		},
 		"rotationUnit": "degree",
 		"rotation": {
@@ -24,7 +20,7 @@
 		}
 	},
 	"material": {
-		"texture": "showcase/common/font8x8.png",
+		"texture": "common/font8x8.png",
 		"diffuse": {
 			"r": 255,
 			"g": 255,
@@ -36,7 +32,7 @@
 		"renderer": "sys:renderer2d",
 		"size": {
 			"x": 256,
-			"y": 16
+			"y": 192
 		},
 		"cellSize": {
 			"x": 8,
@@ -48,10 +44,11 @@
 		},
 		"alignment": {
 			"x": "center",
-			"y": "center"
+			"y": "begin"
 		},
 		"lines": [
-			"PRESS Z KEY TO START"
+			"WORLD",
+			"0-0"
 		]
 	}
 }

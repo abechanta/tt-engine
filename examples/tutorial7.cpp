@@ -39,22 +39,12 @@ namespace Tutorial7 {
 			auto a = make_unique<Actor>(Actor::noAction, Indexer::append("p1"));
 			auto b = make_unique<Actor>(Actor::noAction, Indexer::append("p2"));
 			cout << "--- find1" << endl;
-			{
-				Finder<Actor>::find("p2", [](Actor &) {
-					cout << "\t" << "p2 found." << endl;
-				});
-				Finder<Actor>::find("p3", [](Actor &) {
-					cout << "\t" << "p3 found." << endl;
-				});
-			}
+			Finder<Actor>::find("p2", [](Actor &) { cout << "\t" << "p2 found." << endl; });
+			Finder<Actor>::find("p3", [](Actor &) { cout << "\t" << "p3 found." << endl; });
 			cout << "--- dtor" << endl;
 		}
 		cout << "--- find2" << endl;
-		{
-			Finder<Actor>::find("p2", [](Actor &) {
-				cout << "\t" << "p2 found." << endl;
-			});
-		}
+		Finder<Actor>::find("p2", [](Actor &) { cout << "\t" << "p2 found." << endl; });
 	}
 }
 
