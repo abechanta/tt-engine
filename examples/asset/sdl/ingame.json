@@ -1,0 +1,45 @@
+{
+	"contentType": "text/json",
+	"parent": "sys:resource",
+	"components": [
+		"indexer",
+		"resource",
+		"prefab"
+	],
+	"indexer": {
+		"name": "prefab:stage"
+	},
+	"resource": {
+		"asset": "ingame"
+	},
+	"prefab": {
+		"resources": [
+		],
+		"actors": [
+			{
+				"name": "levelmap",
+				"property": "ingame/levelmap.json"
+			},
+			{
+				"name": "hud-score",
+				"property": "ingame/hud/score.json"
+			},
+			{
+				"name": "hud-coins",
+				"property": "ingame/hud/coins.json"
+			},
+			{
+				"name": "hud-world",
+				"property": "ingame/hud/world.json"
+			},
+			{
+				"name": "hud-time",
+				"property": "ingame/hud/time.json"
+			},
+			{
+				"name": "p1",
+				"property": "ingame/p1.json"
+			}
+		]
+	}
+}

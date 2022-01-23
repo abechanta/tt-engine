@@ -1,0 +1,105 @@
+{
+	"contentType": "text/json",
+	"components": [
+		"indexer",
+		"transform",
+		"material",
+		"sprite",
+		"animator"
+	],
+	"indexer": {
+		"name": "p1"
+	},
+	"sprite": {
+		"renderer": "sys:renderer2d",
+		"size": {
+			"x": 16,
+			"y": 16
+		},
+		"cellSize": {
+			"x": 16,
+			"y": 16
+		},
+		"anchor": {
+			"x": 0.5,
+			"y": 1.0
+		},
+		"flip": {
+			"x": false,
+			"y": false
+		}
+	},
+	"transform": {
+		"translation": {
+			"x": 31,
+			"y": 199
+		},
+		"rotationUnit": "degree",
+		"rotation": {
+			"z": 0
+		},
+		"scaling": {
+			"x": 1,
+			"y": 1
+		}
+	},
+	"material": {
+		"texture": "ingame/p1.png",
+		"diffuse": {
+			"r": 255,
+			"g": 255,
+			"b": 255,
+			"a": 255
+		},
+		"uvUnit": "px",
+		"uv": [
+			{
+				"x": 0,
+				"y": 0
+			},
+			{
+				"x": 16,
+				"y": 16
+			}
+		]
+	},
+	"wp": {
+		"x": 32,
+		"y": 207
+	},
+	"speed": {
+		"value": {
+			"x": 0.0,
+			"y": 0.0
+		},
+		"min": {
+			"x": -2.5,
+			"y": -5.5
+		},
+		"max": {
+			"x": 2.5,
+			"y": 5.5
+		},
+		"yj0": -5.5
+	},
+	"accel": {
+		"xr": 0.25,
+		"xj": 0.20,
+		"xrRegist": 0.20,
+		"xjRegist": 0.01,
+		"y": 0.0,
+		"yjGravity": 1.0
+	},
+	"jumping": {
+		"value": false,
+		"frame": {
+			"left": 0,
+			"max": 10
+		}
+	},
+	"collider2d": {
+		"x": 10,
+		"y": 16
+	},
+	"replay": ""
+}

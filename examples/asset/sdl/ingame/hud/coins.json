@@ -1,0 +1,53 @@
+{
+	"contentType": "text/json",
+	"components": [
+		"transform",
+		"material",
+		"text"
+	],
+	"transform": {
+		"translation": {
+			"x": 88,
+			"y": 16
+		},
+		"rotationUnit": "degree",
+		"rotation": {
+			"z": 0
+		},
+		"scaling": {
+			"x": 1,
+			"y": 1
+		}
+	},
+	"material": {
+		"texture": "common/font8x8.png",
+		"diffuse": {
+			"r": 255,
+			"g": 255,
+			"b": 255,
+			"a": 255
+		}
+	},
+	"text": {
+		"renderer": "sys:renderer2d",
+		"size": {
+			"x": 256,
+			"y": 192
+		},
+		"cellSize": {
+			"x": 8,
+			"y": 8
+		},
+		"blitSize": {
+			"x": 8,
+			"y": 8
+		},
+		"alignment": {
+			"x": "begin",
+			"y": "begin"
+		},
+		"lines": [
+			"@x00"
+		]
+	}
+}
